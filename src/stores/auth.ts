@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 
 import { fetchWrapper } from '@/helpers';
-import { router } from '@/router';
+import { router } from '@/router/router';
 import { useAlertStore } from '@/stores';
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
@@ -11,7 +11,7 @@ export const useAuthStore = defineStore({
     state: () => ({
         // initialize state from local storage to enable user to stay logged in
         user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null,
-        returnUrl: null
+        returnUrl: null as unknown
     }),
     actions: {
         async login(username:string, password:string) {

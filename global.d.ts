@@ -1,35 +1,51 @@
+// Global function handlers
 interface Window {
     mmInfo: any       // add to window obj for testing convenience
     getParam: any
     hprose: any
 }
 
-interface ScorePair {
-    score: number
-    member: string
+interface ChatItem {
+    AI: string;
+    Human: string;
 }
+interface LegalCase {
+    id: string,         // Mimei Id of this Case object
+    title: string,
+    brief: string,
+    plaintiff: string,
+    defendant: string,
+    attorney:string,
+    chatHistoryId?: string,  // Mimei id points to the chat history database
+    // chatHistory: [{AI:string, Human:string}],
+    // human ask, and AI reply. Within Mimei DB, each chat item is stored as ScorePair.
+    // score: timestamp when the item is created, which means AI answered a question.
+    timestamp: Number,      // date and time this leagal case is created in the system.
+}
+interface UserAccount {
+    username: string,
+    fullname: string,
+    password: string,
+    caseMid?: string,        // mid of Case Mimei db
+}
+
+// Mimei data structures
+declare class ScorePair {
+    score: number;
+    member: any;
+    constructor(score: number, member: any) {
+      this.score = score;
+      this.member = member;
+    }
+};
+// export const ScorePair = new  ScorePair()
+
 interface FVPair {
-    field: string
-    value: any
-}
-interface FileInfo {
-    name: string
-    lastModified: number
-    size: number
-    type: string
-    // macid:string
-    mid: string      // mimei ID associated with the File
-    caption: string   // Displayed in File List view
+    field: string       // usually the Mimei Id
+    value: any          // Mimei object
 }
 
-type ContentColumn = {
-    title: string
-    titleZh: string
-    orderBy?: number
-    link?: string
-    subColumn?: ContentColumn[]
-}
-
+// Mimei specific data types
 type PulledMessage = {
     tm: string      //消息发生的时间
     from: string
