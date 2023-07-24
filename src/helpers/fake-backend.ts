@@ -2,11 +2,11 @@ export { fakeBackend };
 
 // array in local storage for registered users
 const usersKey = 'vue-3-pinia-registration-login-example-users';
-let users = JSON.parse(localStorage.getItem(usersKey)) || [];
+let users = JSON.parse(localStorage.getItem(usersKey)!) || [];
 
 function fakeBackend() {
-    let realFetch = window.fetch;
-    window.fetch = function (url, opts) {
+    const realFetch = window.fetch;
+    window.fetch = function (url:string, opts:any) {
         return new Promise((resolve, reject) => {
             // wrap in timeout to simulate server api call
             setTimeout(handleRoute, 500);
@@ -37,7 +37,7 @@ function fakeBackend() {
 
             function authenticate() {
                 const { username, password } = body();
-                const user = users.find(x => x.username === username && x.password === password);
+                const user = users.find((x :any) => x.username === username && x.password === password);
 
                 if (!user) return error('Username or password is incorrect');
 
@@ -50,33 +50,33 @@ function fakeBackend() {
             function register() {
                 const user = body();
 
-                if (users.find(x => x.username === user.username)) {
+                if (users.find((x :any)  => x.username === user.username)) {
                     return error('Username "' + user.username + '" is already taken')
                 }
 
-                user.id = users.length ? Math.max(...users.map(x => x.id)) + 1 : 1;
+                user.id = users.length ? Math.max(...users.map((x :any)  => x.id)) + 1 : 1;
                 users.push(user);
                 localStorage.setItem(usersKey, JSON.stringify(users));
-                return ok();
+                return ok("");
             }
 
             function getUsers() {
                 if (!isAuthenticated()) return unauthorized();
-                return ok(users.map(x => basicDetails(x)));
+                return ok(users.map((x:any) => basicDetails(x)));
             }
 
             function getUserById() {
                 if (!isAuthenticated()) return unauthorized();
 
-                const user = users.find(x => x.id === idFromUrl());
+                const user = users.find((x :any)  => x.id === idFromUrl());
                 return ok(basicDetails(user));
             }
 
             function updateUser() {
                 if (!isAuthenticated()) return unauthorized();
 
-                let params = body();
-                let user = users.find(x => x.id === idFromUrl());
+                const params = body();
+                const user = users.find((x :any)  => x.id === idFromUrl());
 
                 // only update password if entered
                 if (!params.password) {
@@ -84,7 +84,7 @@ function fakeBackend() {
                 }
 
                 // if username changed check if taken
-                if (params.username !== user.username && users.find(x => x.username === params.username)) {
+                if (params.username !== user.username && users.find((x:any) => x.username === params.username)) {
                     return error('Username "' + params.username + '" is already taken')
                 }
 
@@ -92,32 +92,32 @@ function fakeBackend() {
                 Object.assign(user, params);
                 localStorage.setItem(usersKey, JSON.stringify(users));
 
-                return ok();
+                return ok("");
             }
 
             function deleteUser() {
                 if (!isAuthenticated()) return unauthorized();
 
-                users = users.filter(x => x.id !== idFromUrl());
+                users = users.filter((x :any)  => x.id !== idFromUrl());
                 localStorage.setItem(usersKey, JSON.stringify(users));
-                return ok();
+                return ok("");
             }
 
             // helper functions
 
-            function ok(body) {
-                resolve({ ok: true, ...headers(), json: () => Promise.resolve(body) })
+            function ok(body:any) {
+                resolve({ ok: true, ...headers(), json: () => Promise.resolve(body) } as any)
             }
 
             function unauthorized() {
-                resolve({ status: 401, ...headers(), json: () => Promise.resolve({ message: 'Unauthorized' }) })
+                resolve({ status: 401, ...headers(), json: () => Promise.resolve({ message: 'Unauthorized' }) } as any)
             }
 
-            function error(message) {
-                resolve({ status: 400, ...headers(), json: () => Promise.resolve({ message }) })
+            function error(message:string) {
+                resolve({ status: 400, ...headers(), json: () => Promise.resolve({ message }) } as any)
             }
 
-            function basicDetails(user) {
+            function basicDetails(user: any) {
                 const { id, username, firstName, lastName } = user;
                 return { id, username, firstName, lastName };
             }

@@ -7,9 +7,9 @@ export const fetchWrapper = {
     delete: request('DELETE')
 };
 
-function request(method) {
-    return (url, body) => {
-        const requestOptions = {
+function request(method: string) {
+    return async (url:string, body:string) => {
+        const requestOptions:any = {
             method,
             headers: authHeader(url)
         };
@@ -23,7 +23,7 @@ function request(method) {
 
 // helper functions
 
-function authHeader(url) {
+function authHeader(url:string) {
     // return auth header with jwt if user is logged in and request is to the api url
     const { user } = useAuthStore();
     const isLoggedIn = !!user?.token;
@@ -35,7 +35,7 @@ function authHeader(url) {
     }
 }
 
-async function handleResponse(response) {
+async function handleResponse(response:any) {
     const isJson = response.headers?.get('content-type')?.includes('application/json');
     const data = isJson ? await response.json() : null;
 
