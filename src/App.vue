@@ -30,7 +30,7 @@ const authStore = useAuthStore();
 </template>
 
 <style scoped>
-/* @import './assets/base.css'; */
+@import './assets/base.css';
 
 header {
   line-height: 1.5;
