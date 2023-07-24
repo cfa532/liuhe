@@ -1,23 +1,36 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-// import HelloWorld from './components/HelloWorld.vue'
+import { RouterView } from 'vue-router'
+import { Nav, Alert } from './components/index'
+import { useAuthStore  } from '@/stores';
+
+const authStore = useAuthStore();
 </script>
 
 <template>
-<table style="background-color: aliceblue; width: 100%; height: 100%; overflow:visible;">
-  <tr style="width: 100%; height: 50px;"></tr>
-  <tr>
-    <td style="width: 120px;"></td>
-    <td></td>
-  </tr>
-</table>
-
-<!-- <RouterView /> -->
-
+  <div class="app-container" :class="authStore.user && 'bg-light'">
+    <Nav />
+    <Alert />
+    <div class="container-fluid text-left" style="position: absolute; left: 0px; padding: 5px;">
+      <div class="row justify-content-start">
+        <div class="col-2 align-self-start">
+          <div class="btn-group" role="group" aria-label="Cases">
+            <button type="button" class="btn btn-primary">Case 1</button>
+          </div>
+        </div>
+        <div class="col">
+          <div class="container pt-4 pb-4">
+            <div>
+              <router-view />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-
+/* @import './assets/base.css'; */
 
 header {
   line-height: 1.5;
