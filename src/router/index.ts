@@ -1,10 +1,10 @@
 // export { router } from './router'
 
 import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore, useAlertStore } from '../stores/index';
-import { Home } from '../views/';
-import accountRoutes from './account';
-import usersRoutes from './users';
+import { useAuthStore, useAlertStore } from '@/stores';
+import { Home } from '@/views';
+import accountRoutes from '@/router/account';
+import usersRoutes from '@/router/users';
 
 export const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),

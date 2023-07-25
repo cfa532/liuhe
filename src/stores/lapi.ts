@@ -17,7 +17,6 @@ export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler', 
     state: ()=>({
         _sid: "",
-        returnUrl: "",
         hostUrl: "ws://" + import.meta.env.VITE_LEITHER_IP +"/ws/",         // IP:port, where leither service runs
     }),
     getters: {
@@ -31,7 +30,7 @@ export const useLeitherStore = defineStore({
     },
     actions: {
         login(user="lsb", pswd="123456") {
-            return new Promise<string>((resolve, reject)=>{
+            return new Promise<any>((resolve, reject)=>{
                 this.client.Login(user, pswd, "byname").then(
                     (result:any)=>{ 
                         this._sid = result.sid
@@ -45,10 +44,8 @@ export const useLeitherStore = defineStore({
                             console.log("ppt=", JSON.parse(ppt))
                             this.client.RequestService(ppt).then(
                                 (map:any)=>{
-                                    console.log("Request service, ", map)
-                                    console.log("return url", this.returnUrl)
-                                    resolve(this.returnUrl.slice(2))         // remove the trailing #/
-                                    // router.push(this.returnUrl.slice(2))   
+                                    console.log("Request service: ", map)
+                                    resolve(this)
                                 }, (err:Error)=>{
                                     console.error("Request service error=", err)
                                     reject("Request service error")
@@ -58,8 +55,8 @@ export const useLeitherStore = defineStore({
                             reject("Sign PPT error")
                         })
                     }, (e:Error) => {
-                        console.error("Login error=", e)
-                        reject("Login error")
+                        console.error("Leither login error=", e)
+                        reject("Leither login error")
                     }
                 )
             })
@@ -154,7 +151,7 @@ export const useMainStore = defineStore({
     id: 'MainMimei',      // Mimei to store all users' profile
     state: ()=>({
         api: {} as any,      // leither api handler, entrance to all Leither functions
-        mid: import.meta.env.VITE_MIMEI_DB,             // main database Mimei ID, for all users' profile data
+        mid: "",             // main database Mimei ID, for all users' profile data
         // populated after user login. The Id is read from main database Mimei, store all cases handled by the current user
         _mmsid: "",         // session id for the current user Mimei
         key: "USER_ACCOUNTS",

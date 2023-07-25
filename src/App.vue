@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import { Nav, Alert } from './components/index'
+import { Nav, Alert } from '@/components'
 import { useAuthStore  } from '@/stores';
 
 const authStore = useAuthStore();

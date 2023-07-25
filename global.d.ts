@@ -24,7 +24,8 @@ interface LegalCase {
 }
 interface UserAccount {
     username: string,
-    fullname: string,
+    familyName: string,
+    givenName: string,
     password: string,
     caseMid?: string,        // mid of Case Mimei db
 }

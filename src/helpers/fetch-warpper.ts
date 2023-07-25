@@ -8,7 +8,7 @@ export const fetchWrapper = {
 };
 
 function request(method: string) {
-    return async (url:string, body:string) => {
+    return async (url:string, body:any=null) => {
         const requestOptions:any = {
             method,
             headers: authHeader(url)
@@ -18,6 +18,7 @@ function request(method: string) {
             requestOptions.body = JSON.stringify(body);
         }
         return fetch(url, requestOptions).then(handleResponse);
+        // fetch is monkey patched in fake-backend
     }
 }
 

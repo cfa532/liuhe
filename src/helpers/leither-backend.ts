@@ -1,40 +1,37 @@
-export { fakeBackend };
+import { useMainStore } from "@/stores";
+
+export { leitherBackend };
 
 // array in local storage for registered users
 const usersKey = 'vue-3-pinia-registration-login-example-users';
 let users = JSON.parse(localStorage.getItem(usersKey)!) || [];
 
-function fakeBackend() {
-    const realFetch = window.fetch;
+function leitherBackend() {
+    const realFetch = window.fetch;     // monkey patching
     window.fetch = function (url:string, opts:any) {
         return new Promise((resolve, reject) => {
-            // wrap in timeout to simulate server api call
-            setTimeout(handleRoute, 500);
-
-            function handleRoute() {
-                switch (true) {
-                    case url.endsWith('/users/authenticate') && opts.method === 'POST':
-                        return authenticate();
-                    case url.endsWith('/users/register') && opts.method === 'POST':
-                        return register();
-                    case url.endsWith('/users') && opts.method === 'GET':
-                        return getUsers();
-                    case url.match(/\/users\/\d+$/) && opts.method === 'GET':
-                        return getUserById();
-                    case url.match(/\/users\/\d+$/) && opts.method === 'PUT':
-                        return updateUser();
-                    case url.match(/\/users\/\d+$/) && opts.method === 'DELETE':
-                        return deleteUser();
-                    default:
-                        // pass through any requests not handled above
-                        return realFetch(url, opts)
-                            .then(response => resolve(response))
-                            .catch(error => reject(error));
-                }
+            switch (true) {
+                case url.endsWith('/users/authenticate') && opts.method === 'POST':
+                    return authenticate();
+                case url.endsWith('/users/register') && opts.method === 'POST':
+                    return register();
+                case url.endsWith('/users') && opts.method === 'GET':
+                    return getUsers();
+                case url.match(/\/users\/\d+$/) && opts.method === 'GET':
+                    return getUserById();
+                case url.match(/\/users\/\d+$/) && opts.method === 'PUT':
+                    return updateUser();
+                case url.match(/\/users\/\d+$/) && opts.method === 'DELETE':
+                    return deleteUser();
+                default:
+                    // pass through any requests not handled above
+                    // handle them with original window.fetch()
+                    return realFetch(url, opts)
+                        .then(response => resolve(response))
+                        .catch(error => reject(error));
             }
 
             // route functions
-
             function authenticate() {
                 const { username, password } = body();
                 const user = users.find((x :any) => x.username === username && x.password === password);
@@ -50,9 +47,12 @@ function fakeBackend() {
             function register() {
                 const user = body();
 
-                if (users.find((x :any)  => x.username === user.username)) {
+                if (users.find((x :any) => x.username === user.username)) {
                     return error('Username "' + user.username + '" is already taken')
                 }
+                // check Main DB to see if username exists
+                const userDb = useMainStore()
+                userDb.addUser({})
 
                 user.id = users.length ? Math.max(...users.map((x :any)  => x.id)) + 1 : 1;
                 users.push(user);
@@ -127,6 +127,7 @@ function fakeBackend() {
             }
 
             function body() {
+                console.log("return body=", opts)
                 return opts.body && JSON.parse(opts.body);
             }
 
