@@ -183,7 +183,15 @@ export const useMainStore = defineStore({
                 throw new Error(err)
             }
         },
-
+        async authenticate(username:string, password:string) :Promise<UserAccount> {
+            const u = await this.api.client.Hget(await this.mmsid, this.key, username)
+            if (u) {
+                if (u.password === password) {
+                    return u
+                }
+            }
+            throw new Error("Username and password do not match")
+        },
         async addUser(user: UserAccount):Promise<UserAccount> {
             // add a new user account into system.
             // first check if the username is taken

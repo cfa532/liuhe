@@ -1,10 +1,10 @@
-import { useMainStore } from "@/stores";
+import { useAlertStore, useMainStore } from "@/stores";
 
 export { leitherBackend };
 
 // array in local storage for registered users
 const usersKey = 'vue-3-pinia-registration-login-example-users';
-let users = JSON.parse(localStorage.getItem(usersKey)!) || [];
+const users = JSON.parse(localStorage.getItem(usersKey)!) || [];
 
 function leitherBackend() {
     const realFetch = window.fetch;     // monkey patching
@@ -32,32 +32,38 @@ function leitherBackend() {
             }
 
             // route functions
-            function authenticate() {
+            async function authenticate() {
                 const { username, password } = body();
-                const user = users.find((x :any) => x.username === username && x.password === password);
-
-                if (!user) return error('Username or password is incorrect');
-
-                return ok({
-                    ...basicDetails(user),
-                    token: 'fake-jwt-token'
-                });
+                try {
+                    const user = await useMainStore().authenticate(username, password)
+                    console.log(user, {
+                        ...basicDetails(user),
+                        token: 'fake-jwt-token'
+                    })
+                    return ok({
+                        ...basicDetails(user),
+                        token: 'fake-jwt-token'
+                    });
+                } catch(err) {
+                    console.error("Login failed", err)
+                    useAlertStore().error("Login error")
+                }
             }
 
             function register() {
                 const user = body();
 
-                if (users.find((x :any) => x.username === user.username)) {
-                    return error('Username "' + user.username + '" is already taken')
-                }
                 // check Main DB to see if username exists
                 const userDb = useMainStore()
-                userDb.addUser({})
-
-                user.id = users.length ? Math.max(...users.map((x :any)  => x.id)) + 1 : 1;
-                users.push(user);
-                localStorage.setItem(usersKey, JSON.stringify(users));
-                return ok("");
+                const ua = {"username":user.username, "familyName":user.lastName, "givenName":user.firstName, "password":user.password}
+                userDb.addUser(ua).then((u:UserAccount)=>{
+                    console.log("New Leither user=", u)
+                    users.push(u);
+                    localStorage.setItem(usersKey, JSON.stringify(users));
+                    return ok();
+                }, err=>{
+                    console.error("User register error,", err)
+                })
             }
 
             function getUsers() {
@@ -105,7 +111,7 @@ function leitherBackend() {
 
             // helper functions
 
-            function ok(body:any) {
+            function ok(body:any=null) {
                 resolve({ ok: true, ...headers(), json: () => Promise.resolve(body) } as any)
             }
 
@@ -118,8 +124,8 @@ function leitherBackend() {
             }
 
             function basicDetails(user: any) {
-                const { id, username, firstName, lastName } = user;
-                return { id, username, firstName, lastName };
+                const { username, familyName, givenName, caseMid } = user;
+                return { username, familyName, givenName, caseMid };
             }
 
             function isAuthenticated() {
