@@ -4,7 +4,6 @@ export { leitherBackend };
 
 // array in local storage for registered users
 const usersKey = 'vue-3-pinia-registration-login-example-users';
-const users = JSON.parse(localStorage.getItem(usersKey)!) || [];
 
 function leitherBackend() {
     const realFetch = window.fetch;     // monkey patching
@@ -17,11 +16,11 @@ function leitherBackend() {
                     return register();
                 case url.endsWith('/users') && opts.method === 'GET':
                     return getUsers();
-                case url.match(/\/users\/\d+$/) && opts.method === 'GET':
+                case url.match(/\/users\/\w+$/) && opts.method === 'GET':
                     return getUserById();
-                case url.match(/\/users\/\d+$/) && opts.method === 'PUT':
+                case url.match(/\/users\/\w+$/) && opts.method === 'PUT':
                     return updateUser();
-                case url.match(/\/users\/\d+$/) && opts.method === 'DELETE':
+                case url.match(/\/users\/\w+$/) && opts.method === 'DELETE':
                     return deleteUser();
                 default:
                     // pass through any requests not handled above
@@ -36,17 +35,14 @@ function leitherBackend() {
                 const { username, password } = body();
                 try {
                     const user = await useMainStore().authenticate(username, password)
-                    console.log(user, {
-                        ...basicDetails(user),
-                        token: 'fake-jwt-token'
-                    })
+                    localStorage.setItem(usersKey, JSON.stringify(user));
                     return ok({
                         ...basicDetails(user),
-                        token: 'fake-jwt-token'
+                        token: 'fake-jwt-token'     // JWT token of authentication
                     });
                 } catch(err) {
-                    console.error("Login failed", err)
-                    useAlertStore().error("Login error")
+                    console.error("Login failed.")
+                    error('Username or password is incorrect')
                 }
             }
 
@@ -55,57 +51,56 @@ function leitherBackend() {
 
                 // check Main DB to see if username exists
                 const userDb = useMainStore()
-                const ua = {"username":user.username, "familyName":user.lastName, "givenName":user.firstName, "password":user.password}
+                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password}
                 userDb.addUser(ua).then((u:UserAccount)=>{
                     console.log("New Leither user=", u)
-                    users.push(u);
-                    localStorage.setItem(usersKey, JSON.stringify(users));
+                    localStorage.setItem(usersKey, JSON.stringify(u));
                     return ok();
                 }, err=>{
                     console.error("User register error,", err)
+                    useAlertStore().error("Registration error "+ err)
                 })
             }
 
             function getUsers() {
                 if (!isAuthenticated()) return unauthorized();
-                return ok(users.map((x:any) => basicDetails(x)));
+                const arr = new Array()
+                arr[0] = basicDetails(JSON.parse(localStorage.getItem(usersKey)!))
+                return ok(arr)
             }
 
             function getUserById() {
                 if (!isAuthenticated()) return unauthorized();
 
-                const user = users.find((x :any)  => x.id === idFromUrl());
-                return ok(basicDetails(user));
+                return ok(basicDetails(JSON.parse(localStorage.getItem(usersKey)!)));
             }
 
             function updateUser() {
                 if (!isAuthenticated()) return unauthorized();
 
                 const params = body();
-                const user = users.find((x :any)  => x.id === idFromUrl());
-
                 // only update password if entered
                 if (!params.password) {
                     delete params.password;
                 }
-
-                // if username changed check if taken
-                if (params.username !== user.username && users.find((x:any) => x.username === params.username)) {
-                    return error('Username "' + params.username + '" is already taken')
-                }
-
-                // update and save user
+                // username cannot be changed
+                delete params.username
+                
+                const user = JSON.parse(localStorage.getItem(usersKey)!)
                 Object.assign(user, params);
-                localStorage.setItem(usersKey, JSON.stringify(users));
+                useMainStore().editUser(user).then(()=>{
+                    localStorage.setItem(usersKey, JSON.stringify(user));
+                    return ok();
+                }, err=>{
+                    console.error("update failed:", err)
+                    error("Update failed, "+err)
+                })
 
-                return ok("");
             }
 
             function deleteUser() {
+                // do nothing for now
                 if (!isAuthenticated()) return unauthorized();
-
-                users = users.filter((x :any)  => x.id !== idFromUrl());
-                localStorage.setItem(usersKey, JSON.stringify(users));
                 return ok("");
             }
 
@@ -137,10 +132,10 @@ function leitherBackend() {
                 return opts.body && JSON.parse(opts.body);
             }
 
-            function idFromUrl() {
-                const urlParts = url.split('/');
-                return parseInt(urlParts[urlParts.length - 1]);
-            }
+            // function idFromUrl() {
+            //     const urlParts = url.split('/');
+            //     return urlParts[urlParts.length - 1];
+            // }
 
             function headers() {
                 return {

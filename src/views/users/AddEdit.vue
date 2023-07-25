@@ -22,12 +22,12 @@ if (id) {
 }
 
 const schema = Yup.object().shape({
-    firstName: Yup.string()
-        .required('First Name is required'),
-    lastName: Yup.string()
-        .required('Last Name is required'),
+    familyName: Yup.string()
+        .required('姓氏必填'),
+    givenName: Yup.string()
+        .required('名字必填'),
     username: Yup.string()
-        .required('Username is required'),
+        .required('用户名必填'),
     password: Yup.string()
         .transform(x => x === '' ? undefined : x)
         // password optional in edit mode
@@ -59,25 +59,25 @@ async function onSubmit(values:any) {
         <Form @submit="onSubmit" :validation-schema="schema" :initial-values="user" v-slot="{ errors, isSubmitting }">
             <div class="form-row">
                 <div class="form-group col">
-                    <label>First Name</label>
-                    <Field name="firstName" type="text" class="form-control" :class="{ 'is-invalid': errors.firstName }" />
+                    <label>姓</label>
+                    <Field name="familyName" type="text" class="form-control" :class="{ 'is-invalid': errors.firstName }" />
                     <div class="invalid-feedback">{{ errors.firstName }}</div>
                 </div>
                 <div class="form-group col">
-                    <label>Last Name</label>
-                    <Field name="lastName" type="text" class="form-control" :class="{ 'is-invalid': errors.lastName }" />
+                    <label>名</label>
+                    <Field name="givenName" type="text" class="form-control" :class="{ 'is-invalid': errors.lastName }" />
                     <div class="invalid-feedback">{{ errors.lastName }}</div>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group col">
-                    <label>Username</label>
+                    <label>用户名</label>
                     <Field name="username" type="text" class="form-control" :class="{ 'is-invalid': errors.username }" />
                     <div class="invalid-feedback">{{ errors.username }}</div>
                 </div>
                 <div class="form-group col">
                     <label>
-                        Password
+                        密码
                         <em v-if="user">(Leave blank to keep the same password)</em>
                     </label>
                     <Field name="password" type="password" class="form-control" :class="{ 'is-invalid': errors.password }" />

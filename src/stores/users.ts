@@ -16,9 +16,10 @@ export const useUsersStore = defineStore({
             await fetchWrapper.post(`${baseUrl}/register`, user);
         },
         async getAll() {
+            // only get current login user
             this.users = { loading: true };
             try {
-                this.users = await fetchWrapper.get(baseUrl);    
+                this.users = await fetchWrapper.get(baseUrl);
             } catch (error) {
                 this.users = { error };
             }
@@ -46,6 +47,8 @@ export const useUsersStore = defineStore({
             }
         },
         async delete(id:string) {
+            return 
+            
             // add isDeleting prop to user being deleted
             this.users.find((x:any) => x.id === id).isDeleting = true;
 
