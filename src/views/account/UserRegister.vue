@@ -32,11 +32,11 @@ async function onSubmit(values: any) {
 
 <template>
     <div class="card m-3">
-        <h4 class="card-header">Register</h4>
+        <h4 class="card-header">注册</h4>
         <div class="card-body">
             <Form @submit="onSubmit" :validation-schema="schema" v-slot="{ errors, isSubmitting }">
                 <div class="form-group">
-                    <label>姓</label>
+                    <label>姓氏</label>
                     <Field name="familyName" type="text" class="form-control" :class="{ 'is-invalid': errors.firstName }" />
                     <div class="invalid-feedback">{{ errors.firstName }}</div>
                 </div>

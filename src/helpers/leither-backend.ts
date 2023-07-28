@@ -7,7 +7,7 @@ const usersKey = 'vue-3-pinia-registration-login-example-users';
 
 function leitherBackend() {
     const realFetch = window.fetch;     // monkey patching
-    window.fetch = function (url:string, opts:any) {
+    const leitherFetch = function (url:string, opts:any):Promise<Response> {
         return new Promise((resolve, reject) => {
             switch (true) {
                 case url.endsWith('/users/authenticate') && opts.method === 'POST':
@@ -25,8 +25,12 @@ function leitherBackend() {
                 default:
                     // pass through any requests not handled above
                     // handle them with original window.fetch()
+                    console.log(url, opts)
                     return realFetch(url, opts)
-                        .then(response => resolve(response))
+                        .then(response => {
+                            console.log(response)
+                            resolve(response)
+                        })
                         .catch(error => reject(error));
             }
 
@@ -148,4 +152,5 @@ function leitherBackend() {
             }
         });
     }
+    window.fetch = leitherFetch as any     // to get rid of the type error message, which prevent building from success
 }

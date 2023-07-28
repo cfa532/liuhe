@@ -52,6 +52,5 @@ async function handleResponse(response:any) {
         const error = (data && data.message) || response.status;
         return Promise.reject(error);
     }
-
     return data;
 }

@@ -2,8 +2,13 @@
 import { RouterView } from 'vue-router'
 import { Nav, Alert } from '@/components'
 import { useAuthStore  } from '@/stores';
-
+import { router } from '@/router'
 const authStore = useAuthStore();
+
+function addNewCase() {
+  // create a new case
+  router.push('/case/add')
+}
 </script>
 
 <template>
@@ -14,7 +19,7 @@ const authStore = useAuthStore();
       <div class="row justify-content-start">
         <div v-show="authStore.user" class="col-2 align-self-start">
           <div class="btn-group" role="group" aria-label="Cases">
-            <button type="button" class="btn btn-primary">Case 1</button>
+            <button @click="addNewCase()" type="button" class="btn btn-primary">新建</button>
           </div>
         </div>
         <div class="col">
