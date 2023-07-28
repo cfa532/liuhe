@@ -52,7 +52,7 @@ async function onSubmit() {
   formData.append("file", filesUpload.value[0])
   const resp = await fetch(LLM_URL + '/init', {
     method: "POST",
-    mode: "cors",
+    mode: "cors",   // add resp.headers["Access-Control-Allow-Origin"] = '*' at server
     // headers: {               
     //   "Content-Type": "multipart/form-data",   // do NOT set this
     // },
