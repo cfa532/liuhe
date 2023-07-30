@@ -2,6 +2,7 @@
 import { onMounted, onBeforeUnmount, ref, reactive, computed } from "vue";
 import type { CSSProperties } from "vue";
 import Preview from "./FilePreview.vue";
+import axios from 'axios'
 interface HTMLInputEvent extends Event { target: HTMLInputElement & EventTarget }
 
 const props = defineProps({
@@ -23,8 +24,9 @@ const inpCaption = ref()
 const divAttach = ref()
 const dropHere = ref()
 const myModal = ref()
-const emit = defineEmits(["uploaded", "hide"])
+const emit = defineEmits(["newCaseValues", "hide"])
 const LLM_URL = import.meta.env.VITE_LLM_URL
+// const axios: any = inject('axios')
 
 function onSelect(e: Event) {
   let files = (e as HTMLInputEvent).target.files || (e as DragEvent).dataTransfer?.files;
@@ -49,21 +51,34 @@ function dragOver(evt: DragEvent) {
 async function onSubmit() {
   // process the uploaded file with AI
   const formData = new FormData()
-  formData.append("file", filesUpload.value[0])
-  const resp = await fetch(LLM_URL + '/init', {
-    method: "POST",
-    mode: "cors",   // add resp.headers["Access-Control-Allow-Origin"] = '*' at server
-    // headers: {               
-    //   "Content-Type": "multipart/form-data",   // do NOT set this
-    // },
-    body: formData
+  filesUpload.value.forEach((f, i)=>{formData.append('file', f)})
+  // formData.append("file", filesUpload.value[0])
+
+  const instance = axios.create()
+  instance.postForm(LLM_URL+'/init', formData, )
+  .then((response)=>{
+    console.log(response.data)
+    emit("newCaseValues", response.data)
   })
-  if (resp.ok) {
-    const data = await resp.json()
-    console.log(data)
-  } else {
-    console.error("Fetch error", resp)
-  }
+  .catch(err=>{
+    console.error(err)
+  })
+
+  // const resp = await fetch(LLM_URL + '/init', {
+  //   method: "POST",
+  //   mode: "cors",   // add resp.headers["Access-Control-Allow-Origin"] = '*' at server
+  //   // headers: {               
+  //   //   "Content-Type": "multipart/form-data",   // do NOT set this
+  //   // },
+  //   body: formData
+  // })
+  // if (resp.ok) {
+  //   const data = await resp.json()    // get key fields of the new case from a file
+  //   console.log(data)
+  //   emit("newCaseValues", data)
+  // } else {
+  //   console.error("Fetch error", resp)
+  // }
 }
 function selectFile() {
   // call the real function to select a file to upload
@@ -77,6 +92,7 @@ function removeFile(f: File) {
 // When the user clicks anywhere outside of the modal, close it
 const onClickOutside = (e: MouseEvent) => {
   if (e.target == myModal.value) {
+    // console.log("Hide modal")
     emit("hide")
   }
 };
@@ -106,7 +122,7 @@ onMounted(async () => {
             v-bind:src="file" v-bind:progress="uploadProgress[index]"></Preview>
         </div>
         <div>
-          <input id="selectFiles" @change="onSelect" type="file" name="file" hidden>
+          <input id="selectFiles" @change="onSelect" type="file" name="files[]" hidden multiple>
           <button @click.prevent="selectFile">Choose</button>
           <button style="float: right;">Submit</button>
         </div>

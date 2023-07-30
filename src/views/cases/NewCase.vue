@@ -10,6 +10,7 @@ import { useAlertStore, useCaseStore } from '@/stores';
 import { router } from '@/router';
 
 const route = useRoute();
+const formValues = ref({} as any)
 const showUploader = ref("none")
 const schema = Yup.object().shape({
     title: Yup.string()
@@ -40,13 +41,13 @@ onMounted(()=>{
 
 <template>
     <div>
-        <Uploader :display=showUploader @hide="showUploader='none'" ></Uploader>
+        <Uploader :display=showUploader @hide="showUploader='none'" @newCaseValues="data=>formValues=data" ></Uploader>
     </div>
     <div class="card m-3">
         <span><h4 class="card-header">新建案件</h4>
         <button type="button" @click="showUploader='block'" class="btn btn-secondary btn-sm">初始化</button></span>
         <div class="card-body">
-            <Form @submit="onSubmit" :validation-schema="schema" v-slot="{errors, isSubmitting}">
+            <Form @submit="onSubmit" :validation-schema="schema" :initial-values="formValues" v-slot="{errors, isSubmitting}">
                 <div class="form-group">
                     <label>标题</label>
                     <Field name="title" type="text" class="form-control" :class="{ 'is-invalid': errors.title }" />
