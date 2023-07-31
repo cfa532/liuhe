@@ -2,7 +2,9 @@
 import { onMounted, onBeforeUnmount, ref, reactive, computed } from "vue";
 import type { CSSProperties } from "vue";
 import Preview from "./FilePreview.vue";
-import axios from 'axios'
+// import axios from 'axios'
+import { io, Socket } from "socket.io-client"
+
 interface HTMLInputEvent extends Event { target: HTMLInputElement & EventTarget }
 
 const props = defineProps({
@@ -50,19 +52,27 @@ function dragOver(evt: DragEvent) {
 }
 async function onSubmit() {
   // process the uploaded file with AI
+  // if (filesUpload.value.length < 1) return    // do nothing if no attached files
   const formData = new FormData()
-  filesUpload.value.forEach((f, i)=>{formData.append('file', f)})
+  filesUpload.value.forEach((f)=>{formData.append('file', f)})
   // formData.append("file", filesUpload.value[0])
-
-  const instance = axios.create()
-  instance.postForm(LLM_URL+'/init', formData, )
-  .then((response)=>{
-    console.log(response.data)
-    emit("newCaseValues", response.data)
+  const socket:Socket = io("ws://127.0.0.1:5000",)
+  socket.on('connect', ()=>{
+    console.log("socket connected")
+    // socket.emit("hello", "world", (response:string) => {
+    //   console.log(response); // "got it"
+    // });
   })
-  .catch(err=>{
-    console.error(err)
-  })
+  // socket.send(filesUpload.value[0])
+  // const instance = axios.create()
+  // instance.postForm(LLM_URL+'/init', formData, )
+  // .then((response)=>{
+  //   console.log(response.data)
+  //   emit("newCaseValues", response.data)
+  // })
+  // .catch(err=>{
+  //   console.error(err)
+  // })
 
   // const resp = await fetch(LLM_URL + '/init', {
   //   method: "POST",
