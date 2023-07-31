@@ -56,14 +56,18 @@ async function onSubmit() {
   const formData = new FormData()
   filesUpload.value.forEach((f)=>{formData.append('file', f)})
   // formData.append("file", filesUpload.value[0])
-  const socket:Socket = io("ws://127.0.0.1:5000",)
+  const socket:Socket = io("ws://192.168.0.5:5000")
   socket.on('connect', ()=>{
     console.log("socket connected")
-    // socket.emit("hello", "world", (response:string) => {
-    //   console.log(response); // "got it"
-    // });
+    socket.emit("hello", "world", (response:string) => {
+      console.log(response); // "got it"
+    });
+
+    socket.emit("init_case", filesUpload.value[0], (status:any)=>{
+      console.log(status)
+    })
   })
-  // socket.send(filesUpload.value[0])
+
   // const instance = axios.create()
   // instance.postForm(LLM_URL+'/init', formData, )
   // .then((response)=>{
