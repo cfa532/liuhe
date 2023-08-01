@@ -55,7 +55,7 @@ async function onSubmit() {
   // if (filesUpload.value.length < 1) return    // do nothing if no attached files
   const formData = new FormData()
   filesUpload.value.forEach((f)=>{formData.append('file', f)})
-  // formData.append("file", filesUpload.value[0])
+
   const socket:Socket = io("ws://192.168.0.5:5000")
   socket.on('connect', ()=>{
     console.log("socket connected")
@@ -63,7 +63,7 @@ async function onSubmit() {
       console.log(response); // "got it"
     });
 
-    socket.emit("init_case", filesUpload.value[0], (status:any)=>{
+    socket.emit("init_case", {"form_data": formData}, (status:any)=>{
       console.log(status)
     })
   })
