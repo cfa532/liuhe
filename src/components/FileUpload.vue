@@ -23,11 +23,11 @@ const filesUpload = ref<File[]>([]);
 const uploadProgress = reactive<number[]>([]); // New ref to store upload progress of each file
 const inpCaption = ref()
 const divAttach = ref()
-const divResult = ref()
 const dropHere = ref()
 const myModal = ref()
 const emit = defineEmits(["newCaseValues", "hide"])
 const LLM_URL = import.meta.env.VITE_LLM_URL
+const results = ref([] as any[])
 // const axios: any = inject('axios')
 
 function onSelect(e: Event) {
@@ -56,7 +56,7 @@ async function onSubmit() {
   const formData = new FormData()
   filesUpload.value.forEach((f)=>{formData.append('file', f)})
 
-  const socket:Socket = io("ws://127.0.0.1:5000")
+  const socket:Socket = io(LLM_URL)
   socket.on('connect', ()=>{
     console.log("socket connected")
     socket.emit("hello", "world", (response:any) => {
@@ -68,8 +68,8 @@ async function onSubmit() {
     })
 
     socket.on("result", (res)=>{
-      // console.log("received: " + res)
-      divResult.value.append("<p>"+res+"</p>")
+      console.log("received: " + res)
+      results.value.push(res)
     })
   })
 
@@ -145,7 +145,9 @@ onMounted(async () => {
           <button @click.prevent="selectFile">Choose</button>
           <button style="float: right;">Submit</button>
         </div>
-        <div ref="divResult"></div>
+        <div id="divResult">
+          <p v-for="(r,i) in results" :key="i.toString">{{ r }}</p>
+        </div>
       </form>
     </div>
   </div>
