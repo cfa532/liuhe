@@ -4,7 +4,6 @@ import type { CSSProperties } from "vue";
 import Preview from "./FilePreview.vue";
 // import axios from 'axios'
 import { io, Socket } from "socket.io-client"
-
 interface HTMLInputEvent extends Event { target: HTMLInputElement & EventTarget }
 
 const props = defineProps({
@@ -56,14 +55,14 @@ async function onSubmit() {
   const formData = new FormData()
   filesUpload.value.forEach((f)=>{formData.append('file', f)})
 
-  const socket:Socket = io("ws://192.168.0.5:5000")
-  socket.on('connect', ()=>{
+  const socket:Socket = io("ws://127.0.0.1:5000")
+  socket.on('connect', async ()=>{
     console.log("socket connected")
     socket.emit("hello", "world", (response:string) => {
       console.log(response); // "got it"
     });
 
-    socket.emit("init_case", {"form_data": formData}, (status:any)=>{
+    socket.emit("init_case", filesUpload.value[0].name, filesUpload.value[0].type, filesUpload.value[0], (status:any)=>{
       console.log(status)
     })
   })
