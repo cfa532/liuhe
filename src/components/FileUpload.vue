@@ -23,6 +23,7 @@ const filesUpload = ref<File[]>([]);
 const uploadProgress = reactive<number[]>([]); // New ref to store upload progress of each file
 const inpCaption = ref()
 const divAttach = ref()
+const divResult = ref()
 const dropHere = ref()
 const myModal = ref()
 const emit = defineEmits(["newCaseValues", "hide"])
@@ -56,14 +57,19 @@ async function onSubmit() {
   filesUpload.value.forEach((f)=>{formData.append('file', f)})
 
   const socket:Socket = io("ws://127.0.0.1:5000")
-  socket.on('connect', async ()=>{
+  socket.on('connect', ()=>{
     console.log("socket connected")
-    socket.emit("hello", "world", (response:string) => {
-      console.log(response); // "got it"
+    socket.emit("hello", "world", (response:any) => {
+      console.log(response.status); // "got it"
     });
 
     socket.emit("init_case", filesUpload.value[0].name, filesUpload.value[0].type, filesUpload.value[0], (status:any)=>{
       console.log(status)
+    })
+
+    socket.on("result", (res)=>{
+      // console.log("received: " + res)
+      divResult.value.append("<p>"+res+"</p>")
     })
   })
 
@@ -139,6 +145,7 @@ onMounted(async () => {
           <button @click.prevent="selectFile">Choose</button>
           <button style="float: right;">Submit</button>
         </div>
+        <div ref="divResult"></div>
       </form>
     </div>
   </div>
