@@ -67,9 +67,12 @@ async function onSubmit() {
       console.log(status)
     })
 
-    socket.on("result", (res)=>{
+    socket.on("Done", (res)=>{
       console.log("received: " + res)
       results.value.push(res)
+      emit("hide", true)
+      emit("newCaseValues", res)
+      // hide modal and return to previous page
     })
   })
 

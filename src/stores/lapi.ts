@@ -9,9 +9,8 @@ const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "Getnodeip", "SwarmL
     "MFGetData", "MMCreate", "MMOpen", "Hset", "Hget", "Hmset", "Hmget", "Zadd", "Zrangebyscore", "Zrange", "MFOpenMacFile",
     "MFReaddir", "MFGetMimeType", "MFSetObject", "MFGetObject", "Zcount", "Zrevrange", "Hlen", "Hscan", "Hrevscan",
     "MMRelease", "MMBackup", "MFStat", "Zrem", "Zremrangebyscore", "MiMeiPublish", "PullMsg", "MFTemp2Ipfs", "MFSetCid",
-    "MMSum", "MiMeiSync", "IpfsAdd", "MMAddRef", "Hdel"
+    "MMSum", "MiMeiSync", "IpfsAdd", "MMAddRef", "Hdel", "Hgetall"
 ];
-const PAGE_SIZE = 50        // chat items diplayed per page
 
 export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler', 
@@ -68,85 +67,7 @@ export const useLeitherStore = defineStore({
         }
     }
 })
-export const useCaseStore = defineStore({
-    // holding all cases of the current user, in a FV database
-    id: "CaseMimei",
-    state: ()=>({
-        api: {} as any,
-        mid: "",        // Mimei database to hold all the cases of a user
-        _mmsid: "",         // session id for the current user Mimei
-        _fieldKey: "CASE_FIELD_KEY",
-        _case: null as any,
-        _chatHistory: [] as ChatItem[]
-    }),
-    getters: {
-        // mimei sid for reading
-        mmsid: async function(state) :Promise<string> {
-            state._mmsid = state._mmsid? state._mmsid : await this.api.client.MMOpen(this.api.sid, this.mid, "last")
-            return state._mmsid
-        },
-        // mimei sid for writing
-        mmsidCur: async function() :Promise<string> {
-            return await this.api.client.MMOpen(this.api.sid, this.mid, "cur");
-        },
-        chatHistory: function() :ChatItem[] {
-            return this._chatHistory
-        },
-    },
-    actions: {
-        init(api:any, mid:string) {
-            this.$state.api = api;        // leither api object
-            this.$state.mid = mid          // mimei id for Main user database
-        },
-        async backup(mid: string="") {
-            if (!mid) mid = this.mid;
-            try {
-                const newVer = await this.api.client.MMBackup(this.api.sid, mid, '')
-                this.$state._mmsid = await this.api.client.MMOpen(this.api.sid, mid, "last");
-                // now publish a new version of database Mimei
-                const ret:DhtReply = this.api.client.MiMeiPublish(this.api.sid, "", mid)
-                console.log("Case Mimei publish []DhtReply=", ret, this._mmsid, "newVer="+newVer)
-            } catch(err:any) {
-                throw new Error(err)
-            }
-        },
-        async addCase(c:LegalCase) {
-            // add a new Case to database FV and return the Field. Use
-            const hk = await this.api.client.MMCreate(this.api.sid, "Liuhe", '', c.title, 1, 0x07276705)
-            if (await this.api.client.Hget(await this.mmsid, this._fieldKey, hk)) {
-                throw new Error("Case title already exists")
-            }
-            // also use this hash key as chat history key
-            c.id = hk
-            this._case = c
-            await this.api.client.Hset(await this.mmsidCur, this._fieldKey, hk, c);
-            await this.backup()
-        },
-        async getCase(fieldId:string) {
-            this._case = await this.api.client.Hget(await this.mmsid, this._fieldKey, fieldId)
-            if (!this._case)
-                throw new Error("Case does not exist for "+fieldId)
-        },
-        async editCase(c:LegalCase) {
-            // reset case data with 
-            await this.api.client.Hset(await this.mmsidCur, this._fieldKey, c.id, c);
-            await this.backup()
-        },
-        async addChatItem(c: ChatItem) {
-            // case id (its field id) is also used as Key of chat history Score-Pair
-            await this.api.client.Zadd(await this.mmsidCur, this._fieldKey, new ScorePair(Date.now(), JSON.stringify(c)))
-            await this.backup()
-        },
-        async getChatHistory(pageNum: number) {
-            const start = (pageNum-1)*PAGE_SIZE
-            await this.api.client.Zrevrange(await this.mmsid, this._fieldKey, start, start+PAGE_SIZE-1),
-            (ch:ChatItem[])=>{
-                this._chatHistory.concat(ch)
-                // get currut page of chat history
-            }
-        },
-    }
-})
+
 export const useMainStore = defineStore({
     id: 'MainMimei',      // Mimei to store all users' profile
     state: ()=>({

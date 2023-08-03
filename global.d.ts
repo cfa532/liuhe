@@ -3,6 +3,7 @@ interface Window {
     mmInfo: any       // add to window obj for testing convenience
     getParam: any
     hprose: any
+    lapi: any         // Leither api handler
 }
 
 interface ChatItem {
@@ -10,7 +11,7 @@ interface ChatItem {
     Human: string;
 }
 interface LegalCase {
-    id: string,         // Mimei Id of this Case object
+    id: string,         // hashed Id of this Case object
     title: string,
     brief: string,
     plaintiff: string,
@@ -20,7 +21,7 @@ interface LegalCase {
     // chatHistory: [{AI:string, Human:string}],
     // human ask, and AI reply. Within Mimei DB, each chat item is stored as ScorePair.
     // score: timestamp when the item is created, which means AI answered a question.
-    timestamp: Number,      // date and time this leagal case is created in the system.
+    timestamp: number,      // date and time this leagal case is created in the system.
 }
 interface UserAccount {
     username: string,

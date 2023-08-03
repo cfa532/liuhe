@@ -2,11 +2,6 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { router } from '@/router'
 import { useLeitherStore, useMainStore } from "@/stores"
-
-// import axios from 'axios'
-// import VueAxios from 'vue-axios'
-
-// import './assets/main.css'
 import App from './App.vue'
 
 // setup Leither backend as database
@@ -20,9 +15,9 @@ app.use(router)
 // app.provide('axios', app.config.globalProperties.axios)
 
 useLeitherStore().login().then((api)=>{
-    const mainDBMid = import.meta.env.VITE_MIMEI_DB     // Mimei ID of main database that stores all users information
-    useMainStore().init(api, mainDBMid)
+    window.lapi = api
     // Main DB is also initiated with a Leither object API
+    useMainStore().init(api, import.meta.env.VITE_MIMEI_DB)
     app.mount('#app')
 }, (err)=>{
     console.error(err)
