@@ -10,7 +10,7 @@ import { useAlertStore, useCaseStore } from '@/stores';
 import { router } from '@/router';
 
 const route = useRoute();
-const formValues = ref({} as any)
+const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
 const showUploader = ref("none")
 const schema = Yup.object().shape({
     title: Yup.string()
@@ -24,16 +24,20 @@ const schema = Yup.object().shape({
 });
 
 async function onSubmit(values:any) {
+
     const caseStore = useCaseStore()
     const alertStore = useAlertStore()
     try {
-        await caseStore.addCase(values)
+        console.log(caseStore)
+        await caseStore.createCase(values)
         alertStore.success("New case added")
         // go to chat page
     } catch(err) {
+        console.error(err)
         alertStore.error(err)
     }
 }
+
 onMounted(()=>{
     console.log("New Case Mounted")
 })

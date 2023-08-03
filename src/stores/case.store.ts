@@ -8,7 +8,7 @@ export const useCaseStore = defineStore({
     id: "CaseMimei",
     state: ()=>({
         api: window.lapi,     // Leither api handle
-        mid: "",            // Mimei database to hold all the cases of a user
+        _mid: "",            // Mimei database to hold all the cases of a user
         _mmsid: "",         // session id for the current user Mimei
         _fieldKey: "CASE_FIELD_KEY",
         _field: null as any,     // current Case Field, hash coded from its title
@@ -16,6 +16,11 @@ export const useCaseStore = defineStore({
         _chatHistory: [] as ChatItem[]
     }),
     getters: {
+        mid: function(state) {
+            const user = useAuthStore()
+            state._mid = user.user.caseMid
+            return state._mid
+        },
         // mimei sid for reading
         mmsid: async function(state) :Promise<string> {
             state._mmsid = state._mmsid? state._mmsid : await this.api.client.MMOpen(this.api.sid, this.mid, "last")
@@ -27,9 +32,6 @@ export const useCaseStore = defineStore({
         },
     },
     actions: {
-        init(mid:string) {
-            this.$state.mid = mid          // mimei id for Main user database
-        },
         async backup(mid: string="") {
             if (!mid) mid = this.mid;       // use this mid by default
             try {
@@ -42,9 +44,11 @@ export const useCaseStore = defineStore({
                 throw new Error(err)
             }
         },
-        async addCase(c:LegalCase) {
+        async createCase(c:LegalCase) {
             // add a new Case to database FV and return the Field. Use
+            console.log(c, this.api.sid)
             const hk = await this.api.client.MMCreate(this.api.sid, "Liuhe", '', c.title, 1, 0x07276705)
+            console.log(c, hk, await this.mmsid, this.api)
             if (await this.api.client.Hget(await this.mmsid, this._fieldKey, hk)) {
                 throw new Error("Case title already exists")
             }
@@ -92,7 +96,6 @@ export const useCaseListStore = defineStore({
         mid: function(state) {
             const user = useAuthStore()
             state._mid = user.user.caseMid
-            console.log(state._mid)
             return state._mid
         },
         // mimei sid for reading
@@ -105,9 +108,7 @@ export const useCaseListStore = defineStore({
             return await this.api.client.MMOpen(this.api.sid, this.mid, "cur");
         },
         allCases: async function() :Promise<LegalCase[]> {
-            console.log(this.mmsid, this._fieldKey)
-            const cases: LegalCase[] = await this.api.client.Hgetall(await this.mmsid, this._fieldKey)
-            console.log(cases)
+            const cases:LegalCase[] = await this.api.client.Hgetall(await this.mmsid, this._fieldKey).map((e:any)=>e.value)
             cases.sort((a,b)=> a.timestamp-b.timestamp)
             return cases
         }
@@ -118,8 +119,6 @@ export const useCaseListStore = defineStore({
             if (!c)
                 throw new Error("Case does not exist for "+fieldId)
             const caseStore = useCaseStore()
-            caseStore.mid = this.mid
-            caseStore._mmsid = this._mmsid
             return caseStore
         },
     }
