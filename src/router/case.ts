@@ -1,4 +1,4 @@
-import { NewCase, EditCase, Layout } from "@/views/cases";
+import { NewCase, EditCase, Layout, Intro } from "@/views/cases";
 
 export default {
     path: '/case',

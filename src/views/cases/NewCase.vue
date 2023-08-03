@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import { Form, Field } from 'vee-validate';
 import * as Yup from 'yup';
-import { useRoute } from 'vue-router';
 import { onMounted, ref } from 'vue';
-import { storeToRefs } from 'pinia';
 import { Uploader } from '@/components';
 
 import { useAlertStore, useCaseStore } from '@/stores';
-import { router } from '@/router';
 
-const route = useRoute();
 const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
 const showUploader = ref("none")
 const schema = Yup.object().shape({
