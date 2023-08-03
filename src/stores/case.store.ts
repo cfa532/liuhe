@@ -91,8 +91,19 @@ export const useCaseListStore = defineStore({
         _mid: "", //user.user.caseMid,            // Mimei database to hold all the cases of a user
         _mmsid: "",         // session id for the current user Mimei
         _fieldKey: "CASE_FIELD_KEY",
+        _activeId: "",
     }),
     getters: {
+        activeId: function():string {
+            if (this._activeId)
+                return this._activeId
+            else
+                if (localStorage["activeId"]) {
+                    this._activeId = localStorage["activeId"]
+                    return this._activeId
+                }
+            return ""
+        },       // current working case
         mid: function(state) {
             const user = useAuthStore()
             state._mid = user.user.caseMid
@@ -121,5 +132,9 @@ export const useCaseListStore = defineStore({
             const caseStore = useCaseStore()
             return caseStore
         },
+        setActiveId(id:string) {
+            localStorage["activeId"] = id
+            this._activeId = id
+        }
     }
 })
