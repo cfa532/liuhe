@@ -4,6 +4,7 @@ import { onMounted, computed } from "vue";
 import { storeToRefs } from 'pinia';
 import { useCaseListStore } from "@/stores";
 import { CButtonGroup, CButton } from '@coreui/vue';
+import { router } from '@/router'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 let allCases = shallowRef([] as LegalCase[])
@@ -22,9 +23,15 @@ function selectCase(c:LegalCase) {
     useCaseListStore().setActiveId(c.id)
     console.log("active="+caseListStore.activeId.value, "selected="+c.id)
 }
+function addNewCase() {
+  // create a new case
+  router.push('/case/add')
+}
 </script>
 <template>
 <div>
+    <button @click="addNewCase()" type="button" class="btn btn-primary">新建</button>
+
     <CButtonGroup vertical role="group" aria-label="Vertical button group">
         <CButton :active="currentId==c.id? true:false" @click="selectCase(c)"
         v-for="(c,i) in allCases" :key="i.toString()">{{c.title}}</CButton>

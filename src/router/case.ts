@@ -4,9 +4,9 @@ export default {
     path: '/case',
     component: Layout,
     children: [
-        { path: '', component: NewCase},
+        { path: '', component: Intro},
         { path: 'add', component: NewCase },
-        { path: 'edit/:id', component: EditCase }
+        { path: '/:id', component: EditCase }
     ]
 
 }
