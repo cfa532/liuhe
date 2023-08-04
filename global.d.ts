@@ -17,6 +17,7 @@ interface LegalCase {
     plaintiff: string,
     defendant: string,
     attorney:string,
+    judge?:string,
     chatHistoryId?: string,  // Mimei id points to the chat history database
     // chatHistory: [{AI:string, Human:string}],
     // human ask, and AI reply. Within Mimei DB, each chat item is stored as ScorePair.

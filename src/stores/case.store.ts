@@ -7,7 +7,7 @@ export const useCaseStore = defineStore({
     // holding all cases of the current user, in a FV database
     id: "CaseMimei",
     state: ()=>({
-        api: {} as any,     // Leither api handle
+        api: window.lapi,     // Leither api handle
         _mid: "",            // Mimei database to hold all the cases of a user
         _mmsid: "",         // session id for the current user Mimei
         _fieldKey: "CASE_FIELD_KEY",
@@ -17,8 +17,7 @@ export const useCaseStore = defineStore({
     }),
     getters: {
         mid: function(state) {
-            // const user = useAuthStore()
-            // state._mid = user.user.caseMid
+            state._mid = useAuthStore().user.caseMid
             return state._mid
         },
         // mimei sid for reading
@@ -32,12 +31,6 @@ export const useCaseStore = defineStore({
         },
     },
     actions: {
-        init() {
-            console.log(this.api, this._mid)
-            this.api = window.lapi
-            this._mid = useAuthStore().user.caseMid
-            console.log(this.api, this._mid)
-        },
         async backup(mid: string="") {
             if (!mid) mid = this.mid;       // use this mid by default
             try {
@@ -116,8 +109,7 @@ export const useCaseListStore = defineStore({
             return ""
         },       // current working case
         mid: function(state) {
-            const user = useAuthStore()
-            state._mid = user.user.caseMid
+            state._mid = useAuthStore().user.caseMid
             return state._mid
         },
         // mimei sid for reading
