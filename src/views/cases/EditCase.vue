@@ -10,12 +10,12 @@ import { onMounted, ref } from 'vue';
 const alertStore = useAlertStore();
 const route = useRoute();
 
-onMounted(()=>{
+onMounted(async ()=>{
     const caseStore = useCaseStore()
-    console.log(caseStore)
     caseStore.init()
-    caseStore.initCase(route.params.id as string)
     console.log(caseStore)
+    await caseStore.initCase(route.params.id as string)
+    console.log(caseStore._value)
 })
 </script>
 
