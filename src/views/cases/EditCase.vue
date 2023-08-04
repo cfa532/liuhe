@@ -5,25 +5,38 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAlertStore, useCaseStore } from '@/stores';
 import { router } from '@/router';
-import { onMounted, ref } from 'vue';
+import { onMounted, watch } from 'vue';
 
 const alertStore = useAlertStore();
-const caseStore = useCaseStore()
+const caseStore = storeToRefs(useCaseStore())
 const route = useRoute();
 
 onMounted(async ()=>{
-    await caseStore.initCase(route.params.id as string)     // update caseStore with current case data
-    console.log(caseStore._value)
+    await useCaseStore().initCase(route.params.id as string)     // update caseStore with current case data
+    console.log(caseStore._value.value)
 })
+watch(()=>route.params.id, async (nv, ov)=>{
+    if (nv != ov) {
+        await useCaseStore().initCase(nv as string)
+        console.log(caseStore._value.value)
+    }},
+    {deep: true}
+)
 </script>
 
 <template>
     <div class="container">
-        <p>{{ caseStore._value.title }}</p>
-        <p>{{ caseStore._value.brief }}</p>
-        <p>{{ caseStore._value.plaintiff }}</p>
-        <p>{{ caseStore._value.defendant }}</p>
-        <p>{{ caseStore._value.attorney }}</p>
-        <p>{{ caseStore._value.judge }}</p>
+        <p>{{ caseStore._value.value.title }}</p>
+        <p>{{ caseStore._value.value.brief }}</p>
+        <p>{{ caseStore._value.value.plaintiff }}</p>
+        <p>{{ caseStore._value.value.defendant }}</p>
+        <p>{{ caseStore._value.value.attorney }}</p>
+        <p>{{ caseStore._value.value.judge }}</p>
+        <form>
+            <input>
+        </form>
+    </div>
+    <div>
+        <div>chat history</div>
     </div>
 </template>
