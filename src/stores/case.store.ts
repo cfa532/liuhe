@@ -7,7 +7,7 @@ export const useCaseStore = defineStore({
     // holding all cases of the current user, in a FV database
     id: "CaseMimei",
     state: ()=>({
-        api: window.lapi,     // Leither api handle
+        api: {} as any,     // Leither api handle
         _mid: "",            // Mimei database to hold all the cases of a user
         _mmsid: "",         // session id for the current user Mimei
         _fieldKey: "CASE_FIELD_KEY",
@@ -17,8 +17,8 @@ export const useCaseStore = defineStore({
     }),
     getters: {
         mid: function(state) {
-            const user = useAuthStore()
-            state._mid = user.user.caseMid
+            // const user = useAuthStore()
+            // state._mid = user.user.caseMid
             return state._mid
         },
         // mimei sid for reading
@@ -32,6 +32,12 @@ export const useCaseStore = defineStore({
         },
     },
     actions: {
+        init() {
+            console.log(this.api, this._mid)
+            this.api = window.lapi
+            this._mid = useAuthStore().user.caseMid
+            console.log(this.api, this._mid)
+        },
         async backup(mid: string="") {
             if (!mid) mid = this.mid;       // use this mid by default
             try {
@@ -82,7 +88,7 @@ export const useCaseStore = defineStore({
             const ch:ChatItem[] = await this.api.client.Zrevrange(await this.mmsid, this._fieldKey, start, start+PAGE_SIZE-1)
             this.chatHistory.concat(ch)
         },
-        async initCaseStore(id: string) {
+        async initCase(id: string) {
             this._value = await this.api.client.Hget(await this.mmsid, this._fieldKey, id)
             await this.getChatHistory(1)
         }
@@ -125,7 +131,7 @@ export const useCaseListStore = defineStore({
         },
         allCases: async function() :Promise<LegalCase[]> {
             const cases:LegalCase[] = await this.api.client.Hgetall(await this.mmsid, this._fieldKey).map((e:any)=>e.value)
-            cases.sort((a,b)=> a.timestamp-b.timestamp)
+            cases.sort((a,b)=> b.timestamp-a.timestamp)
             return cases
         }
     },

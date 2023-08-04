@@ -22,6 +22,7 @@ const schema = Yup.object().shape({
 async function onSubmit(values:any) {
 
     const caseStore = useCaseStore()
+    caseStore.init()
     const alertStore = useAlertStore()
     try {
         console.log(caseStore)

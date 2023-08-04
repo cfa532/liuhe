@@ -8,17 +8,18 @@ import { router } from '@/router';
 import { onMounted, ref } from 'vue';
 
 const alertStore = useAlertStore();
-const caseStore = useCaseStore()
 const route = useRoute();
 
 onMounted(()=>{
-    caseStore.initCaseStore(route.params.id as string)
-    console.log(caseStore._value)
+    const caseStore = useCaseStore()
+    console.log(caseStore)
+    caseStore.init()
+    caseStore.initCase(route.params.id as string)
+    console.log(caseStore)
 })
 </script>
 
 <template>
     <div>
-
     </div>
 </template>
