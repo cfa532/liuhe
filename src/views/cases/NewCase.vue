@@ -3,7 +3,7 @@ import { Form, Field } from 'vee-validate';
 import * as Yup from 'yup';
 import { onMounted, ref } from 'vue';
 import { Uploader } from '@/components';
-
+import { router } from '@/router'
 import { useAlertStore, useCaseStore } from '@/stores';
 
 const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
@@ -25,9 +25,9 @@ async function onSubmit(values:any) {
     const alertStore = useAlertStore()
     try {
         console.log(caseStore)
-        await caseStore.createCase(values)
-        alertStore.success("New case added")
-        // go to chat page
+        const newid = await caseStore.createCase(values)
+        alertStore.success("New case added, "+newid)
+        router.push("/case/edit/"+newid)
     } catch(err) {
         console.error(err)
         alertStore.error(err)

@@ -3,25 +3,22 @@ import { Form, Field } from 'vee-validate';
 import * as Yup from 'yup';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
-
-import { useUsersStore, useAlertStore } from '@/stores';
+import { useAlertStore, useCaseStore } from '@/stores';
 import { router } from '@/router';
+import { onMounted, ref } from 'vue';
 
-const usersStore = useUsersStore();
 const alertStore = useAlertStore();
+const caseStore = useCaseStore()
 const route = useRoute();
-const id = route.params.id;
 
-let title = 'Add User';
-let user:any = null;
-if (id) {
-    // edit mode
-    title = '案件';
-    ({ user } = storeToRefs(usersStore));
-    usersStore.getById(id as string);
-}
+onMounted(()=>{
+    caseStore.initCaseStore(route.params.id as string)
+    console.log(caseStore._value)
+})
 </script>
 
 <template>
-    <div></div>
+    <div>
+
+    </div>
 </template>

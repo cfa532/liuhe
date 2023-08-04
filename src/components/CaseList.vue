@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, shallowRef } from 'vue'
+import { shallowRef } from 'vue'
 import { onMounted, computed } from "vue";
 import { storeToRefs } from 'pinia';
 import { useCaseListStore } from "@/stores";
@@ -21,7 +21,7 @@ onMounted(async ()=>{
 function selectCase(c:LegalCase) {
     // highlight current case and 
     useCaseListStore().setActiveId(c.id)
-    console.log("active="+caseListStore.activeId.value, "selected="+c.id)
+    router.push("/case/edit/"+c.id)
 }
 function addNewCase() {
   // create a new case
@@ -30,7 +30,7 @@ function addNewCase() {
 </script>
 <template>
 <div>
-    <button @click="addNewCase()" type="button" class="btn btn-primary">新建</button>
+    <button @click="addNewCase" type="button" class="btn btn-primary">新建</button>
 
     <CButtonGroup vertical role="group" aria-label="Vertical button group">
         <CButton :active="currentId==c.id? true:false" @click="selectCase(c)"

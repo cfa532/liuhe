@@ -11,9 +11,9 @@ export const useCaseStore = defineStore({
         _mid: "",            // Mimei database to hold all the cases of a user
         _mmsid: "",         // session id for the current user Mimei
         _fieldKey: "CASE_FIELD_KEY",
-        _field: null as any,     // current Case Field, hash coded from its title
+        // _field: "",     // current Case Field, hash coded from its title
         _value: {} as LegalCase,
-        _chatHistory: [] as ChatItem[]
+        chatHistory: [] as ChatItem[]
     }),
     getters: {
         mid: function(state) {
@@ -44,7 +44,7 @@ export const useCaseStore = defineStore({
                 throw new Error(err)
             }
         },
-        async createCase(c:LegalCase) {
+        async createCase(c:LegalCase):Promise<string> {
             // add a new Case to database FV and return the Field. Use
             console.log(c, this.api.sid)
             const hk = await this.api.client.MMCreate(this.api.sid, "Liuhe", '', c.title, 1, 0x07276705)
@@ -58,6 +58,7 @@ export const useCaseStore = defineStore({
             this._value = c
             await this.api.client.Hset(await this.mmsidCur, this._fieldKey, hk, c);
             await this.backup()
+            return hk
         },
         async editCase(c:LegalCase) {
             // reset case data with 
@@ -79,8 +80,12 @@ export const useCaseStore = defineStore({
             // get currut page of chat history
             const start = (pageNum!-1)*PAGE_SIZE
             const ch:ChatItem[] = await this.api.client.Zrevrange(await this.mmsid, this._fieldKey, start, start+PAGE_SIZE-1)
-            this._chatHistory.concat(ch)
+            this.chatHistory.concat(ch)
         },
+        async initCaseStore(id: string) {
+            this._value = await this.api.client.Hget(await this.mmsid, this._fieldKey, id)
+            await this.getChatHistory(1)
+        }
     }
 })
 
@@ -125,13 +130,6 @@ export const useCaseListStore = defineStore({
         }
     },
     actions: {
-        async getCase(fieldId:string) {
-            const c:LegalCase = await this.api.client.Hget(await this.mmsid, this._fieldKey, fieldId)
-            if (!c)
-                throw new Error("Case does not exist for "+fieldId)
-            const caseStore = useCaseStore()
-            return caseStore
-        },
         setActiveId(id:string) {
             localStorage["activeId"] = id
             this._activeId = id
