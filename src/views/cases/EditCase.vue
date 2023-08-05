@@ -18,11 +18,9 @@ onMounted(async ()=>{
 })
 watch(()=>route.params.id, async (nv, ov)=>{
     if (nv!=ov && nv) {
-        console.info(nv, ov)
         await useCaseStore().initCase(nv as string)
-        console.log(caseStore._value.value)
     }},
-    {deep: true}
+    // {deep: true}
 )
 </script>
 
