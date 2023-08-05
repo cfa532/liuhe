@@ -35,16 +35,16 @@ function addNewCase() {
     // create a new case
     router.push('/case/add')
 }
+function btnClass(c:LegalCase) {
+    return "btn btn-secondary " + (c.id==currentId.value? "active":"")
+}
 </script>
 <template>
 <div>
     <button @click="addNewCase" type="button" class="btn btn-primary">新建</button>
 
-    <div class="btn-group-vertical" role="group" aria-label="Basic example">
-        <div  v-for="(c,i) in allCases" :key="i.toString()" @click="selectCase(c)">
-            <button v-if="currentId==c.id" type="button" class="btn btn-secondary active">{{c.title}}</button>
-            <button v-else type="button" class="btn btn-outline-primary">{{c.title}}</button>
-        </div>
+    <div class="btn-group-vertical" role="group" aria-label="Large button group">
+        <button @click="selectCase(c)" v-for="(c,i) in allCases" :key="i.toString()" type="button" :class="btnClass(c)">{{c.title}}</button>
     </div>
 </div>
 </template>
