@@ -3,9 +3,7 @@ import { shallowRef } from 'vue'
 import { onMounted, computed } from "vue";
 import { storeToRefs } from 'pinia';
 import { useCaseListStore, useCaseStore } from "@/stores";
-import { CButtonGroup, CButton } from '@coreui/vue';
 import { router } from '@/router'
-import 'bootstrap/dist/css/bootstrap.min.css'
 
 const props=defineProps({
     newId: {type: String, required: false},
@@ -42,9 +40,11 @@ function addNewCase() {
 <div>
     <button @click="addNewCase" type="button" class="btn btn-primary">新建</button>
 
-    <CButtonGroup vertical role="group" aria-label="Vertical button group">
-        <CButton :active="currentId==c.id? true:false" @click="selectCase(c)"
-        v-for="(c,i) in allCases" :key="i.toString()">{{c.title}}</CButton>
-    </CButtonGroup>
+    <div class="btn-group-vertical" role="group" aria-label="Basic example">
+        <div  v-for="(c,i) in allCases" :key="i.toString()" @click="selectCase(c)">
+            <button v-if="currentId==c.id" type="button" class="btn btn-secondary active">{{c.title}}</button>
+            <button v-else type="button" class="btn btn-outline-primary">{{c.title}}</button>
+        </div>
+    </div>
 </div>
 </template>
