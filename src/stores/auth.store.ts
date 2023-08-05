@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 
 import { fetchWrapper } from '@/helpers';
 import { router } from '@/router';
-import { useAlertStore } from '@/stores';
+import { useAlertStore, useCaseStore, useCaseListStore } from '@/stores';
 
 const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
 
@@ -33,6 +33,8 @@ export const useAuthStore = defineStore({
         },
         logout() {
             this.user = null;
+            useCaseStore().$reset()
+            useCaseListStore().$reset()
             localStorage.removeItem('user');
             router.push('/account/login');
         }
