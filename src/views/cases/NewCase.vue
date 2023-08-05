@@ -28,7 +28,7 @@ async function onSubmit(values:any) {
         const newId = await caseStore.createCase(values)
         alertStore.success("New case added, " + caseStore._value)
         // because store is singleton, the caseStore is updated with new data by now.
-        emits("newCaseAdded", newId)
+        emits("newCaseAdded", newId)    // To have case list updated
         router.push("/case/edit/"+newId)
     } catch(err) {
         console.error(err)

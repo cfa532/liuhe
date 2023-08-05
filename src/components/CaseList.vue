@@ -14,9 +14,10 @@ const props=defineProps({
 let allCases = shallowRef([] as LegalCase[])
 const caseListStore = storeToRefs(useCaseListStore())
 const currentId = computed(()=>{
-    console.log("newId=",props.newId, "\nactiveId=",caseListStore.activeId.value)
+    // console.log("newId=",props.newId, "\nactiveId=",caseListStore.activeId.value)
     if (props.newId) {
-        allCases.value.push(useCaseStore()._value)
+        if (allCases.value.findIndex(c=>c.id==props.newId) == -1)
+            allCases.value.unshift(useCaseStore()._value)
         useCaseListStore().setActiveId(props.newId)
     }
     return caseListStore.activeId.value
@@ -33,8 +34,8 @@ function selectCase(c:LegalCase) {
     router.push("/case/edit/"+c.id)
 }
 function addNewCase() {
-  // create a new case
-  router.push('/case/add')
+    // create a new case
+    router.push('/case/add')
 }
 </script>
 <template>
