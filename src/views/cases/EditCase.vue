@@ -10,13 +10,15 @@ import { onMounted, watch } from 'vue';
 const alertStore = useAlertStore();
 const caseStore = storeToRefs(useCaseStore())
 const route = useRoute();
+const emits = defineEmits(["newCaseAdded"])     // to keep Vue from complaining
 
 onMounted(async ()=>{
     await useCaseStore().initCase(route.params.id as string)     // update caseStore with current case data
     console.log(caseStore._value.value)
 })
 watch(()=>route.params.id, async (nv, ov)=>{
-    if (nv != ov) {
+    if (nv!=ov && nv) {
+        console.info(nv, ov)
         await useCaseStore().initCase(nv as string)
         console.log(caseStore._value.value)
     }},

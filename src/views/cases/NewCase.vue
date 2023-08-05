@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { onMounted, ref } from 'vue';
 import { Uploader } from '@/components';
 import { router } from '@/router'
-import { useAlertStore, useCaseStore } from '@/stores';
+import { useAlertStore, useCaseStore, useCaseListStore } from '@/stores';
 
 const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
 const showUploader = ref("none")
@@ -18,16 +18,18 @@ const schema = Yup.object().shape({
     defendant: Yup.string()
         .required("被告名必填"),
 });
+const emits = defineEmits(["newCaseAdded"])     // to keep Vue from complaining
 
 async function onSubmit(values:any) {
 
     const caseStore = useCaseStore()
-    // caseStore.init()
     const alertStore = useAlertStore()
     try {
-        const newid = await caseStore.createCase(values)
-        alertStore.success("New case added, "+newid)
-        router.push("/case/edit/"+newid)
+        const newId = await caseStore.createCase(values)
+        alertStore.success("New case added, " + caseStore._value)
+        // because store is singleton, the caseStore is updated with new data by now.
+        emits("newCaseAdded", newId)
+        // router.push("/case/edit/"+newid)
     } catch(err) {
         console.error(err)
         alertStore.error(err)

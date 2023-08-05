@@ -2,14 +2,23 @@
 import { shallowRef } from 'vue'
 import { onMounted, computed } from "vue";
 import { storeToRefs } from 'pinia';
-import { useCaseListStore } from "@/stores";
+import { useCaseListStore, useCaseStore } from "@/stores";
 import { CButtonGroup, CButton } from '@coreui/vue';
 import { router } from '@/router'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
+const props=defineProps({
+    newId: {type: String, required: false},
+})
+
 let allCases = shallowRef([] as LegalCase[])
 const caseListStore = storeToRefs(useCaseListStore())
 const currentId = computed(()=>{
+    console.log("newId=",props.newId, "\nactiveId=",caseListStore.activeId.value)
+    if (props.newId) {
+        allCases.value.push(useCaseStore()._value)
+        useCaseListStore().setActiveId(props.newId)
+    }
     return caseListStore.activeId.value
 })
 
