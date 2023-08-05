@@ -29,7 +29,7 @@ async function onSubmit(values:any) {
         alertStore.success("New case added, " + caseStore._value)
         // because store is singleton, the caseStore is updated with new data by now.
         emits("newCaseAdded", newId)
-        // router.push("/case/edit/"+newid)
+        router.push("/case/edit/"+newId)
     } catch(err) {
         console.error(err)
         alertStore.error(err)
