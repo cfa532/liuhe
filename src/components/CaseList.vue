@@ -36,12 +36,12 @@ function addNewCase() {
     router.push('/case/add')
 }
 function btnClass(c:LegalCase) {
-    return "btn btn-outline-secondary " + (c.id==currentId.value? "active":"")
+    return "btn btn-light text-nowrap btn-outline-secondary " + (c.id==currentId.value? "active":"")
 }
 </script>
 <template>
-<div>
-    <button @click="addNewCase" type="button" class="btn btn-primary">新建</button>
+<div style="min-width: 80px;">
+    <button @click="addNewCase" type="button" class="btn btn-light">新建</button>
 
     <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Small button group">
         <button @click="selectCase(c)" v-for="(c,i) in allCases" :key="i.toString()" type="button" :class="btnClass(c)">{{c.title}}</button>
