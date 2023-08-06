@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-import { onMounted, computed } from "vue";
+import { shallowRef, watch } from 'vue'
+import { onMounted } from "vue";
 import { storeToRefs } from 'pinia';
 import { useCaseListStore, useCaseStore } from "@/stores";
 import { router } from '@/router'
@@ -11,16 +11,13 @@ const props=defineProps({
 
 let allCases = shallowRef([] as LegalCase[])
 const caseListStore = storeToRefs(useCaseListStore())
-const currentId = computed(()=>{
-    // console.log("newId=",props.newId, "\nactiveId=",caseListStore.activeId.value)
-    if (props.newId) {
+watch(()=>props.newId, (nv, ov)=>{
+    if (nv) {
         if (allCases.value.findIndex(c=>c.id==props.newId) == -1)
             allCases.value.unshift(useCaseStore()._value)
-        useCaseListStore().setActiveId(props.newId)
+        useCaseListStore().setActiveId(nv)
     }
-    return caseListStore.activeId.value
 })
-
 onMounted(async ()=>{
     // get list of cases of the user
     allCases.value = await caseListStore.allCases.value
@@ -36,7 +33,7 @@ function addNewCase() {
     router.push('/case/add')
 }
 function btnClass(c:LegalCase) {
-    return "btn btn-outline-secondary " + (c.id==currentId.value? "active":"")
+    return "btn btn-outline-secondary " + (c.id==caseListStore.activeId.value? "active":"")
 }
 </script>
 <template>
