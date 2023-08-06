@@ -4,13 +4,11 @@ import * as Yup from 'yup';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAlertStore, useCaseStore } from '@/stores';
-import { router } from '@/router';
 import { onMounted, watch } from 'vue';
 
 const alertStore = useAlertStore();
 const caseStore = storeToRefs(useCaseStore())
 const route = useRoute();
-const emits = defineEmits(["newCaseAdded"])     // to keep Vue from complaining
 
 onMounted(async ()=>{
     await useCaseStore().initCase(route.params.id as string)     // update caseStore with current case data
@@ -26,17 +24,22 @@ watch(()=>route.params.id, async (nv, ov)=>{
 
 <template>
     <div class="container">
-        <p>{{ caseStore._value.value.title }}</p>
-        <p>{{ caseStore._value.value.brief }}</p>
-        <p>{{ caseStore._value.value.plaintiff }}</p>
-        <p>{{ caseStore._value.value.defendant }}</p>
-        <p>{{ caseStore._value.value.attorney }}</p>
-        <p>{{ caseStore._value.value.judge }}</p>
+    <div class="card" style="width: 40rem;">
+        <div class="card-header">
+            {{ caseStore._value.value.title }}
+        </div>
+        <ul class="list-group list-group-flush">
+        <li class="list-group-item">{{ caseStore._value.value.brief }}</li>
+        <li class="list-group-item">原告：{{ caseStore._value.value.plaintiff }}</li>
+        <li class="list-group-item">被告：{{ caseStore._value.value.defendant }}</li>
+        <li v-if="caseStore._value.value.judge" class="list-group-item">主审：{{ caseStore._value.value.judge }}</li>
+    </ul>
+    </div>
         <form>
             <input>
         </form>
     </div>
-    <div>
+    <div class="container" >
         <div>chat history</div>
     </div>
 </template>
