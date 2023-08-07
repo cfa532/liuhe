@@ -20,6 +20,9 @@ watch(()=>route.params.id, async (nv, ov)=>{
     }},
     // {deep: true}
 )
+function uploadFiles() {
+
+}
 </script>
 
 <template>
@@ -30,7 +33,7 @@ watch(()=>route.params.id, async (nv, ov)=>{
             <div class="card-header">
                 {{ caseStore._value.value.title }}
             <div style="position: absolute; right: 0px; top:1px">
-                <button type="button" class="btn btn-link">添加文件</button>
+                <button type="button" @click="uploadFiles" class="btn btn-link">&nbsp;添加文件</button>
             </div>
             </div>
             <ul class="list-group list-group-flush">
@@ -55,4 +58,6 @@ watch(()=>route.params.id, async (nv, ov)=>{
     </div>
     </div>
 </div>
+
+
 </template>
