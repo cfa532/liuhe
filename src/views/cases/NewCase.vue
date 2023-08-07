@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import { onMounted, ref } from 'vue';
 import { Uploader } from '@/components';
 import { router } from '@/router'
-import { useAlertStore, useCaseStore, useCaseListStore } from '@/stores';
+import { useAlertStore, useCaseStore } from '@/stores';
 
 const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
 const showUploader = ref("none")

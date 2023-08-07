@@ -30,6 +30,7 @@ function selectCase(c:LegalCase) {
 }
 function addNewCase() {
     // create a new case
+    useCaseListStore().setActiveId("")
     router.push('/case/add')
 }
 function btnClass(c:LegalCase) {

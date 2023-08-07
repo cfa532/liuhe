@@ -23,23 +23,33 @@ watch(()=>route.params.id, async (nv, ov)=>{
 </script>
 
 <template>
-    <div class="container">
-    <div class="card" style="width: 40rem;">
-        <div class="card-header">
-            {{ caseStore._value.value.title }}
+<div class="container d-grid row-gap-3">
+    <div class="row">
+        <div class="col">
+        <div class="card fs-6" style="width: 40rem;">
+            <div class="card-header">
+                {{ caseStore._value.value.title }}
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item text-secondary">{{ caseStore._value.value.brief }}</li>
+                <li class="list-group-item text-secondary">原告：{{ caseStore._value.value.plaintiff }}</li>
+                <li class="list-group-item text-secondary">被告：{{ caseStore._value.value.defendant }}</li>
+                <li v-if="caseStore._value.value.judge" class="list-group-item text-secondary">主审：{{ caseStore._value.value.judge }}</li>
+            </ul>
         </div>
-        <ul class="list-group list-group-flush">
-        <li class="list-group-item">{{ caseStore._value.value.brief }}</li>
-        <li class="list-group-item">原告：{{ caseStore._value.value.plaintiff }}</li>
-        <li class="list-group-item">被告：{{ caseStore._value.value.defendant }}</li>
-        <li v-if="caseStore._value.value.judge" class="list-group-item">主审：{{ caseStore._value.value.judge }}</li>
-    </ul>
     </div>
+    </div>
+    <div class="row">
+        <div class="col">
         <form>
             <input>
         </form>
     </div>
-    <div class="container" >
+    </div>
+    <div class="row text-secondary">
+        <div class="col">
         <div>chat history</div>
     </div>
+    </div>
+</div>
 </template>
