@@ -40,7 +40,9 @@ function btnClass(c:LegalCase) {
 <template>
 <div style="min-width: 80px;">
     <div class="btn-group-vertical btn-group-sm d-grid gap-1" role="group" aria-label="Small button group">
-        <button @click="addNewCase" type="button" class="btn btn-light text-nowrap btn-outline-primary">新建</button>
+        <button @click="addNewCase" type="button" class="btn btn-light text-nowrap btn-outline-primary">
+            <span class="text-decoration-underline">&nbsp;新建&nbsp;</span>
+        </button>
         <button @click="selectCase(c)" v-for="(c,i) in allCases" :key="i.toString()" type="button" :class="btnClass(c)">{{c.title}}</button>
     </div>
 </div>

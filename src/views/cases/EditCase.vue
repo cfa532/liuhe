@@ -29,6 +29,9 @@ watch(()=>route.params.id, async (nv, ov)=>{
         <div class="card fs-6" style="width: 40rem;">
             <div class="card-header">
                 {{ caseStore._value.value.title }}
+            <div style="position: absolute; right: 0px; top:1px">
+                <button type="button" class="btn btn-link">添加文件</button>
+            </div>
             </div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item text-secondary">{{ caseStore._value.value.brief }}</li>
@@ -37,7 +40,7 @@ watch(()=>route.params.id, async (nv, ov)=>{
                 <li v-if="caseStore._value.value.judge" class="list-group-item text-secondary">主审：{{ caseStore._value.value.judge }}</li>
             </ul>
         </div>
-    </div>
+        </div>
     </div>
     <div class="row">
         <div class="col">
