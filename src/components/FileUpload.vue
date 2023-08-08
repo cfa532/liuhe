@@ -2,13 +2,7 @@
 import { onMounted, ref, reactive } from "vue";
 import Preview from "./FilePreview.vue";
 import { io, Socket } from "socket.io-client"
-// import { Modal } from 'bootstrap'
-
 interface HTMLInputEvent extends Event { target: HTMLInputElement & EventTarget }
-
-const state = reactive({
-    modal_demo: null,
-})
 
 const props = defineProps({
     display: {type: String, required: false, default:"none"},
@@ -79,8 +73,6 @@ function removeFile(f: File) {
 }
 onMounted(async () => {
   console.log("Editor mount", props)
-  // state.modal_demo = new Modal('#myModal', {})
-  // state.modal_demo.show()
 })
 </script>
 
