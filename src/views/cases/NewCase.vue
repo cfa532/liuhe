@@ -7,7 +7,6 @@ import { router } from '@/router'
 import { useAlertStore, useCaseStore } from '@/stores';
 
 const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
-const myModal = ref(null as any)
 const schema = Yup.object().shape({
     title: Yup.string()
         .required('案件标题必填'),
@@ -43,7 +42,7 @@ onMounted(()=>{
 
 <template>
     <div>
-        <Uploader @newCaseValues="data=>formValues=data" ref="myModal"></Uploader>
+        <Uploader @newCaseValues="data=>formValues=data"></Uploader>
     </div>
     <div class="card m-3">
         <h4 class="card-header">新建案件</h4>

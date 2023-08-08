@@ -2,7 +2,7 @@
 import { onMounted, ref, reactive } from "vue";
 import Preview from "./FilePreview.vue";
 import { io, Socket } from "socket.io-client"
-import { Modal } from 'bootstrap'
+// import { Modal } from 'bootstrap'
 
 interface HTMLInputEvent extends Event { target: HTMLInputElement & EventTarget }
 
@@ -18,7 +18,7 @@ const uploadProgress = reactive<number[]>([]); // New ref to store upload progre
 const inpCaption = ref()
 const divAttach = ref()
 const dropHere = ref()
-const emit = defineEmits(["newCaseValues", "hide", "myModal"])
+const emit = defineEmits(["newCaseValues", "hide"])
 const LLM_URL = import.meta.env.VITE_LLM_URL
 const results = ref([] as any[])
 // const axios: any = inject('axios')
