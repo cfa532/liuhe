@@ -17,7 +17,7 @@ const schema = Yup.object().shape({
     defendant: Yup.string()
         .required("被告名必填"),
 });
-const emits = defineEmits(["newCaseAdded"])     // to keep Vue from complaining
+const emits = defineEmits(["newCaseAdded"])     // add new case to list
 
 async function onSubmit(values:any) {
 
@@ -41,9 +41,7 @@ onMounted(()=>{
 </script>
 
 <template>
-    <div>
-        <Uploader @newCaseValues="data=>formValues=data"></Uploader>
-    </div>
+    <Uploader @newCaseValues="data=>formValues=data"></Uploader>
     <div class="card m-3">
         <h4 class="card-header">新建案件</h4>
         <div style="position: absolute; right: 0px; top:0px">

@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref, reactive } from "vue";
+import { ref, reactive } from "vue";
 import Preview from "./FilePreview.vue";
 import { io, Socket } from "socket.io-client"
 interface HTMLInputEvent extends Event { target: HTMLInputElement & EventTarget }
 
-const props = defineProps({
-    display: {type: String, required: false, default:"none"},
-})
 const filesUpload = ref<File[]>([]);
 const uploadProgress = reactive<number[]>([]); // New ref to store upload progress of each file
-const inpCaption = ref()
 const divAttach = ref()
 const dropHere = ref()
-const emit = defineEmits(["newCaseValues", "hide"])
 const LLM_URL = import.meta.env.VITE_LLM_URL
 const results = ref([] as any[])
 // const axios: any = inject('axios')
@@ -25,9 +20,6 @@ function onSelect(e: Event) {
     if (filesUpload.value.findIndex((e:File) => { return e.name === f.name && e.size === f.size && e.lastModified === f.lastModified }) === -1) {
       // filter duplication
       console.log(f)
-      if (inpCaption.value === "" || !inpCaption.value) {
-        inpCaption.value = f.name
-      }
       filesUpload.value.push(f);
     }
   })
@@ -43,6 +35,8 @@ async function onSubmit() {
   // process the uploaded file with AI
   const formData = new FormData()
   filesUpload.value.forEach((f)=>{formData.append('file', f)})
+  console.log(filesUpload.value)
+  return
 
   const socket:Socket = io(LLM_URL)
   socket.on('connect', ()=>{
@@ -58,11 +52,11 @@ async function onSubmit() {
     socket.on("Done", (res)=>{
       console.log("received: " + res)
       results.value.push(res)
-      emit("hide", true)
-      emit("newCaseValues", res)
       // hide modal and return to previous page
     })
   })
+  // clear files and hide the modal
+  document.getElementById("closeModal")?.click()
 }
 function selectFile() {
   // call the real function to select a file to upload
@@ -74,19 +68,16 @@ function removeFile(f: File) {
   filesUpload.value.splice(i, 1)
   dragOver()
 }
-onMounted(async () => {
-  console.log("Editor mount", props)
-})
 </script>
 
 <template>
 <div id="myModal" class="modal fade" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content" @dragover.prevent="dragOver" @drop.prevent="onSelect">
-      <form @submit.prevent="onSubmit" enctype="multipart/form-data" method="POST">
+      <form enctype="multipart/form-data" method="POST">
       <div class="modal-header">
         <h5 class="modal-title">上传文件</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button id="closeModal" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
           <div ref="dropHere"
@@ -100,9 +91,9 @@ onMounted(async () => {
         </div>
       </div>
         <div class="modal-footer">
-          <input id="selectFiles" @change="onSelect" type="file" name="files[]" hidden multiple>
-          <button @click.prevent="selectFile"  type="button" class="btn btn-secondary">Choose</button>
-          <button style="float: right;"  type="button" class="btn btn-primary">Submit</button>
+          <input id="selectFiles" @change="onSelect" type="file" name="files[]" accept=".pdf,.txt,.docx" hidden multiple>
+          <button @click.prevent="selectFile" type="button" class="btn btn-secondary">Choose</button>
+          <button @click.prevent="onSubmit" type="button" class="btn btn-primary">Submit</button>
         </div>
       </form>
       <div id="divResult">

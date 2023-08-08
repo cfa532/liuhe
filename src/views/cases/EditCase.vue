@@ -5,14 +5,16 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAlertStore, useCaseStore } from '@/stores';
 import { onMounted, watch } from 'vue';
+import { MultiUploader } from '@/components';
 
 const alertStore = useAlertStore();
 const caseStore = storeToRefs(useCaseStore())
 const route = useRoute();
+const emits = defineEmits(["newCaseAdded"])     // to keep Vue from complaining
 
 onMounted(async ()=>{
     await useCaseStore().initCase(route.params.id as string)     // update caseStore with current case data
-    console.log(caseStore._value.value)
+    console.log(caseStore._value.value, route.params.id)
 })
 watch(()=>route.params.id, async (nv, ov)=>{
     if (nv!=ov && nv) {
@@ -20,12 +22,10 @@ watch(()=>route.params.id, async (nv, ov)=>{
     }},
     // {deep: true}
 )
-function uploadFiles() {
-
-}
 </script>
 
 <template>
+<multi-uploader></multi-uploader>
 <div class="container d-grid row-gap-3">
     <div class="row">
         <div class="col">
@@ -33,7 +33,7 @@ function uploadFiles() {
             <div class="card-header">
                 {{ caseStore._value.value.title }}
             <div style="position: absolute; right: 0px; top:1px">
-                <button type="button" @click="uploadFiles" class="btn btn-link">&nbsp;添加文件</button>
+                <button type="button" data-bs-target="#myModal" class="btn btn-link" data-bs-toggle="modal">&nbsp;添加文件</button>
             </div>
             </div>
             <ul class="list-group list-group-flush">
@@ -50,12 +50,12 @@ function uploadFiles() {
         <form>
             <input>
         </form>
-    </div>
+        </div>
     </div>
     <div class="row text-secondary">
         <div class="col">
-        <div>chat history</div>
-    </div>
+            <div>chat history</div>
+        </div>
     </div>
 </div>
 

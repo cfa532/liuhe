@@ -2,6 +2,7 @@
 import { onMounted, ref, reactive } from "vue";
 import Preview from "./FilePreview.vue";
 import { io, Socket } from "socket.io-client"
+import { Modal } from 'bootstrap'
 interface HTMLInputEvent extends Event { target: HTMLInputElement & EventTarget }
 
 const props = defineProps({
