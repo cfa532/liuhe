@@ -7,7 +7,7 @@ import { router } from '@/router'
 import { useAlertStore, useCaseStore } from '@/stores';
 
 const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
-const showUploader = ref("none")
+const myModal = ref(null as any)
 const schema = Yup.object().shape({
     title: Yup.string()
         .required('案件标题必填'),
@@ -43,11 +43,13 @@ onMounted(()=>{
 
 <template>
     <div>
-        <Uploader :display=showUploader @hide="showUploader='none'" @newCaseValues="data=>formValues=data" ></Uploader>
+        <Uploader @newCaseValues="data=>formValues=data" ref="myModal"></Uploader>
     </div>
     <div class="card m-3">
-        <span><h4 class="card-header">新建案件</h4>
-        <button type="button" @click="showUploader='block'" class="btn btn-secondary btn-sm">初始化</button></span>
+        <h4 class="card-header">新建案件</h4>
+        <div style="position: absolute; right: 0px; top:0px">
+            <button type="button" data-bs-target="#myModal" class="btn btn-secondary btn-sm" data-bs-toggle="modal">初始化</button>
+        </div>
         <div class="card-body">
             <Form @submit="onSubmit" :validation-schema="schema" :initial-values="formValues" v-slot="{errors, isSubmitting}">
                 <div class="form-group">
@@ -85,7 +87,7 @@ onMounted(()=>{
                         <span v-show="isSubmitting" class="spinner-border spinner-border-sm mr-1"></span>
                         注册
                     </button>
-                    <router-link to="login" class="btn btn-link">取消</router-link>
+                    <router-link to="login" class="btn btn-link" style="float: right;">取消</router-link>
                 </div>
             </Form>
         </div>

@@ -3,6 +3,9 @@ import { createPinia } from 'pinia'
 import { router } from '@/router'
 import { useLeitherStore, useMainStore } from "@/stores"
 import App from './App.vue'
+// import 'bootstrap/dist/css/bootstrap.css'
+import "bootstrap/dist/css/bootstrap.min.css"
+import "bootstrap"
 
 // setup Leither backend as database
 import { leitherBackend } from './helpers';

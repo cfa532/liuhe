@@ -2,7 +2,6 @@
 import { RouterView } from 'vue-router'
 import { Nav, Alert } from '@/components'
 import { useAuthStore  } from '@/stores'
-import 'bootstrap/dist/css/bootstrap.min.css'
 
 const authStore = useAuthStore();
 </script>

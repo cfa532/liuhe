@@ -1,31 +1,24 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, reactive, computed } from "vue";
-import type { CSSProperties } from "vue";
+import { onMounted, ref, reactive } from "vue";
 import Preview from "./FilePreview.vue";
-// import axios from 'axios'
 import { io, Socket } from "socket.io-client"
+import { Modal } from 'bootstrap'
+
 interface HTMLInputEvent extends Event { target: HTMLInputElement & EventTarget }
+
+const state = reactive({
+    modal_demo: null,
+})
 
 const props = defineProps({
     display: {type: String, required: false, default:"none"},
-})
-const classModal = computed(():CSSProperties=>{
-  return {
-    display: props.display,
-    position: "fixed",
-    'z-index': 1,
-    overflow: "auto",
-    left: 0, top: 0, width: "100%", height: "100%",
-    'background-color': "rgb(0,0,0,0.7)",
-  }
 })
 const filesUpload = ref<File[]>([]);
 const uploadProgress = reactive<number[]>([]); // New ref to store upload progress of each file
 const inpCaption = ref()
 const divAttach = ref()
 const dropHere = ref()
-const myModal = ref()
-const emit = defineEmits(["newCaseValues", "hide"])
+const emit = defineEmits(["newCaseValues", "hide", "myModal"])
 const LLM_URL = import.meta.env.VITE_LLM_URL
 const results = ref([] as any[])
 // const axios: any = inject('axios')
@@ -52,7 +45,6 @@ function dragOver(evt: DragEvent) {
 }
 async function onSubmit() {
   // process the uploaded file with AI
-  // if (filesUpload.value.length < 1) return    // do nothing if no attached files
   const formData = new FormData()
   filesUpload.value.forEach((f)=>{formData.append('file', f)})
 
@@ -75,32 +67,6 @@ async function onSubmit() {
       // hide modal and return to previous page
     })
   })
-
-  // const instance = axios.create()
-  // instance.postForm(LLM_URL+'/init', formData, )
-  // .then((response)=>{
-  //   console.log(response.data)
-  //   emit("newCaseValues", response.data)
-  // })
-  // .catch(err=>{
-  //   console.error(err)
-  // })
-
-  // const resp = await fetch(LLM_URL + '/init', {
-  //   method: "POST",
-  //   mode: "cors",   // add resp.headers["Access-Control-Allow-Origin"] = '*' at server
-  //   // headers: {               
-  //   //   "Content-Type": "multipart/form-data",   // do NOT set this
-  //   // },
-  //   body: formData
-  // })
-  // if (resp.ok) {
-  //   const data = await resp.json()    // get key fields of the new case from a file
-  //   console.log(data)
-  //   emit("newCaseValues", data)
-  // } else {
-  //   console.error("Fetch error", resp)
-  // }
 }
 function selectFile() {
   // call the real function to select a file to upload
@@ -111,27 +77,23 @@ function removeFile(f: File) {
   var i = filesUpload.value.findIndex((e:File) => e==f);
   filesUpload.value.splice(i, 1)
 }
-// When the user clicks anywhere outside of the modal, close it
-const onClickOutside = (e: MouseEvent) => {
-  if (e.target == myModal.value) {
-    // console.log("Hide modal")
-    emit("hide")
-  }
-};
-
-onBeforeUnmount(() => {
-  window.removeEventListener("click", onClickOutside);
-});
 onMounted(async () => {
   console.log("Editor mount", props)
-  window.addEventListener("click", onClickOutside);
+  // state.modal_demo = new Modal('#myModal', {})
+  // state.modal_demo.show()
 })
 </script>
 
 <template>
-  <div ref="myModal" :style="classModal">
+<div id="myModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
     <div class="modal-content" @dragover.prevent="dragOver" @drop.prevent="onSelect">
       <form @submit.prevent="onSubmit" enctype="multipart/form-data" method="POST">
+      <div class="modal-header">
+        <h5 class="modal-title">上传文件</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
         <div style="width:99%; margin-bottom: 10px;">
           <div ref="dropHere"
             style="border: 1px solid lightgrey; text-align: center; width:100%; height:100px; margin: 0px;">
@@ -143,30 +105,18 @@ onMounted(async () => {
           <Preview @file-canceled="removeFile(file)" v-for="(file, index) in filesUpload" :key="index"
             v-bind:src="file" v-bind:progress="uploadProgress[index]"></Preview>
         </div>
-        <div>
+      </div>
+        <div class="modal-footer">
           <input id="selectFiles" @change="onSelect" type="file" name="files[]" hidden multiple>
-          <button @click.prevent="selectFile">Choose</button>
-          <button style="float: right;">Submit</button>
-        </div>
-        <div id="divResult">
-          <p v-for="(r,i) in results" :key="i.toString">{{ r }}</p>
+          <button @click.prevent="selectFile"  type="button" class="btn btn-secondary">Choose</button>
+          <button style="float: right;"  type="button" class="btn btn-primary">Submit</button>
         </div>
       </form>
+      <div id="divResult">
+        <p v-for="(r,i) in results" :key="i.toString">{{ r }}</p>
+      </div>
     </div>
+  </div>
   </div>
 </template>
 
-<style>
-.modal-content {
-  border-radius: 5px;
-  background-color: #ebf0f3;
-  margin: 5% 10% 5% 2%;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-  /* height: 150px; */
-  max-width: 800px;
-  top: 5%;
-  left: 5%
-}
-</style>
