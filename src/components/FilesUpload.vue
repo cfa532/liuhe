@@ -9,6 +9,7 @@ const props = defineProps({
 })
 const filesUpload = ref<File[]>([]);
 const uploadProgress = reactive<number[]>([]); // New ref to store upload progress of each file
+const inpCaption = ref()
 const divAttach = ref()
 const dropHere = ref()
 const emit = defineEmits(["newCaseValues", "hide"])
@@ -19,8 +20,17 @@ const results = ref([] as any[])
 function onSelect(e: Event) {
   let files = (e as HTMLInputEvent).target.files || (e as DragEvent).dataTransfer?.files;
   if (!files) return
-  console.log(files[0])
-  filesUpload.value[0] = files[0]
+
+  Array.from(files).forEach(f => {
+    if (filesUpload.value.findIndex((e:File) => { return e.name === f.name && e.size === f.size && e.lastModified === f.lastModified }) === -1) {
+      // filter duplication
+      console.log(f)
+      if (inpCaption.value === "" || !inpCaption.value) {
+        inpCaption.value = f.name
+      }
+      filesUpload.value.push(f);
+    }
+  })
   divAttach.value!.hidden = false
   dropHere.value!.hidden = true
 };
@@ -90,7 +100,7 @@ onMounted(async () => {
         </div>
       </div>
         <div class="modal-footer">
-          <input id="selectFiles" @change="onSelect" type="file" name="files[]" hidden>
+          <input id="selectFiles" @change="onSelect" type="file" name="files[]" hidden multiple>
           <button @click.prevent="selectFile"  type="button" class="btn btn-secondary">Choose</button>
           <button style="float: right;"  type="button" class="btn btn-primary">Submit</button>
         </div>

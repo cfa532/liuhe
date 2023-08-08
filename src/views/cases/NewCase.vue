@@ -52,36 +52,36 @@ onMounted(()=>{
         <div class="card-body">
             <Form @submit="onSubmit" :validation-schema="schema" :initial-values="formValues" v-slot="{errors, isSubmitting}">
                 <div class="form-group">
-                    <label>标题</label>
+                    <label>标题：</label>
                     <Field name="title" type="text" class="form-control" :class="{ 'is-invalid': errors.title }" />
                     <div class="invalid-feedback">{{ errors.title }}</div>
                 </div>
                 <div class="form-group">
-                    <label>简述</label>
-                    <Field name="brief" type="text" class="form-control" :class="{ 'is-invalid': errors.brief }" />
+                    <label>简述：</label>
+                    <Field name="brief" rows="5" as="textarea" class="form-control" :class="{ 'is-invalid': errors.brief }" />
                     <div class="invalid-feedback">{{ errors.brief }}</div>
                 </div>
                 <div class="form-group">
-                    <label>原告</label>
+                    <label>原告：</label>
                     <Field name="plaintiff" type="text" class="form-control" :class="{ 'is-invalid': errors.plaintiff }" />
                     <div class="invalid-feedback">{{ errors.plaintiff }}</div>
                 </div>
                 <div class="form-group">
-                    <label>被告</label>
+                    <label>被告：</label>
                     <Field name="defendant" type="text" class="form-control" :class="{ 'is-invalid': errors.defendant }" />
                     <div class="invalid-feedback">{{ errors.defendant }}</div>
                 </div>
                 <div class="form-group">
-                    <label>主审法官</label>
+                    <label>主审法官：</label>
                     <Field name="judge" type="text" class="form-control" :class="{ 'is-invalid': errors.judge }" />
                     <div class="invalid-feedback">{{ errors.judge }}</div>
                 </div>
                 <div class="form-group">
-                    <label>律师</label>
+                    <label>律师：</label>
                     <Field name="attorney" type="text" class="form-control" :class="{ 'is-invalid': errors.attorney }" />
                     <div class="invalid-feedback">{{ errors.attorney }}</div>
                 </div>
-                <div class="form-group">
+                <div class="form-group mt-2">
                     <button class="btn btn-primary" :disabled="isSubmitting">
                         <span v-show="isSubmitting" class="spinner-border spinner-border-sm mr-1"></span>
                         注册
