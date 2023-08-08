@@ -26,10 +26,11 @@ watch(()=>route.params.id, async (nv, ov)=>{
 
 <template>
 <multi-uploader></multi-uploader>
+<form>
 <div class="container d-grid row-gap-3">
     <div class="row">
-        <div class="col">
-        <div class="card fs-6" style="width: 40rem;">
+        <div class="col-8">
+        <div class="card fs-6">
             <div class="card-header">
                 {{ caseStore._value.value.title }}
             <div style="position: absolute; right: 0px; top:1px">
@@ -45,19 +46,37 @@ watch(()=>route.params.id, async (nv, ov)=>{
         </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col">
-        <form>
-            <input>
-        </form>
+    <div class="row flex-nowrap">
+        <div class="col-2">
+            <select class="form-select text-secondary" aria-label="Default">
+                <option value="1" selected>原告</option>
+                <option value="2">被告</option>
+                <option value="3">法官</option>
+            </select>
+        </div>
+        <div class="col-6">
+            <select class="form-select text-secondary" aria-label="Default">
+                <option value="1" selected>原告</option>
+                <option value="2">被告</option>
+                <option value="3">法官</option>
+            </select>
         </div>
     </div>
-    <div class="row text-secondary">
-        <div class="col">
-            <div>chat history</div>
+    <div class="row mt-1">
+        <textarea rows="5" class="col-8"></textarea>
+    </div>
+    <div class="row">
+        <div class="col-7"></div>
+        <div class="col-1">
+            <button>Submit</button>
         </div>
     </div>
 </div>
+</form>
 
-
+<div class="row text-secondary mt-4">
+    <div class="col">
+        <div>chat history</div>
+    </div>
+</div>
 </template>
