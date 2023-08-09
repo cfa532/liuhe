@@ -120,7 +120,7 @@ export const useMainStore = defineStore({
                 throw new Error("The username is taken.")
             }
             // create a new Mimei to store user cases information
-            user.caseMid = await this.api.client.MMCreate(this.api.sid, '', '', '{{auto}}', 2, 0x07276707);
+            user.caseMid = await this.api.client.MMCreate(this.api.sid, '', '', "liuhe_leither_ai_"+user.username, 2, 0x07276707);
             await this.api.client.Hset(await this.mmsidCur, this.key, user.username, user)
             await this.api.client.MMAddRef(this.api.sid, this.mid, user.caseMid)        // associate the new MM with Main MMM
             await this.backup()

@@ -30,6 +30,7 @@ interface UserAccount {
     givenName: string,
     password: string,
     caseMid?: string,        // mid of Case Mimei db
+    template?: string,      // stringified json object
 }
 
 // Mimei data structures

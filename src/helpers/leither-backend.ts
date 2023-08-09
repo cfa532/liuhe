@@ -1,5 +1,5 @@
 import { useAlertStore, useMainStore } from "@/stores";
-
+import lawTemplate from '../assets/template.json'
 export { leitherBackend };
 
 // array in local storage for registered users
@@ -55,7 +55,8 @@ function leitherBackend() {
 
                 // check Main DB to see if username exists
                 const userDb = useMainStore()
-                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password}
+                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password,
+                            "template": JSON.stringify(lawTemplate)}
                 userDb.addUser(ua).then((u:UserAccount)=>{
                     console.log("New Leither user=", u)
                     localStorage.setItem(usersKey, JSON.stringify(u));
