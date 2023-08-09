@@ -124,8 +124,8 @@ function leitherBackend() {
             }
 
             function basicDetails(user: any) {
-                const { username, familyName, givenName, caseMid } = user;
-                return { username, familyName, givenName, caseMid };
+                const { username, familyName, givenName, caseMid, template } = user;
+                return { username, familyName, givenName, caseMid, "template":JSON.parse(template) };
             }
 
             function isAuthenticated() {

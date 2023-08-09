@@ -3,18 +3,31 @@ import { Form, Field } from 'vee-validate';
 import * as Yup from 'yup';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { useAlertStore, useCaseStore } from '@/stores';
-import { onMounted, watch } from 'vue';
+import { useAlertStore, useCaseStore, useAuthStore } from '@/stores';
+import { onMounted, watch, ref, computed } from 'vue';
 import { MultiUploader } from '@/components';
-
+const emits = defineEmits(["newCaseAdded"])     //DO NOT remove. to keep Vue from complaining. 
 const alertStore = useAlertStore();
+
+const user = useAuthStore()
+const userRole = ref("attorney")
+const userTask = ref("t1")
 const caseStore = storeToRefs(useCaseStore())
 const route = useRoute();
-const emits = defineEmits(["newCaseAdded"])     // to keep Vue from complaining
-
+const taskList = computed(()=>{
+    console.log("userRole=", userRole.value, userTask.value)
+    // let s = userRole.value? userRole.value : "attorney"
+    return Object.keys(user.user.template[userRole.value]).map((k:string)=>{
+        return {...{}, [k]:user.user.template[userRole.value][k]["title"]}}     // create an obj with key and value
+    )
+})
+const userSubtasks = computed(()=>{
+    const c = user.user.template[userRole.value][userTask.value]["content"]
+    return JSON.stringify(c)
+})
 onMounted(async ()=>{
     await useCaseStore().initCase(route.params.id as string)     // update caseStore with current case data
-    console.log(caseStore._value.value, route.params.id)
+    console.log(caseStore._value.value, route.params.id, taskList.value)
 })
 watch(()=>route.params.id, async (nv, ov)=>{
     if (nv!=ov && nv) {
@@ -48,22 +61,20 @@ watch(()=>route.params.id, async (nv, ov)=>{
     </div>
     <div class="row flex-nowrap">
         <div class="col-2">
-            <select class="form-select text-secondary" aria-label="Default">
-                <option value="1" selected>原告</option>
-                <option value="2">被告</option>
-                <option value="3">法官</option>
+            <select v-model="userRole" class="form-select text-secondary" aria-label="Default">
+                <option value="attorney" selected>律师</option>
+                <option value="judge">法官</option>
             </select>
         </div>
         <div class="col-6">
-            <select class="form-select text-secondary" aria-label="Default">
-                <option value="1" selected>原告</option>
-                <option value="2">被告</option>
-                <option value="3">法官</option>
+            <select v-model="userTask" class="form-select text-secondary" aria-label="Default">
+                <option disabled value="=">Please select one</option>
+                <option v-for="t in taskList" :value="Object.keys(t)[0]" :key="Object.keys(t)[0]">{{ Object.values(t)[0] }}</option>
             </select>
         </div>
     </div>
     <div class="row mt-1">
-        <textarea rows="5" class="col-8"></textarea>
+        <textarea rows="5" class="col-8" v-model="userSubtasks"></textarea>
     </div>
     <div class="row">
         <div class="col-7"></div>
@@ -76,7 +87,7 @@ watch(()=>route.params.id, async (nv, ov)=>{
 
 <div class="row text-secondary mt-4">
     <div class="col">
-        <div>chat history</div>
+        <div>{{ userSubtasks }}</div>
     </div>
 </div>
 </template>
