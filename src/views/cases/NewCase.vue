@@ -6,7 +6,8 @@ import { Uploader } from '@/components';
 import { router } from '@/router'
 import { useAlertStore, useCaseStore } from '@/stores';
 
-const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
+// const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
+const formValues = ref()
 const schema = Yup.object().shape({
     title: Yup.string()
         .required('案件标题必填'),

@@ -36,7 +36,6 @@ async function onSubmit() {
   const formData = new FormData()
   filesUpload.value.forEach((f)=>{formData.append('file', f)})
   console.log(filesUpload.value)
-  return
 
   const socket:Socket = io(LLM_URL)
   socket.on('connect', ()=>{
@@ -45,7 +44,7 @@ async function onSubmit() {
       console.log(response.status); // "got it"
     });
 
-    socket.emit("init_case", filesUpload.value[0].name, filesUpload.value[0].type, filesUpload.value[0], (status:any)=>{
+    socket.emit("upload", filesUpload.value[0].name, filesUpload.value[0].type, filesUpload.value[0], (status:any)=>{
       console.log(status)
     })
 

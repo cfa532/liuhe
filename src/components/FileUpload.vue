@@ -11,7 +11,7 @@ const filesUpload = ref<File[]>([]);
 const uploadProgress = reactive<number[]>([]); // New ref to store upload progress of each file
 const divAttach = ref()
 const dropHere = ref()
-const emit = defineEmits(["newCaseValues", "hide"])
+const emit = defineEmits(["newCaseValues"])
 const LLM_URL = import.meta.env.VITE_LLM_URL
 const results = ref([] as any[])
 // const axios: any = inject('axios')
@@ -33,6 +33,7 @@ async function onSubmit() {
   // process the uploaded file with AI
   const formData = new FormData()
   filesUpload.value.forEach((f)=>{formData.append('file', f)})
+  console.log(filesUpload.value)
 
   const socket:Socket = io(LLM_URL)
   socket.on('connect', ()=>{
@@ -48,9 +49,9 @@ async function onSubmit() {
     socket.on("Done", (res)=>{
       console.log("received: " + res)
       results.value.push(res)
-      emit("hide", true)
       emit("newCaseValues", res)
       // hide modal and return to previous page
+      document.getElementById("btnClose")?.click()
     })
   })
 }
@@ -73,10 +74,10 @@ onMounted(async () => {
 <div id="myModal" class="modal fade" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content" @dragover.prevent="dragOver" @drop.prevent="onSelect">
-      <form @submit.prevent="onSubmit" enctype="multipart/form-data" method="POST">
+      <form enctype="multipart/form-data" method="POST">
       <div class="modal-header">
         <h5 class="modal-title">上传文件</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button id="btnClose" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
           <div ref="dropHere"
@@ -92,7 +93,7 @@ onMounted(async () => {
         <div class="modal-footer">
           <input id="selectFiles" @change="onSelect" type="file" name="files[]" hidden>
           <button @click.prevent="selectFile"  type="button" class="btn btn-secondary">Choose</button>
-          <button style="float: right;"  type="button" class="btn btn-primary">Submit</button>
+          <button @click.prevent="onSubmit" type="button" class="btn btn-primary">Submit</button>
         </div>
       </form>
       <div id="divResult">

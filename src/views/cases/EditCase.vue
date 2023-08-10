@@ -12,19 +12,25 @@ const alertStore = useAlertStore();
 const user = useAuthStore()
 const userRole = ref("attorney")
 const userTask = ref("t1")
+const subTask = ref("task0")
 const caseStore = storeToRefs(useCaseStore())
 const route = useRoute();
 const taskList = computed(()=>{
-    console.log("userRole=", userRole.value, userTask.value)
+    console.log("userRole=", userRole.value, userTask.value, subTask.value)
     // let s = userRole.value? userRole.value : "attorney"
     return Object.keys(user.user.template[userRole.value]).map((k:string)=>{
         return {...{}, [k]:user.user.template[userRole.value][k]["title"]}}     // create an obj with key and value
     )
 })
-const userSubtasks = computed(()=>{
+const subTasklist = computed(()=>{
     const c = user.user.template[userRole.value][userTask.value]["content"]
-    return JSON.stringify(c)
+    return Object.entries(c)
 })
+const taskContent = computed(()=>{
+    const c = user.user.template[userRole.value][userTask.value]["prompt"][subTask.value]
+    return c
+})
+
 onMounted(async ()=>{
     await useCaseStore().initCase(route.params.id as string)     // update caseStore with current case data
     console.log(caseStore._value.value, route.params.id, taskList.value)
@@ -66,15 +72,20 @@ watch(()=>route.params.id, async (nv, ov)=>{
                 <option value="judge">法官</option>
             </select>
         </div>
-        <div class="col-6">
+        <div class="col-3">
             <select v-model="userTask" class="form-select text-secondary" aria-label="Default">
-                <option disabled value="=">Please select one</option>
                 <option v-for="t in taskList" :value="Object.keys(t)[0]" :key="Object.keys(t)[0]">{{ Object.values(t)[0] }}</option>
+            </select>
+        </div>
+        <div class="col-4">
+            <select v-model="subTask" class="form-select text-secondary" aria-label="Default">
+                <option disabled value="=" selected>Please select one</option>
+                <option v-for="t in subTasklist" :key="t[0]" :value="t[0]">{{ t[1] }}</option>
             </select>
         </div>
     </div>
     <div class="row mt-1">
-        <textarea rows="5" class="col-8" v-model="userSubtasks"></textarea>
+        <textarea rows="5" class="col-8" v-model="taskContent"></textarea>
     </div>
     <div class="row">
         <div class="col-7"></div>
@@ -87,7 +98,7 @@ watch(()=>route.params.id, async (nv, ov)=>{
 
 <div class="row text-secondary mt-4">
     <div class="col">
-        <div>{{ userSubtasks }}</div>
+        <div>{{ subTasklist }}</div>
     </div>
 </div>
 </template>
