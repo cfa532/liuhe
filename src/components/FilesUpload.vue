@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, watch } from "vue";
+import { useCaseStore } from '@/stores';
 import Preview from "./FilePreview.vue";
 import { io, Socket } from "socket.io-client"
 interface HTMLInputEvent extends Event { target: HTMLInputElement & EventTarget }
@@ -8,6 +9,8 @@ const filesUpload = ref<File[]>([]);
 const uploadProgress = reactive<number[]>([]); // New ref to store upload progress of each file
 const divAttach = ref()
 const dropHere = ref()
+const btnSubmit = ref()
+const spinner = ref("Submit")
 const LLM_URL = import.meta.env.VITE_LLM_URL
 const results = ref([] as any[])
 // const axios: any = inject('axios')
@@ -31,11 +34,10 @@ function dragOver() {
   if (filesUpload.value.length<1)
     dropHere!.value!.hidden = false
 }
-async function onSubmit() {
+function onSubmit() {
   // process the uploaded file with AI
-  const formData = new FormData()
-  filesUpload.value.forEach((f)=>{formData.append('file', f)})
   console.log(filesUpload.value)
+  const caseStore = useCaseStore()
 
   const socket:Socket = io(LLM_URL)
   socket.on('connect', ()=>{
@@ -44,9 +46,28 @@ async function onSubmit() {
       console.log(response.status); // "got it"
     });
 
-    socket.emit("upload", filesUpload.value[0].name, filesUpload.value[0].type, filesUpload.value[0], (status:any)=>{
-      console.log(status)
-    })
+    function upload_files(files:File[], index:number) {
+      if (index > files.length-1) {
+        // clear files and hide the modal
+        filesUpload.value = []
+        btnSubmit.value.disabled = false
+        spinner.value = "Submit"
+        // document.getElementById("closeModal")?.click()
+        return
+      }
+      // use case id as collection name in DB
+      socket.emit("upload_file", caseStore.id, files[index].name, files[index].type, files[index], (status:any)=>{
+        console.log(status)
+        if (status == "success") {
+          results.value.push(files[index].name + " done.")
+          upload_files(files, index+1)
+        }
+      })
+    }
+    // start the spinner, disable submit button
+    btnSubmit.value.disabled = true
+    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+    upload_files(filesUpload.value, 0)
 
     socket.on("Done", (res)=>{
       console.log("received: " + res)
@@ -54,8 +75,6 @@ async function onSubmit() {
       // hide modal and return to previous page
     })
   })
-  // clear files and hide the modal
-  document.getElementById("closeModal")?.click()
 }
 function selectFile() {
   // call the real function to select a file to upload
@@ -65,8 +84,11 @@ function removeFile(f: File) {
   // removed file from preview list
   var i = filesUpload.value.findIndex((e:File) => e==f);
   filesUpload.value.splice(i, 1)
-  dragOver()
 }
+watch(()=>filesUpload.value.length, (nv)=>{
+  // show "DROP HERE"
+  if (nv==0) dropHere!.value!.hidden = false
+})
 </script>
 
 <template>
@@ -92,7 +114,7 @@ function removeFile(f: File) {
         <div class="modal-footer">
           <input id="selectFiles" @change="onSelect" type="file" name="files[]" accept=".pdf,.txt,.docx" hidden multiple>
           <button @click.prevent="selectFile" type="button" class="btn btn-secondary">Choose</button>
-          <button @click.prevent="onSubmit" type="button" class="btn btn-primary">Submit</button>
+          <button ref="btnSubmit" @click.prevent="onSubmit" type="button" class="btn btn-primary" v-html="spinner"></button>
         </div>
       </form>
       <div id="divResult">

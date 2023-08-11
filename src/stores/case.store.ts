@@ -16,6 +16,9 @@ export const useCaseStore = defineStore({
         chatHistory: [] as ChatItem[]
     }),
     getters: {
+        id: function(): string {
+            return this._value.id
+        },
         mid: function(state) {
             state._mid = useAuthStore().user.caseMid
             return state._mid
