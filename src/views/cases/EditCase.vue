@@ -6,7 +6,7 @@ import { storeToRefs } from 'pinia';
 import { useAlertStore, useCaseStore, useAuthStore } from '@/stores';
 import { onMounted, watch, ref, computed } from 'vue';
 import { MultiUploader } from '@/components';
-const emits = defineEmits(["newCaseAdded"])     //DO NOT remove. to keep Vue from complaining. 
+const emits = defineEmits(["newCaseAdded"])     //DO NOT remove. Keep Vue from complaining. 
 const alertStore = useAlertStore();
 
 const user = useAuthStore()

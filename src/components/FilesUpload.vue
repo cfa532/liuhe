@@ -36,45 +36,38 @@ function dragOver() {
 }
 function onSubmit() {
   // process the uploaded file with AI
-  console.log(filesUpload.value)
   const caseStore = useCaseStore()
-
   const socket:Socket = io(LLM_URL)
+
   socket.on('connect', ()=>{
     console.log("socket connected")
     socket.emit("hello", "world", (response:any) => {
       console.log(response.status); // "got it"
     });
-
-    function upload_files(files:File[], index:number) {
-      if (index > files.length-1) {
-        // clear files and hide the modal
-        filesUpload.value = []
-        btnSubmit.value.disabled = false
-        spinner.value = "Submit"
-        // document.getElementById("closeModal")?.click()
-        return
-      }
-      // use case id as collection name in DB
-      socket.emit("upload_file", caseStore.id, files[index].name, files[index].type, files[index], (status:any)=>{
-        console.log(status)
-        if (status == "success") {
-          results.value.push(files[index].name + " done.")
-          upload_files(files, index+1)
-        }
-      })
-    }
-    // start the spinner, disable submit button
-    btnSubmit.value.disabled = true
-    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
-    upload_files(filesUpload.value, 0)
-
-    socket.on("Done", (res)=>{
-      console.log("received: " + res)
-      results.value.push(res)
-      // hide modal and return to previous page
-    })
   })
+
+  function upload_files(files:File[], index:number) {
+    if (index > files.length-1) {
+      // clear files and hide the modal
+      filesUpload.value = []
+      btnSubmit.value.disabled = false
+      spinner.value = "Submit"
+      // document.getElementById("closeModal")?.click()
+      return
+    }
+    // use case id as collection name in DB
+    socket.emit("upload_file", caseStore.id, files[index].name, files[index].type, files[index], (status:any)=>{
+      console.log(status)
+      if (status == "success") {
+        results.value.push(files[index].name + " done.")
+        upload_files(files, index+1)
+      }
+    })
+  }
+  // start the spinner, disable submit button
+  btnSubmit.value.disabled = true
+  spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+  upload_files(filesUpload.value, 0)
 }
 function selectFile() {
   // call the real function to select a file to upload
