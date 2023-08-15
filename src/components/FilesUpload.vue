@@ -39,12 +39,12 @@ function onSubmit() {
   const caseStore = useCaseStore()
   const socket:Socket = io(LLM_URL)
 
-  socket.on('connect', ()=>{
-    console.log("socket connected")
-    socket.emit("hello", "world", (response:any) => {
-      console.log(response.status); // "got it"
-    });
-  })
+  // socket.on('connect', ()=>{
+  //   console.log("socket connected")
+  //   socket.emit("hello", "world", (response:any) => {
+  //     console.log(response.status); // "got it"
+  //   });
+  // })
 
   function upload_files(files:File[], index:number) {
     if (index > files.length-1) {
@@ -52,7 +52,7 @@ function onSubmit() {
       filesUpload.value = []
       btnSubmit.value.disabled = false
       spinner.value = "Submit"
-      // document.getElementById("closeModal")?.click()
+      document.getElementById("closeModal")?.click()
       return
     }
     // use case id as collection name in DB
