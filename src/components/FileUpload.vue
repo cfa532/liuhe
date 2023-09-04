@@ -37,6 +37,7 @@ function onSubmit() {
   socket.on('connect', ()=>{
     console.log("socket connected")
     socket.emit("hello", "world", (response:any) => {
+      // RESPONSE is the RETURN value from Socket server
       console.log(response.status); // "got it"
     });
 
@@ -94,7 +95,7 @@ watch(()=>filesUpload.value.length, (nv)=>{
         </div>
       </div>
         <div class="modal-footer">
-          <input id="selectFiles" @change="onSelect" type="file" name="files[]" hidden>
+          <input id="selectFiles" @change="onSelect" type="file" name="files[]" hidden multiple>
           <button @click.prevent="selectFile"  type="button" class="btn btn-secondary">Choose</button>
           <button ref="btnSubmit" @click.prevent="onSubmit" type="button" class="btn btn-primary" v-html="spinner"></button>
         </div>
@@ -104,3 +105,15 @@ watch(()=>filesUpload.value.length, (nv)=>{
   </div>
 </template>
 
+<style>
+.modal-content {
+  border-radius: 5px;
+  background-color: #ebf0f3;
+  margin: 5% 10% 5% 2%;
+  padding: 10px;
+  border: 1px solid #888;
+  width: 80%;
+  /* height: 150px; */
+  max-width: 800px;
+}
+</style>

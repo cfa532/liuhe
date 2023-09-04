@@ -21,7 +21,6 @@ const schema = Yup.object().shape({
 const emits = defineEmits(["newCaseAdded"])     // add new case to list
 
 async function onSubmit(values:any) {
-
     const caseStore = useCaseStore()
     const alertStore = useAlertStore()
     try {
@@ -55,30 +54,30 @@ onMounted(()=>{
                     <Field name="title" type="text" class="form-control" :class="{ 'is-invalid': errors.title }" />
                     <div class="invalid-feedback">{{ errors.title }}</div>
                 </div>
-                <div class="form-group">
-                    <label>简述：</label>
-                    <Field name="brief" rows="5" as="textarea" class="form-control" :class="{ 'is-invalid': errors.brief }" />
-                    <div class="invalid-feedback">{{ errors.brief }}</div>
-                </div>
-                <div class="form-group">
+                <div class="form-group mt-2">
                     <label>原告：</label>
                     <Field name="plaintiff" type="text" class="form-control" :class="{ 'is-invalid': errors.plaintiff }" />
                     <div class="invalid-feedback">{{ errors.plaintiff }}</div>
                 </div>
-                <div class="form-group">
+                <div class="form-group mt-2">
                     <label>被告：</label>
                     <Field name="defendant" type="text" class="form-control" :class="{ 'is-invalid': errors.defendant }" />
                     <div class="invalid-feedback">{{ errors.defendant }}</div>
                 </div>
-                <div class="form-group">
+                <div class="form-group mt-2">
                     <label>主审法官：</label>
                     <Field name="judge" type="text" class="form-control" :class="{ 'is-invalid': errors.judge }" />
                     <div class="invalid-feedback">{{ errors.judge }}</div>
                 </div>
-                <div class="form-group">
+                <div class="form-group mt-2">
                     <label>律师：</label>
                     <Field name="attorney" type="text" class="form-control" :class="{ 'is-invalid': errors.attorney }" />
                     <div class="invalid-feedback">{{ errors.attorney }}</div>
+                </div>
+                <div class="form-group mt-2">
+                    <label>诉求：</label>
+                    <Field name="brief" rows="8" as="textarea" class="form-control" :class="{ 'is-invalid': errors.brief }" />
+                    <div class="invalid-feedback">{{ errors.brief }}</div>
                 </div>
                 <div class="form-group mt-2">
                     <button class="btn btn-primary" :disabled="isSubmitting">

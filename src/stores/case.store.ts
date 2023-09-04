@@ -52,7 +52,7 @@ export const useCaseStore = defineStore({
             if (await this.api.client.Hget(await this.mmsid, this._fieldKey, hk)) {
                 throw new Error("Case title already exists")
             }
-            // also use this hash key as chat history key
+            // also use this hashkey as chat_history key and template FV key
             c.id = hk
             c.timestamp = Date.now()
             this._value = c
@@ -66,16 +66,22 @@ export const useCaseStore = defineStore({
             await this.api.client.Hset(await this.mmsidCur, this._fieldKey, c.id, c);
             await this.backup()
         },
+        async addTemplateItem(field: string, val:string) {
+            // Field = userRole:userTask:subTask, value is user approved content for this subtask
+            await this.api.client.Hset(await this.mmsidCur, this.id, field, val)
+        },
+        async getTemplateItem(field: string) {
+            return await this.api.client.Hget(await this.mmsidCur, this.id, field)
+        },
         async addChatItem(c: ChatItem) {
             // case id (its field id) is also used as Key of chat history Score-Pair
             // c.timestamp = Date.now()
-            await this.api.client.Zadd(await this.mmsidCur, this._fieldKey, new ScorePair(Date.now(), JSON.stringify(c)))
+            await this.api.client.Zadd(await this.mmsidCur, this.id, new ScorePair(Date.now(), JSON.stringify(c)))
             await this.backup()
         },
         async getChatHistory(pageNum?: number) {
             if (typeof pageNum === "undefined") {
-                await this.api.client.Zrevrange(await this.mmsid, this._fieldKey, 0, -1)
-                return
+                return await this.api.client.Zrevrange(await this.mmsid, this.id, 0, -1)
             }
             // get currut page of chat history
             const start = (pageNum!-1)*PAGE_SIZE

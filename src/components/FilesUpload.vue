@@ -118,3 +118,15 @@ watch(()=>filesUpload.value.length, (nv)=>{
   </div>
 </template>
 
+<style>
+.modal-content {
+  border-radius: 5px;
+  background-color: #ebf0f3;
+  margin: 5% 10% 5% 2%;
+  padding: 10px;
+  border: 1px solid #888;
+  width: 80%;
+  /* height: 150px; */
+  max-width: 800px;
+}
+</style>

@@ -20,6 +20,7 @@ function newCaseAdded(id:string) {
         <div class="col-8">
             <router-view  @newCaseAdded="newCaseAdded"></router-view>
         </div>
+        <div class="col-2">Chat with AI</div>
       </div>
     </div>
 </template>
