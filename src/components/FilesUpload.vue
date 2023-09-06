@@ -56,8 +56,8 @@ function onSubmit() {
       document.getElementById("closeModal")?.click()
       return
     }
-    // use user id as collection name and case id is used as metadata, case
-    socket.emit("upload_file", authStore.user.mid, files[index].name, files[index].type, files[index], (status:any)=>{
+    // use user id as collection name and case id is used as metadata, case_id
+    socket.emit("upload_file", authStore.user.mid, caseStore.id, files[index].name, files[index].type, files[index], (status:any)=>{
       console.log(status)
       if (status == "success") {
         results.value.push(files[index].name + " done.")
