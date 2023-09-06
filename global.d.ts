@@ -11,7 +11,7 @@ interface ChatItem {
     Human: string;
 }
 interface LegalCase {
-    id: string,         // hashed Id of this Case object
+    id: string,         // hash of the Case title
     title: string,
     brief: string,
     plaintiff: string,      // str[]
@@ -30,7 +30,7 @@ interface UserAccount {
     familyName: string,
     givenName: string,
     password: string,
-    caseMid?: string,        // mid of Case Mimei db
+    mid?: string,        // Mimei id for this user db, everything of the user
     template?: string,      // stringified json object
 }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from "vue";
-import { useCaseStore } from '@/stores';
+import { useCaseStore, useAuthStore } from '@/stores';
 import Preview from "./FilePreview.vue";
 import { io, Socket } from "socket.io-client"
 interface HTMLInputEvent extends Event { target: HTMLInputElement & EventTarget }
@@ -13,6 +13,7 @@ const btnSubmit = ref()
 const spinner = ref("Submit")
 const LLM_URL = import.meta.env.VITE_LLM_URL
 const results = ref([] as any[])
+const authStore = useAuthStore()
 // const axios: any = inject('axios')
 
 function onSelect(e: Event) {
@@ -55,8 +56,8 @@ function onSubmit() {
       document.getElementById("closeModal")?.click()
       return
     }
-    // use case id as collection name in DB
-    socket.emit("upload_file", caseStore.id, files[index].name, files[index].type, files[index], (status:any)=>{
+    // use user id as collection name and case id is used as metadata, case
+    socket.emit("upload_file", authStore.user.mid, files[index].name, files[index].type, files[index], (status:any)=>{
       console.log(status)
       if (status == "success") {
         results.value.push(files[index].name + " done.")

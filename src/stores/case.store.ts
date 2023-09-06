@@ -20,7 +20,7 @@ export const useCaseStore = defineStore({
             return this._value.id
         },
         mid: function(state) {
-            state._mid = useAuthStore().user.caseMid
+            state._mid = useAuthStore().user.mid
             return state._mid
         },
         // mimei sid for reading
@@ -99,7 +99,7 @@ export const useCaseListStore = defineStore({
     id: "CaseListStore",
     state: ()=>({
         api: window.lapi,     // Leither api handle
-        _mid: "", //user.user.caseMid,            // Mimei database to hold all the cases of a user
+        _mid: "", //user.user.mid,            // Mimei database to hold all the cases of a user
         _mmsid: "",         // session id for the current user Mimei
         _fieldKey: "CASE_FIELD_KEY",
         _activeId: "",
@@ -116,7 +116,7 @@ export const useCaseListStore = defineStore({
             return ""
         },       // current working case
         mid: function(state) {
-            state._mid = useAuthStore().user.caseMid
+            state._mid = useAuthStore().user.mid
             return state._mid
         },
         // mimei sid for reading
