@@ -48,17 +48,17 @@ async function submitQuery(e: MouseEvent) {
                     case "t1":      // 民事起诉
                         switch(subTask.value) {
                             case "task0":
-                                socket.emit("case_info", caseStore.id, taskContent.value, async (resp:any)=>{
+                                socket.emit("case_info", caseStore.case, taskContent.value, async (resp:any)=>{
                                     taskContent.value = resp
                                 })
                                 break;
                             case "task1":
-                                socket.emit("case_request", caseStore.id, taskContent.value, async (resp:any)=>{
+                                socket.emit("case_request", caseStore.case, taskContent.value, async (resp:any)=>{
                                     taskContent.value = resp
                                 })
                                 break;
                             case "task2":
-                                socket.emit("case_arguement", caseStore.id, taskContent.value, async (resp:any)=>{
+                                socket.emit("case_arguement", caseStore.case, taskContent.value, async (resp:any)=>{
                                     taskContent.value = resp
                                 })
                                 break;

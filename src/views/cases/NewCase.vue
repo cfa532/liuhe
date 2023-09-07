@@ -41,12 +41,12 @@ onMounted(()=>{
 </script>
 
 <template>
-    <Uploader @newCaseValues="data=>formValues=data"></Uploader>
+    <!-- <Uploader @newCaseValues="data=>formValues=data"></Uploader> -->
     <div class="card m-3">
         <h4 class="card-header">新建案件</h4>
-        <div style="position: absolute; right: 0px; top:0px">
+        <!-- <div style="position: absolute; right: 0px; top:0px">
             <button type="button" data-bs-target="#myModal" class="btn btn-secondary btn-sm" data-bs-toggle="modal">初始化</button>
-        </div>
+        </div> -->
         <div class="card-body">
             <Form @submit="onSubmit" :validation-schema="schema" :initial-values="formValues" v-slot="{errors, isSubmitting}">
                 <div class="form-group">

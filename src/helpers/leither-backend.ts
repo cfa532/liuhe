@@ -55,8 +55,7 @@ function leitherBackend() {
 
                 // check Main DB to see if username exists
                 const userDb = useMainStore()
-                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password,
-                            "template": JSON.stringify(lawTemplate)}
+                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password, "mid":user.mid, "template": JSON.stringify(lawTemplate)}
                 userDb.addUser(ua).then((u:UserAccount)=>{
                     console.log("New Leither user=", u)
                     localStorage.setItem(usersKey, JSON.stringify(u));
@@ -93,8 +92,9 @@ function leitherBackend() {
                 
                 const user = JSON.parse(localStorage.getItem(usersKey)!)
                 Object.assign(user, params);
-                useMainStore().editUser(user).then(()=>{
-                    localStorage.setItem(usersKey, JSON.stringify(user));
+                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password, "mid":user.mid, "template": JSON.stringify(user.template)}
+                 useMainStore().editUser(ua).then(()=>{
+                    localStorage.setItem(usersKey, JSON.stringify(ua));
                     return ok();
                 }, err=>{
                     console.error("update failed:", err)
@@ -133,7 +133,7 @@ function leitherBackend() {
             }
 
             function body() {
-                console.log("return body=", opts)
+                console.log("return body=", JSON.parse(opts.body))
                 return opts.body && JSON.parse(opts.body);
             }
 

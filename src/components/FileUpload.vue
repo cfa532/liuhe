@@ -44,19 +44,18 @@ function onSubmit() {
     btnSubmit.value.disabled = true
     spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
 
-    socket.emit("init_case", filesUpload.value[0].name, filesUpload.value[0].type, filesUpload.value[0], (status:any)=>{
-      console.log(status)
-    })
-
-    socket.on("Done", (res)=>{
-      console.log("received: " + res)
-      emit("newCaseValues", res)
+    socket.emit("init_case", filesUpload.value[0].name, filesUpload.value[0].type, filesUpload.value[0], (res:any)=>{
+      console.log(res)
       // hide modal and return to previous page
       filesUpload.value = []
       btnSubmit.value.disabled = false
       spinner.value = "Submit"
       document.getElementById("btnClose")?.click()
-    })
+      emit("newCaseValues", res)
+  })
+    // socket.on("Done", (res)=>{
+    //   console.log("received: " + res)
+    // })
   })
 }
 function selectFile() {

@@ -17,12 +17,12 @@ interface LegalCase {
     plaintiff: string,      // str[]
     defendant: string,      // need to change to str[]
     attorney:string,
-    judge?:string,
-    chatHistoryKey?: string,  // this.id is used as Key to the chat history Score_Pair
+    judge:string,
+    chatHistoryKey: string,  // this.id is used as Key to the chat history Score_Pair
     // chatHistory: [timestamp: {AI:string, Human:string}],
     // human ask, and AI reply. Within Mimei DB, each chat item is stored as ScorePair.
     // score: timestamp when the item is created, which means AI answered a question.
-    templateKey?: string,   // this.id used as Key to Field_Value for saving result of each template item
+    templateKey: string,   // this.id used as Key to Field_Value for saving result of each template item
     timestamp: number,      // date and time this leagal case is created in the system.
 }
 interface UserAccount {
@@ -30,7 +30,7 @@ interface UserAccount {
     familyName: string,
     givenName: string,
     password: string,
-    mid?: string,        // Mimei id for this user db, everything of the user
+    mid: string,        // Mimei id for this user db, everything of the user
     template?: string,      // stringified json object
 }
 
