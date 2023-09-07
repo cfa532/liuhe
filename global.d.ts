@@ -11,6 +11,7 @@ interface ChatItem {
     Human: string;
 }
 interface LegalCase {
+    mid: string,        // Mimei Id of the current user, which holds all the cases
     id: string,         // hash of the Case title
     title: string,
     brief: string,

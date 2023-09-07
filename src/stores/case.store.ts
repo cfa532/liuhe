@@ -23,6 +23,9 @@ export const useCaseStore = defineStore({
             state._mid = useAuthStore().user.mid
             return state._mid
         },
+        case: function(state) {
+            return state._value
+        },
         // mimei sid for reading
         mmsid: async function(state) :Promise<string> {
             state._mmsid = state._mmsid? state._mmsid : await this.api.client.MMOpen(this.api.sid, this.mid, "last")

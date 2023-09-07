@@ -92,8 +92,9 @@ function leitherBackend() {
                 
                 const user = JSON.parse(localStorage.getItem(usersKey)!)
                 Object.assign(user, params);
-                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password, "mid":user.mid, "template": JSON.stringify(user.template)}
-                 useMainStore().editUser(ua).then(()=>{
+                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password, "mid":user.mid, "template": JSON.stringify(lawTemplate)}    // a tempt solution to change user template
+                console.log(ua)
+                useMainStore().editUser(ua).then(()=>{
                     localStorage.setItem(usersKey, JSON.stringify(ua));
                     return ok();
                 }, err=>{

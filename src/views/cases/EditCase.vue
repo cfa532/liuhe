@@ -31,7 +31,8 @@ const subTasklist = computed(()=>{
     const c = user.user.template[userRole.value][userTask.value]["content"]
     return Object.entries(c)
 })
-const taskContent = ref(user.user.template[userRole.value][userTask.value]["prompt"][subTask.value])
+const prompt = ref(user.user.template[userRole.value][userTask.value]["prompt"][subTask.value])
+const taskContent = ref()
 
 async function submitQuery(e: MouseEvent) {
     const caseStore = useCaseStore()
@@ -137,7 +138,7 @@ watch(()=>route.params.id, async (nv, ov)=>{
         </div>
     </div>
     <div class="row mt-1">
-        <textarea rows="8" class="col-10" v-model="taskContent"></textarea>
+        <textarea rows="8" class="col-10" v-model="prompt"></textarea>
         <p></p>
         <div class="col-10">
             <button ref="submitButton" @click.prevent="submitQuery" style="position: relative; float: right;">Submit</button>
