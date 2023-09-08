@@ -51,12 +51,13 @@ export const useCaseStore = defineStore({
         },
         async createCase(c:LegalCase):Promise<string> {
             // add a new Case to database FV and return the Field. Use
-            const hk = await this.api.client.MMCreate(this.api.sid, "Liuhe", '', c.title, 1, 0x07276705)
+            const hk = await this.api.client.MMCreate(this.api.sid, "LeitherAI", '', c.title, 1, 0x07276705)
             if (await this.api.client.Hget(await this.mmsid, this._fieldKey, hk)) {
                 throw new Error("Case title already exists")
             }
             // also use this hashkey as chat_history key and template FV key
             c.id = hk
+            c.mid = this._mid
             c.timestamp = Date.now()
             this._value = c
             await this.api.client.Hset(await this.mmsidCur, this._fieldKey, hk, c);

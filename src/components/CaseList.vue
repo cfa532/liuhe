@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { shallowRef, watch } from 'vue'
-import { onMounted } from "vue";
+import { shallowRef, watch, onMounted } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useCaseListStore, useCaseStore } from "@/stores";
 import { router } from '@/router'
