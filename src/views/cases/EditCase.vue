@@ -35,7 +35,10 @@ const subTasklist = computed(()=>{
     const c = user.user.template[userRole.value][userTask.value]["content"]
     return Object.entries(c)
 })
-const prompt = ref(user.user.template[userRole.value][userTask.value]["prompt"][subTask.value])
+const template = computed(()=>{
+    return user.user.template[userRole.value][userTask.value]["prompt"][subTask.value]
+})
+const prompt = ref(template)
 const AiContent = ref()
 const showPrompt=ref(true)
 
@@ -95,9 +98,7 @@ async function confirmAiResult() {
 onMounted(async ()=>{
     const caseStore = useCaseStore()
     await caseStore.initCase(route.params.id as string)     // update caseStore with current case data
-    const field = userRole.value+":"+userTask.value+":"+subTask.value
-    console.log(field)
-    AiContent.value = await caseStore.getTemplateItem(field)
+    AiContent.value = await caseStore.getTemplateItem(userRole.value+":"+userTask.value+":"+subTask.value)
     btnConfirm.value.disabled = true
 })
 watch(()=>route.params.id, async (nv, ov)=>{
@@ -105,8 +106,11 @@ watch(()=>route.params.id, async (nv, ov)=>{
     if (nv!=ov && nv) {
         await useCaseStore().initCase(nv as string)
     }},
-    // {deep: true}
 )
+watch(()=>template.value, async (nv, ov)=>{
+    if (nv!=ov)
+        AiContent.value = await caseStore.getTemplateItem(userRole.value+":"+userTask.value+":"+subTask.value)
+})
 </script>
 
 <template>
