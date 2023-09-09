@@ -7,7 +7,6 @@ import { useAlertStore, useCaseStore, useAuthStore } from '@/stores';
 import { onMounted, watch, ref, computed } from 'vue';
 import { MultiUploader } from '@/components';
 import { io, Socket } from "socket.io-client"
-import { Button } from 'bootstrap';
 
 //DO NOT remove the following line. Keep Vue from complaining. 
 const emits = defineEmits(["newCaseAdded"])
@@ -31,16 +30,10 @@ const taskList = computed(()=>{
         return {...{}, [k]:user.user.template[userRole.value][k]["title"]}}     // create an obj given key and value
     )
 })
-const subTasklist = computed(()=>{
-    const c = user.user.template[userRole.value][userTask.value]["content"]
-    return Object.entries(c)
-})
-const template = computed(()=>{
-    return user.user.template[userRole.value][userTask.value]["prompt"][subTask.value]
-})
-const prompt = ref(template)
+const subTasklist = computed(()=>Object.entries(user.user.template[userRole.value][userTask.value]["content"]))
+const field = computed(()=>userRole.value+":"+userTask.value+":"+subTask.value)
+const prompt = ref()
 const AiContent = ref()
-const showPrompt=ref(true)
 
 async function submitQuery(e: MouseEvent) {
     const caseStore = useCaseStore()
@@ -92,13 +85,14 @@ async function submitQuery(e: MouseEvent) {
 }
 async function confirmAiResult() {
     // save AI result to DB
-    await useCaseStore().addTemplateItem(userRole.value+":"+userTask.value+":"+subTask.value, AiContent.value)
+    await useCaseStore().addTemplateItem(field.value, AiContent.value)
     alertStore.success('AI result confirmed');
 }
 onMounted(async ()=>{
     const caseStore = useCaseStore()
     await caseStore.initCase(route.params.id as string)     // update caseStore with current case data
-    AiContent.value = await caseStore.getTemplateItem(userRole.value+":"+userTask.value+":"+subTask.value)
+    AiContent.value = await caseStore.getTemplateItem(field.value)
+    prompt.value = user.user.template[userRole.value][userTask.value]["prompt"][subTask.value]
     btnConfirm.value.disabled = true
 })
 watch(()=>route.params.id, async (nv, ov)=>{
@@ -107,9 +101,25 @@ watch(()=>route.params.id, async (nv, ov)=>{
         await useCaseStore().initCase(nv as string)
     }},
 )
-watch(()=>template.value, async (nv, ov)=>{
-    if (nv!=ov)
-        AiContent.value = await caseStore.getTemplateItem(userRole.value+":"+userTask.value+":"+subTask.value)
+watch(()=>field.value, async (nv, ov)=>{
+    if (nv!=ov) {
+        const aiTempt = await caseStore.getTemplateItem(field.value)
+        if (AiContent.value && AiContent.value!=aiTempt) {
+            // alert()
+        }
+        AiContent.value = aiTempt
+        prompt.value = user.user.template[userRole.value][userTask.value]["prompt"][subTask.value]
+    }
+})
+watch(()=>useCaseStore().case.id, async (nv, ov)=>{
+    if (nv!=ov) {
+        const aiTempt = await caseStore.getTemplateItem(field.value)
+        if (AiContent.value && AiContent.value!=aiTempt) {
+            // alert()
+        }
+        AiContent.value = aiTempt
+        prompt.value = user.user.template[userRole.value][userTask.value]["prompt"][subTask.value]
+    }
 })
 </script>
 
@@ -154,7 +164,7 @@ watch(()=>template.value, async (nv, ov)=>{
             </select>
         </div>
     </div>
-    <div v-show="showPrompt" class="row mt-2">
+    <div class="row mt-2">
         <textarea rows="8" class="col" v-model="prompt"></textarea>
         <p></p>
         <div class="col">
