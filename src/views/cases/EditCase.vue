@@ -9,7 +9,7 @@ import { MultiUploader } from '@/components';
 import { io, Socket } from "socket.io-client"
 import { Button } from 'bootstrap';
 
-//DO NOT remove. Keep Vue from complaining. 
+//DO NOT remove the following line. Keep Vue from complaining. 
 const emits = defineEmits(["newCaseAdded"])
 const alertStore = useAlertStore();
 
