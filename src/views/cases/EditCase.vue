@@ -51,7 +51,7 @@ async function submitQuery(e: MouseEvent) {
                         case "task0":
                             console.log(caseStore.case)
                             socket.emit("case_info", caseStore.case, prompt.value, async (resp:any)=>{
-                                console.log(resp)   // {query: refined query str, result: AI result}
+                                // console.log(resp)   // {query: refined query str, result: AI result}
                                 prompt.value = resp.query 
                                 AiContent.value = resp.result
                                 btnConfirm.value.disabled = false
@@ -59,7 +59,7 @@ async function submitQuery(e: MouseEvent) {
                                 spinner.value = "提交"
                             })
                             break;
-                        case "task1":
+                        case "task1":   // 诉讼请求
                             socket.emit("case_request", caseStore.case, prompt.value, async (resp:any)=>{
                                 AiContent.value = resp
                             })
