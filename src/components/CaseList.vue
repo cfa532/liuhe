@@ -10,7 +10,7 @@ const props=defineProps({
 
 let allCases = shallowRef([] as LegalCase[])
 const caseListStore = storeToRefs(useCaseListStore())
-watch(()=>props.newId, (nv, ov)=>{
+watch(()=>props.newId, (nv)=>{
     if (nv) {
         if (allCases.value.findIndex(c=>c.id==props.newId) == -1)
             allCases.value.unshift(useCaseStore()._value)

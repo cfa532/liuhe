@@ -14,11 +14,11 @@ const alertStore = useAlertStore();
 
 const spinner = ref("提交")
 const btnSubmit = ref()
+const btnConfirm = ref()
 const user = useAuthStore()
 const userRole = ref("attorney")
-const userTask = ref("t1")
-const subTask = ref("task0")
-const btnConfirm = ref()
+const userTask = ref("plaintiff")
+const subTask = ref("info")
 const caseStore = (useCaseStore())
 const route = useRoute();
 const LLM_URL = import.meta.env.VITE_LLM_URL
@@ -35,21 +35,22 @@ const field = computed(()=>userRole.value+":"+userTask.value+":"+subTask.value)
 const prompt = ref()
 const AiContent = ref()
 
-async function submitQuery(e: MouseEvent) {
+async function submitQuery() {
     const caseStore = useCaseStore()
     const socket:Socket = io(LLM_URL)
     console.log(userRole.value, userTask.value, subTask.value)
     // start the spinner, disable submit button
     btnSubmit.value.disabled = true
-    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+    caseStore.case.role = userTask.value + " lawyer. "
 
     switch(userRole.value) {
         case "attorney":
             switch(userTask.value) {
-                case "t1":      // 民事起诉
+                case "plaintiff":      // 民事起诉
                     switch(subTask.value) {
-                        case "task0":
+                        case "info":
                             console.log(caseStore.case)
+                            spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
                             socket.emit("case_info", caseStore.case, prompt.value, async (resp:any)=>{
                                 // console.log(resp)   // {query: refined query str, result: AI result}
                                 prompt.value = resp.query 
@@ -59,12 +60,39 @@ async function submitQuery(e: MouseEvent) {
                                 spinner.value = "提交"
                             })
                             break;
-                        case "task1":   // 诉讼请求
-                            socket.emit("case_request", caseStore.case, prompt.value, async (resp:any)=>{
-                                AiContent.value = resp
-                            })
+                        case "request":   // 诉讼请求
+                            if (spinner.value=="提交") {
+                                spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+                                socket.emit("case_request", caseStore.case, prompt.value, async (resp:any)=>{
+                                    // generate a list of wrongdoings of the defendant and corresponding list
+                                    // of requests for compensations. Waiting for users approval or editing
+                                    prompt.value = resp.result  // wrong doings
+                                    spinner.value = "确认"
+                                    // AiContent.value = resp
+                                })
+                            } 
+                            else if (spinner.value == "确认") {
+                                // user confirmed list of wrongdoings, now process each one of them.
+                                prompt.value = ""
+                                btnSubmit.value.disabled = true
+                                spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+                                socket.emit("case_wrongs", caseStore.case, prompt.value, async (resp:any)=>{
+                                    console.info("List of wrongs:", resp.result)
+                                    // send the list of wrongs to socket server which will parse it into a list
+                                    socket.on("case_request", (resp:any)=>{
+                                        // return facts and rebuff to each wrongdoing. Append it to end of AiContent
+                                        prompt.value.append(resp.query)
+                                        AiContent.value.append(resp.result)
+                                    })
+                                    socket.on("case_done", resp=>{
+                                        spinner.value == "确认"
+                                        btnConfirm.value.disabled = true
+                                    })
+                                })
+                            }
                             break;
-                        case "task2":
+                        case "argument":
+                            spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
                             socket.emit("case_arguement", caseStore.case, prompt.value, async (resp:any)=>{
                                 AiContent.value = resp
                             })
@@ -74,7 +102,7 @@ async function submitQuery(e: MouseEvent) {
                             return;
                     }
                     break;
-                case "t2":      // 民事答辩
+                case "defendant":      // 民事答辩
                     break;
                 default:        // 刑事诉讼
             }
@@ -85,14 +113,14 @@ async function submitQuery(e: MouseEvent) {
 }
 async function confirmAiResult() {
     // save AI result to DB
-    await useCaseStore().addTemplateItem(field.value, AiContent.value)
+    await useCaseStore().updateTemplate(field.value, AiContent.value)
     alertStore.success('AI result confirmed');
 }
 onMounted(async ()=>{
     const caseStore = useCaseStore()
     await caseStore.initCase(route.params.id as string)     // update caseStore with current case data
-    AiContent.value = await caseStore.getTemplateItem(field.value)
-    prompt.value = user.user.template[userRole.value][userTask.value]["prompt"][subTask.value]
+    AiContent.value = caseStore.getTemplateItem(field.value, "result")
+    prompt.value = caseStore.getTemplateItem(field.value, "prompt")
     btnConfirm.value.disabled = true
 })
 watch(()=>route.params.id, async (nv, ov)=>{

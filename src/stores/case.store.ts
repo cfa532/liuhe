@@ -2,16 +2,18 @@ import { defineStore } from 'pinia';
 import { useAuthStore } from '@/stores';
 
 const PAGE_SIZE = 50        // chat items diplayed per page
+const CASE_FIELD_KEY = "CASE_FIELD_KEY"
+const TEMPLATE_KEY = "case_template"
+const CHAT_HISTORY_KEY = "chat_history"
+const userStore = useAuthStore()
 
 export const useCaseStore = defineStore({
     // holding all cases of the current user, in a FV database
     id: "CaseMimei",
     state: ()=>({
-        api: window.lapi,     // Leither api handle
+        api: window.lapi,    // Leither api handle
         _mid: "",            // Mimei database to hold all the cases of a user
-        _mmsid: "",         // session id for the current user Mimei
-        _fieldKey: "CASE_FIELD_KEY",
-        // _field: "",     // current Case Field, hash coded from its title
+        _mmsid: "",          // session id for the current user Mimei
         _value: {} as LegalCase,
         chatHistory: [] as ChatItem[]
     }),
@@ -20,7 +22,7 @@ export const useCaseStore = defineStore({
             return this._value.id
         },
         mid: function(state) {
-            state._mid = useAuthStore().user.mid
+            state._mid = userStore.user.mid
             return state._mid
         },
         case: function(state) {
@@ -35,6 +37,9 @@ export const useCaseStore = defineStore({
         mmsidCur: async function() :Promise<string> {
             return await this.api.client.MMOpen(this.api.sid, this.mid, "cur");
         },
+        template: async function() {
+            return userStore.user.template
+        }
     },
     actions: {
         async backup(mid: string="") {
@@ -52,7 +57,7 @@ export const useCaseStore = defineStore({
         async createCase(c:LegalCase):Promise<string> {
             // add a new Case to database FV and return the Field. Use
             const hk = await this.api.client.MMCreate(this.api.sid, "LeitherAI", '', c.title, 1, 0x07276705)
-            if (await this.api.client.Hget(await this.mmsid, this._fieldKey, hk)) {
+            if (await this.api.client.Hget(await this.mmsid, CASE_FIELD_KEY, hk)) {
                 throw new Error("Case title already exists")
             }
             // also use this hashkey as chat_history key and template FV key
@@ -60,22 +65,30 @@ export const useCaseStore = defineStore({
             c.mid = this._mid
             c.timestamp = Date.now()
             this._value = c
-            await this.api.client.Hset(await this.mmsidCur, this._fieldKey, hk, c);
+            await this.api.client.Hset(await this.mmsidCur, CASE_FIELD_KEY, hk, c); // to get case list quickly
+            await this.api.client.Hset(await this.mmsidCur, hk, TEMPLATE_KEY, JSON.stringify(this.template))
+            // await this.api.client.Hset(await this.mmsidCur, hk, CHAT_HISTORY_KEY, {})
             await this.backup()
             return hk
         },
         async editCase(c:LegalCase) {
             // reset case data with 
             c.timestamp = Date.now()
-            await this.api.client.Hset(await this.mmsidCur, this._fieldKey, c.id, c);
+            await this.api.client.Hset(await this.mmsidCur, CASE_FIELD_KEY, c.id, c);
             await this.backup()
         },
-        async addTemplateItem(field: string, val:string) {
+        async updateTemplate(field: string, val:string, val_type="result") {
+            // only update AI result for now.
             // Field = userRole:userTask:subTask, value is user approved content for this subtask
-            await this.api.client.Hset(await this.mmsidCur, this.id, field, val)
+            const [userRole, userTask, subTask] = field.split(':')
+            const template = useAuthStore().user.template
+            template[userRole][userTask][val_type][subTask] = val
+            await this.api.client.Hset(await this.mmsidCur, this.id, TEMPLATE_KEY, JSON.stringify(template))
+            useAuthStore().update()
         },
-        async getTemplateItem(field: string) {
-            return await this.api.client.Hget(await this.mmsidCur, this.id, field)
+        getTemplateItem(field: string, val_type="result") {
+            const [userRole, userTask, subTask] = field.split(':')
+            return useAuthStore().user.template[userRole][userTask][val_type][subTask]
         },
         async addChatItem(c: ChatItem) {
             // case id (its field id) is also used as Key of chat history Score-Pair
@@ -89,11 +102,11 @@ export const useCaseStore = defineStore({
             }
             // get currut page of chat history
             const start = (pageNum!-1)*PAGE_SIZE
-            const ch:ChatItem[] = await this.api.client.Zrevrange(await this.mmsid, this._fieldKey, start, start+PAGE_SIZE-1)
+            const ch:ChatItem[] = await this.api.client.Zrevrange(await this.mmsid, CASE_FIELD_KEY, start, start+PAGE_SIZE-1)
             this.chatHistory.concat(ch)
         },
         async initCase(id: string) {
-            this._value = await this.api.client.Hget(await this.mmsid, this._fieldKey, id)
+            this._value = await this.api.client.Hget(await this.mmsid, CASE_FIELD_KEY, id)
             await this.getChatHistory(1)
         }
     }
@@ -105,7 +118,6 @@ export const useCaseListStore = defineStore({
         api: window.lapi,     // Leither api handle
         _mid: "", //user.user.mid,            // Mimei database to hold all the cases of a user
         _mmsid: "",         // session id for the current user Mimei
-        _fieldKey: "CASE_FIELD_KEY",
         _activeId: "",
     }),
     getters: {
@@ -133,7 +145,7 @@ export const useCaseListStore = defineStore({
             return await this.api.client.MMOpen(this.api.sid, this.mid, "cur");
         },
         allCases: async function() :Promise<LegalCase[]> {
-            const cases:LegalCase[] = await this.api.client.Hgetall(await this.mmsid, this._fieldKey).map((e:any)=>e.value)
+            const cases:LegalCase[] = await this.api.client.Hgetall(await this.mmsid, CASE_FIELD_KEY).map((e:any)=>e.value)
             cases.sort((a,b)=> b.timestamp-a.timestamp)
             return cases
         }

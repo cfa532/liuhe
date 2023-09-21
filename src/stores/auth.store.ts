@@ -31,6 +31,9 @@ export const useAuthStore = defineStore({
                 alertStore.error(error);                
             }
         },
+        update() {
+            localStorage.setItem('user', JSON.stringify(this.user));
+        },
         logout() {
             this.user = null;
             useCaseStore().$reset()
