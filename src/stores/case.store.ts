@@ -5,7 +5,6 @@ const PAGE_SIZE = 50        // chat items diplayed per page
 const CASE_FIELD_KEY = "CASE_FIELD_KEY"
 const TEMPLATE_KEY = "case_template"
 const CHAT_HISTORY_KEY = "chat_history"
-const userStore = useAuthStore()
 
 export const useCaseStore = defineStore({
     // holding all cases of the current user, in a FV database
@@ -22,7 +21,8 @@ export const useCaseStore = defineStore({
             return this._value.id
         },
         mid: function(state) {
-            state._mid = userStore.user.mid
+            if (!state._mid)
+                state._mid = useAuthStore().user.mid
             return state._mid
         },
         case: function(state) {
@@ -38,7 +38,7 @@ export const useCaseStore = defineStore({
             return await this.api.client.MMOpen(this.api.sid, this.mid, "cur");
         },
         template: async function() {
-            return userStore.user.template
+            return useAuthStore().user.template
         }
     },
     actions: {
