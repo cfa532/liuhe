@@ -9,7 +9,8 @@ import { MultiUploader } from '@/components';
 import { io, Socket } from "socket.io-client"
 
 //DO NOT remove the following line. Keep Vue from complaining. 
-const emits = defineEmits(["newCaseAdded"])
+const emits = defineEmits(["newCaseAdded"]);    /////////////
+//DO NOT remove the above line. Keep Vue from complaining. 
 const alertStore = useAlertStore();
 
 const spinner = ref("提交")
@@ -66,7 +67,11 @@ async function submitQuery() {
                                 socket.emit("case_request", caseStore.case, prompt.value, async (resp:any)=>{
                                     // generate a list of wrongdoings of the defendant and corresponding list
                                     // of requests for compensations. Waiting for users approval or editing
-                                    prompt.value = resp.result  // wrong doings
+                                    console.log(resp)
+                                    prompt.value = resp.query  // wrong doings
+                                    AiContent.value = resp.result
+                                    btnConfirm.value.disabled = false
+                                    btnSubmit.value.disabled = false
                                     spinner.value = "确认"
                                     // AiContent.value = resp
                                 })
@@ -113,6 +118,10 @@ async function submitQuery() {
 }
 async function confirmAiResult() {
     // save AI result to DB
+    // const c = useCaseStore().case
+    // c.plaintiff = "阿家(杭州)文化发展有限公司"
+    // c.defendant = "杭州栖溪商业管理有限公司"
+    // await useCaseStore().editCase(c)
     await useCaseStore().updateTemplate(field.value, AiContent.value)
     alertStore.success('AI result confirmed');
 }
