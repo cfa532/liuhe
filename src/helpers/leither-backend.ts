@@ -1,9 +1,9 @@
-import { useAlertStore, useMainStore } from "@/stores";
+import { useAlertStore, useMainStore, useAuthStore } from "@/stores";
 import lawTemplate from '../assets/template.json'
 export { leitherBackend };
 
 // array in local storage for registered users
-const usersKey = 'vue-3-pinia-registration-login-example-users';
+// const usersKey = 'vue-3-pinia-registration-login-example-users';
 
 function leitherBackend() {
     const realFetch = window.fetch;     // monkey patching
@@ -39,7 +39,6 @@ function leitherBackend() {
                 const { username, password } = body();
                 try {
                     const user = await useMainStore().authenticate(username, password)
-                    localStorage.setItem(usersKey, JSON.stringify(user));
                     return ok({
                         ...basicDetails(user),
                         token: 'fake-jwt-token'     // JWT token of authentication
@@ -56,9 +55,8 @@ function leitherBackend() {
                 // check Main DB to see if username exists
                 const userDb = useMainStore()
                 const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password, "mid":user.mid, "template": JSON.stringify(lawTemplate)}
-                userDb.addUser(ua).then((u:UserAccount)=>{
+                userDb.registerUser(ua).then((u:UserAccount)=>{
                     console.log("New Leither user=", u)
-                    localStorage.setItem(usersKey, JSON.stringify(u));
                     return ok();
                 }, err=>{
                     console.error("User register error,", err)
@@ -69,14 +67,15 @@ function leitherBackend() {
             function getUsers() {
                 if (!isAuthenticated()) return unauthorized();
                 const arr = new Array()
-                arr[0] = basicDetails(JSON.parse(localStorage.getItem(usersKey)!))
+                // arr[0] = basicDetails(JSON.parse(localStorage.getItem(usersKey)!))
+                arr[0] = basicDetails(useAuthStore().user)
                 return ok(arr)
             }
 
             function getUserById() {
                 if (!isAuthenticated()) return unauthorized();
 
-                return ok(basicDetails(JSON.parse(localStorage.getItem(usersKey)!)));
+                // return ok(basicDetails(JSON.parse(localStorage.getItem(usersKey)!)));
             }
 
             function updateUser() {
@@ -90,12 +89,12 @@ function leitherBackend() {
                 // username cannot be changed
                 delete params.username
                 
-                const user = JSON.parse(localStorage.getItem(usersKey)!)
+                const user = useAuthStore().user
                 Object.assign(user, params);
                 const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password, "mid":user.mid, "template": JSON.stringify(lawTemplate)}    // a tempt solution to change user template
                 console.log(ua)
                 useMainStore().editUser(ua).then(()=>{
-                    localStorage.setItem(usersKey, JSON.stringify(ua));
+                    localStorage.setItem('user', JSON.stringify(ua));
                     return ok();
                 }, err=>{
                     console.error("update failed:", err)

@@ -113,7 +113,7 @@ export const useMainStore = defineStore({
             }
             throw new Error("Username and password do not match")
         },
-        async addUser(user: UserAccount):Promise<UserAccount> {
+        async registerUser(user: UserAccount):Promise<UserAccount> {
             // add a new user account into system.
             // first check if the username is taken
             if (await this.api.client.Hget(await this.mmsid, this.key, user.username)) {
@@ -126,12 +126,10 @@ export const useMainStore = defineStore({
             await this.backup()
             return user
         },
-
         async deleteUser(username: string) {
             await this.api.client.Hdel(await this.mmsidCur, this.key, username)
             await this.api.backup()
         },
-
         async editUser(user: UserAccount) {
             // edit user information such as name, email...
             // first check if the username is taken
