@@ -84,6 +84,7 @@ export const useCaseStore = defineStore({
             const template = useAuthStore().user.template
             template[userRole][userTask][val_type][subTask] = val
             await this.api.client.Hset(await this.mmsidCur, this.id, TEMPLATE_KEY, JSON.stringify(template))
+            await this.backup()
             useAuthStore().update()
         },
         getTemplateItem(field: string, val_type="result") {
