@@ -68,7 +68,7 @@ function leitherBackend() {
                 if (!isAuthenticated()) return unauthorized();
                 const arr = new Array()
                 // arr[0] = basicDetails(JSON.parse(localStorage.getItem(usersKey)!))
-                arr[0] = basicDetails(useAuthStore().user)
+                arr[0] = useAuthStore().user
                 return ok(arr)
             }
 

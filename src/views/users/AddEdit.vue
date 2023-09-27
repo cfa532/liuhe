@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { Form, Field } from 'vee-validate';
 import * as Yup from 'yup';
 import { useRoute } from 'vue-router';
-import { storeToRefs } from 'pinia';
 
-import { useUsersStore, useAlertStore } from '@/stores';
+import { useUsersStore, useAlertStore, useAuthStore } from '@/stores';
 import { router } from '@/router';
 
 const usersStore = useUsersStore();
@@ -13,12 +13,13 @@ const route = useRoute();
 const id = route.params.id;
 
 let title = 'Add User';
-let user:any = null;
+// let user:any = null;
+const user = ref()
 if (id) {
     // edit mode
     title = 'Edit User';
-    ({ user } = storeToRefs(usersStore));
-    usersStore.getById(id as string);
+    user.value = useAuthStore().user;
+    // usersStore.getById(id as string);
 }
 
 const schema = Yup.object().shape({
@@ -31,14 +32,14 @@ const schema = Yup.object().shape({
     password: Yup.string()
         .transform(x => x === '' ? undefined : x)
         // password optional in edit mode
-        .concat(user? null : Yup.string().required('Password is required') as any)
+        .concat(user.value? null : Yup.string().required('Password is required') as any)
         .min(6, 'Password must be at least 6 characters')
 });
 
 async function onSubmit(values:any) {
     try {
         let message;
-        if (user) {
+        if (user.value) {
             await usersStore.update(user.value.id, values)
             message = 'User updated';
         } else {

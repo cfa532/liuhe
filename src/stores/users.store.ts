@@ -46,6 +46,7 @@ export const useUsersStore = defineStore({
                 authStore.user = user;
             }
         },
+        // depreciated
         async delete(id:string) {
             return 
             
