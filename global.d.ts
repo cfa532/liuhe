@@ -32,8 +32,8 @@ interface UserAccount {
     familyName: string,
     givenName: string,
     password: string,
-    mid: string,        // Mimei id for this user db, everything of the user
-    template?: string,      // stringified json object
+    mid: string,            // Mimei id for this user db, everything of the user
+    template: string,      // stringified json object
 }
 
 // Mimei data structures

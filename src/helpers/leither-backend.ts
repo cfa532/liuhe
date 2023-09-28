@@ -86,10 +86,10 @@ function leitherBackend() {
                 if (!params.password) {
                     delete params.password;
                 }
-                // username cannot be changed
+                // username cannot be changed, remove it from params
                 delete params.username
                 
-                const user = useAuthStore().user
+                const user = useAuthStore().user!
                 Object.assign(user, params);
                 const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password, "mid":user.mid, "template": JSON.stringify(lawTemplate)}    // a tempt solution to change user template
                 console.log(ua)
