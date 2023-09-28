@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Form, Field } from 'vee-validate';
-import * as Yup from 'yup';
+// import { Form, Field } from 'vee-validate';
+// import * as Yup from 'yup';
 import { useRoute } from 'vue-router';
-import { storeToRefs } from 'pinia';
-import { useAlertStore, useCaseStore, useAuthStore } from '@/stores';
+// import { storeToRefs } from 'pinia';
+import { useAlertStore, useCaseStore } from '@/stores';
 import { onMounted, watch, ref, computed } from 'vue';
 import { MultiUploader } from '@/components';
 import { io, Socket } from "socket.io-client"
@@ -16,29 +16,31 @@ const alertStore = useAlertStore();
 const spinner = ref("提交")
 const btnSubmit = ref()
 const btnConfirm = ref()
-const user = useAuthStore()
+// const user = useAuthStore().user!
 const userRole = ref("attorney")
 const userTask = ref("plaintiff")
 const subTask = ref("info")
-const caseStore = (useCaseStore())
+const caseStore = useCaseStore()
 const route = useRoute();
-const LLM_URL = import.meta.env.VITE_LLM_URL
 const taskList = computed(()=>{
     // much easier to understand the logic here if looking at template.json in /assets.
-    console.log("userRole=", userRole.value, userTask.value, subTask.value)
-    // let s = userRole.value? userRole.value : "attorney"
-    return Object.keys(user.user.template[userRole.value]).map((k:string)=>{
-        return {...{}, [k]:user.user.template[userRole.value][k]["title"]}}     // create an obj given key and value
+    if (!caseStore.template) return
+    console.log("userRole=", userRole.value, userTask.value, subTask.value, caseStore.template)
+    return Object.keys(caseStore.template[userRole.value]).map((k:string)=>{
+        return {...{}, [k]:caseStore.template[userRole.value][k]["title"]}}     // create an obj given key and value
     )
 })
-const subTasklist = computed(()=>Object.entries(user.user.template[userRole.value][userTask.value]["content"]))
+const subTasklist = computed(()=>{
+    if (!caseStore.template) return
+    return Object.entries(caseStore.template[userRole.value][userTask.value]["content"])
+})
 const field = computed(()=>userRole.value+":"+userTask.value+":"+subTask.value)
 const prompt = ref()
 const AiContent = ref()
 
 async function submitQuery() {
     const caseStore = useCaseStore()
-    const socket:Socket = io(LLM_URL)
+    const socket:Socket = io(import.meta.env.VITE_LLM_URL)
     console.log(userRole.value, userTask.value, subTask.value)
     // start the spinner, disable submit button
     btnSubmit.value.disabled = true
@@ -89,7 +91,8 @@ async function submitQuery() {
                                         prompt.value.append(resp.query)
                                         AiContent.value.append(resp.result)
                                     })
-                                    socket.on("case_done", resp=>{
+                                    socket.on("case_done", (resp)=>{
+                                        console.log(resp)
                                         spinner.value == "确认"
                                         btnConfirm.value.disabled = true
                                     })
@@ -118,15 +121,14 @@ async function submitQuery() {
 }
 async function confirmAiResult() {
     // save AI result to DB
-    // const c = useCaseStore().case
-    // c.plaintiff = "阿家(杭州)文化发展有限公司"
-    // c.defendant = "杭州栖溪商业管理有限公司"
-    // await useCaseStore().editCase(c)
+    const c = useCaseStore().case
+    c.plaintiff = "阿家(杭州)文化发展有限公司"
+    c.defendant = "杭州栖溪商业管理有限公司"
+    await useCaseStore().editCase(c)
     await useCaseStore().updateTemplate(field.value, AiContent.value)
     alertStore.success('AI result confirmed');
 }
 onMounted(async ()=>{
-    const caseStore = useCaseStore()
     await caseStore.initCase(route.params.id as string)     // update caseStore with current case data
     AiContent.value = caseStore.getTemplateItem(field.value, "result")
     prompt.value = caseStore.getTemplateItem(field.value, "prompt")
@@ -145,7 +147,7 @@ watch(()=>field.value, async (nv, ov)=>{
             // alert()
         }
         AiContent.value = aiTempt
-        prompt.value = user.user.template[userRole.value][userTask.value]["prompt"][subTask.value]
+        prompt.value = caseStore.template[userRole.value][userTask.value]["prompt"][subTask.value]
     }
 })
 watch(()=>useCaseStore().case.id, async (nv, ov)=>{
@@ -155,7 +157,7 @@ watch(()=>useCaseStore().case.id, async (nv, ov)=>{
             // alert()
         }
         AiContent.value = aiTempt
-        prompt.value = user.user.template[userRole.value][userTask.value]["prompt"][subTask.value]
+        prompt.value = caseStore.getTemplateItem(field.value, "prompt")
     }
 })
 </script>
