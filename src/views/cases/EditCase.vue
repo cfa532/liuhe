@@ -37,6 +37,7 @@ const subTasklist = computed(()=>{
 const field = computed(()=>userRole.value+":"+userTask.value+":"+subTask.value)
 const prompt = ref()
 const AiContent = ref()
+const tips = ref()
 
 async function submitQuery() {
     const caseStore = useCaseStore()
@@ -74,36 +75,38 @@ async function submitQuery() {
                                     AiContent.value = resp.result
                                     btnConfirm.value.disabled = false
                                     btnSubmit.value.disabled = false
-                                    spinner.value = "确认"
-                                    // AiContent.value = resp
+                                    // spinner.value = "确认"
                                 })
                             } 
-                            else if (spinner.value == "确认") {
-                                // user confirmed list of wrongdoings, now process each one of them.
-                                prompt.value = ""
-                                btnSubmit.value.disabled = true
-                                spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
-                                socket.emit("case_wrongs", caseStore.case, prompt.value, async (resp:any)=>{
-                                    console.info("List of wrongs:", resp.result)
-                                    // send the list of wrongs to socket server which will parse it into a list
-                                    socket.on("case_request", (resp:any)=>{
-                                        // return facts and rebuff to each wrongdoing. Append it to end of AiContent
-                                        prompt.value.append(resp.query)
-                                        AiContent.value.append(resp.result)
-                                    })
-                                    socket.on("case_done", (resp)=>{
-                                        console.log(resp)
-                                        spinner.value == "确认"
-                                        btnConfirm.value.disabled = true
-                                    })
-                                })
-                            }
                             break;
                         case "argument":
-                            spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
-                            socket.emit("case_arguement", caseStore.case, prompt.value, async (resp:any)=>{
-                                AiContent.value = resp
-                            })
+                            if (spinner.value == "提交") {
+                                // user confirmed list of wrongdoings, now process each one of them.
+                                const wrongs = prompt.value
+                                prompt.value = ""
+                                AiContent.value = ""
+                                tips.value = "Processing task....."
+                                spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+                                // make sure to start a new item on a new line
+                                wrongs.split('\n').filter(String).forEach((e:string)=>{
+                                    prompt.value = prompt.value.concat(e)
+                                    socket.emit("case_wrongs", caseStore.case, e, (resp:any)=>{
+                                        console.log(resp)
+                                        tips.value = ""
+                                    })
+                                })
+                                socket.on("task_result", (resp:any)=>{
+                                    // return facts and rebuff to each wrongdoing. Append it to end of AiContent
+                                    console.log(resp)
+                                    AiContent.value = AiContent.value.concat(resp+"\n\n")
+                                })
+                                socket.on("case_done", (resp)=>{
+                                    spinner.value == "提交"
+                                    AiContent.value = AiContent.value.concat(resp)
+                                    btnConfirm.value.disabled = false
+                                    console.log("Case Done", resp)
+                                })
+                            }
                             break;
                         default:
                             console.error("Unknown tasks, ")
@@ -119,13 +122,15 @@ async function submitQuery() {
             console.log("judge")
     }
 }
+
 async function confirmAiResult() {
     // save AI result to DB
-    const c = useCaseStore().case
-    c.plaintiff = "阿家(杭州)文化发展有限公司"
-    c.defendant = "杭州栖溪商业管理有限公司"
-    await useCaseStore().editCase(c)
-    await useCaseStore().updateTemplate(field.value, AiContent.value)
+    // const c = useCaseStore().case
+    // c.plaintiff = "阿家(杭州)文化发展有限公司"
+    // c.defendant = "杭州栖溪商业管理有限公司"
+    // await useCaseStore().editCase(c)
+    await useCaseStore().updateTemplate(field.value, AiContent.value)       // save the AI output to template items
+    btnConfirm.value.disabled = true
     alertStore.success('AI result confirmed');
 }
 onMounted(async ()=>{
@@ -149,6 +154,10 @@ watch(()=>field.value, async (nv, ov)=>{
         AiContent.value = aiTempt
         prompt.value = caseStore.template[userRole.value][userTask.value]["prompt"][subTask.value]
     }
+    if (subTask.value == "argument") {
+        // set init prompt value from previous AI output
+        prompt.value = caseStore.template[userRole.value][userTask.value]["result"]["request"]
+    }
 })
 watch(()=>useCaseStore().case.id, async (nv, ov)=>{
     if (nv!=ov) {
@@ -160,6 +169,7 @@ watch(()=>useCaseStore().case.id, async (nv, ov)=>{
         prompt.value = caseStore.getTemplateItem(field.value, "prompt")
     }
 })
+
 </script>
 
 <template>
@@ -204,7 +214,7 @@ watch(()=>useCaseStore().case.id, async (nv, ov)=>{
         </div>
     </div>
     <div class="row mt-2">
-        <textarea rows="8" class="col" v-model="prompt"></textarea>
+        <textarea rows="8" class="col" v-model="prompt" :placeholder="tips"></textarea>
         <p></p>
         <div class="col">
             <!-- <button @click.prevent="submitQuery" style="position: relative; float: right;">提交</button> -->
@@ -212,7 +222,7 @@ watch(()=>useCaseStore().case.id, async (nv, ov)=>{
         </div>
     </div>
     <div v-show="AiContent" class="row mt-2">
-        <textarea rows="8" class="col" v-model="AiContent"></textarea>
+        <textarea rows="8" class="col" @input="btnConfirm.disabled = false" v-model="AiContent"></textarea>
         <p></p>
         <div class="col">
             <button ref="btnConfirm" @click.prevent="confirmAiResult" type="button" class="btn btn-primary" style="position: relative; float: right;">保存</button>

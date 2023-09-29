@@ -47,6 +47,7 @@ export const useAuthStore = defineStore({
             useCaseStore().$reset()
             useCaseListStore().$reset()
             localStorage.removeItem('user');
+            localStorage.removeItem('activeId');
             router.push('/account/login');
         }
     }
