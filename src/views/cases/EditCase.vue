@@ -75,7 +75,7 @@ async function submitQuery() {
                                     AiContent.value = resp.result
                                     btnConfirm.value.disabled = false
                                     btnSubmit.value.disabled = false
-                                    // spinner.value = "确认"
+                                    spinner.value = "确认"
                                 })
                             } 
                             break;
