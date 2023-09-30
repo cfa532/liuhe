@@ -84,27 +84,23 @@ async function submitQuery() {
                                 socket.on("process_task", (resp)=>{
                                     prompt.value += resp + "\n\n"
                                 })
+                                socket.on("task_result", (resp:any)=>{
+                                    // return facts and rebuff to each wrongdoing. Append it to end of AiContent
+                                    console.log(resp)
+                                    AiContent.value += resp.argument+"\n\n" + resp.law + "\n\n"
+                                })
                                 // user confirmed list of wrongdoings, now process each one of them.
                                 socket.emit("case_wrongs", caseStore.case, prompt.value, (resp:any)=>{
-                                    console.log(resp)
+                                    spinner.value == "提交"
                                     tips.value = ""
+                                    AiContent.value += resp     // laws concerning the argument
+                                    btnConfirm.value.disabled = false
+                                    console.log("Case Done", resp)
                                 })
                                 prompt.value = ""
                                 AiContent.value = ""
                                 tips.value = "Processing task....."
                                 spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
-                                // make sure to start a new item on a new line
-                                socket.on("task_result", (resp:any)=>{
-                                    // return facts and rebuff to each wrongdoing. Append it to end of AiContent
-                                    console.log(resp)
-                                    AiContent.value += resp.argument+"\n\n"
-                                })
-                                socket.on("case_done", (resp)=>{
-                                    spinner.value == "提交"
-                                    AiContent.value = AiContent.value.concat(resp)
-                                    btnConfirm.value.disabled = false
-                                    console.log("Case Done", resp)
-                                })
                             }
                             break;
                         default:
