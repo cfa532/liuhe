@@ -91,9 +91,10 @@ async function submitQuery() {
                                 })
                                 // user confirmed list of wrongdoings, now process each one of them.
                                 socket.emit("case_wrongs", caseStore.case, prompt.value, (resp:any)=>{
-                                    spinner.value == "提交"
+                                    spinner.value = "提交"
                                     tips.value = ""
                                     AiContent.value += resp     // laws concerning the argument
+                                    btnSubmit.value.disabled = true
                                     btnConfirm.value.disabled = false
                                     console.log("Case Done", resp)
                                 })
