@@ -81,24 +81,23 @@ async function submitQuery() {
                             break;
                         case "argument":
                             if (spinner.value == "提交") {
+                                socket.on("process_task", (resp)=>{
+                                    prompt.value += resp + "\n\n"
+                                })
                                 // user confirmed list of wrongdoings, now process each one of them.
-                                const wrongs = prompt.value
+                                socket.emit("case_wrongs", caseStore.case, prompt.value, (resp:any)=>{
+                                    console.log(resp)
+                                    tips.value = ""
+                                })
                                 prompt.value = ""
                                 AiContent.value = ""
                                 tips.value = "Processing task....."
                                 spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
                                 // make sure to start a new item on a new line
-                                wrongs.split('\n').filter(String).forEach((e:string)=>{
-                                    prompt.value = prompt.value.concat(e)
-                                    socket.emit("case_wrongs", caseStore.case, e, (resp:any)=>{
-                                        console.log(resp)
-                                        tips.value = ""
-                                    })
-                                })
                                 socket.on("task_result", (resp:any)=>{
                                     // return facts and rebuff to each wrongdoing. Append it to end of AiContent
                                     console.log(resp)
-                                    AiContent.value = AiContent.value.concat(resp+"\n\n")
+                                    AiContent.value += resp.argument+"\n\n"
                                 })
                                 socket.on("case_done", (resp)=>{
                                     spinner.value == "提交"
