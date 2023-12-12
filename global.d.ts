@@ -14,9 +14,10 @@ interface ChatCase {       // chat
     // this.id is used as Key to the chat history Score_Pair
     // human ask, and AI reply. Within Mimei DB, each chat item is stored as ScorePair.
     // score: timestamp when the item is created, which means AI answered a question.
-    id: number,         // increment of chat items length
+    id: string,             // id of the chat case, use sequence of timestamp which will be unique.
     timestamp: number,      // date and time this leagal case is created in the system. Updated every time change is made
                             // used to sort the chat case list
+    brief: string,          // brief description of the case
 }
 interface UserAccount {
     username: string,

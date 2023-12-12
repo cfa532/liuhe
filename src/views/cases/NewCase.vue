@@ -19,10 +19,16 @@ const props = defineProps({
 
 async function onSubmit(values:any) {
     // send message to websoceket and wait for response
+    console.log("Submit value: ", values)
     const caseStore = useCaseStore()
     const alertStore = useAlertStore()
+
+    // submit query to AI and wait for reply
+    const ci = {} as ChatItem
+    ci.Q = values.query;        // query submitted to AI
+    ci.A = "Hello, Human"
     if (!props.chatId) {
-        const newId = await caseStore.createCase(values)
+        const newId = await caseStore.createCase(ci)
         alertStore.success("New case added, " + caseStore._value)
         // because store is singleton, the caseStore is updated with new data by now.
         emits("newCaseAdded", newId)    // To have case list updated
@@ -41,15 +47,15 @@ onMounted(()=>{
 <template>
     <!-- <Uploader @newCaseValues="data=>formValues=data"></Uploader> -->
     <div class="card">
-        <h4 class="card-header">新建案件</h4>
+        <h4 class="card-header">对话框</h4>
         <!-- <div style="position: absolute; right: 0px; top:0px">
             <button type="button" data-bs-target="#myModal" class="btn btn-secondary btn-sm" data-bs-toggle="modal">初始化</button>
         </div> -->
         <div class="card-body">
             <Form @submit="onSubmit" :validation-schema="schema" :initial-values="formValues" v-slot="{errors, isSubmitting}">
                 <div class="form-group">
-                    <label>诉求：</label>
-                    <Field name="brief" rows="8" as="textarea" class="form-control" :class="{ 'is-invalid': errors.brief }" />
+                    <label>Query :</label>
+                    <Field name="query" rows="8" as="textarea" class="form-control" :class="{ 'is-invalid': errors.brief }" />
                     <div class="invalid-feedback">{{ errors.brief }}</div>
                 </div>
                 <div class="form-group mt-2">

@@ -2,9 +2,9 @@ import { defineStore } from 'pinia';
 import { useAuthStore } from '@/stores';
 
 const PAGE_SIZE = 50        // chat items diplayed per page
-const CASE_FIELD_KEY = "CASE_INFO"
+const CHAT_CASE_FIELD = "CHAT_CASE_INFORMATION"
 const TEMPLATE_KEY = "CASE_TEMPLATE"
-const CHAT_HISTORY_KEY = "CASE_CHAT_HISTORY"
+const CHAT_HISTORY = "CHAT_HISTORY_"
 
 export const useCaseStore = defineStore({
     // holding all cases of the current user, in a FV database
@@ -14,11 +14,10 @@ export const useCaseStore = defineStore({
         _mid: "",            // Mimei database to hold all the cases of a user
         _mmsid: "",          // session id for the current user Mimei
         _value: {} as ChatCase,
-        _template: null as any,       // case specific template value
         chatHistory: [] as ChatItem[]
     }),
     getters: {
-        id: function(): number {
+        id: function(): string {
             return this._value.id
         },
         mid: function(state) {
@@ -38,9 +37,6 @@ export const useCaseStore = defineStore({
         mmsidCur: async function() :Promise<string> {
             return await this.api.client.MMOpen(this.api.sid, this.mid, "cur");
         },
-        template: function(state) {
-            return state._template
-        }
     },
     actions: {
         async backup(mid: string="") {
@@ -55,59 +51,41 @@ export const useCaseStore = defineStore({
                 throw new Error(err)
             }
         },
-        async createCase(c:LegalCase):Promise<string> {
+        async createCase(ci:ChatItem):Promise<string> {
             // add a new Case to database FV and return the Field. Use
-            const hk = await this.api.client.MMCreate(this.api.sid, "LeitherAI", '', "{{auto}}", 1, 0x07276705)
             // also use this hashkey as chat_history key and template FV key
-            c.id = hk
-            c.mid = this._mid
+            const c = this._value
             c.timestamp = Date.now()
-            this._value = c
-            await this.api.client.Hset(await this.mmsidCur, CASE_FIELD_KEY, hk, c);     // to get case list quickly
+            c.id = c.timestamp.toString()
 
-            // get default template of user as case template. Each case template can be edited individually
-            await this.api.client.Hset(await this.mmsidCur, TEMPLATE_KEY, hk, JSON.stringify(useAuthStore().template))
-            // await this.api.client.Hset(await this.mmsidCur, CHAT_HISTORY_KEY, hk, {})
+            // create a new Chat Case in Mimei
+            await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_FIELD, c.id, c);     // to get case list quickly
+            // add a chat item to chat history of the current case
+            await this.api.client.Zadd(await this.mmsidCur, CHAT_HISTORY+c.id, new ScorePair(c.timestamp, ci))
             await this.backup()
-            return hk
+            return c.id
         },
-        async editCase(c:LegalCase) {
-            // reset case data with 
+        async addChatItem(ci:ChatItem) {
+            // add a chat item to chat history of the current case
+            const c = this._value
             c.timestamp = Date.now()
-            await this.api.client.Hset(await this.mmsidCur, CASE_FIELD_KEY, c.id, c);
-            await this.backup()
-        },
-        async updateTemplate(field: string, val:string, val_type="result") {
-            // only update AI result for now.
-            // Field = userRole:userTask:subTask, value is user approved content for this subtask
-            const [userRole, userTask, subTask] = field.split(':')
-            this._template[userRole][userTask][val_type][subTask] = val
-            await this.api.client.Hset(await this.mmsidCur, TEMPLATE_KEY, this.id, JSON.stringify(this._template))
-            await this.backup()
-            useAuthStore().update()     // update localstorage data
-        },
-        getTemplateItem(field: string, val_type="result") {
-            const [userRole, userTask, subTask] = field.split(':')
-            return this.template? this.template[userRole][userTask][val_type][subTask] : null
-        },
-        async addChatItem(c: ChatItem) {
-            // case id (its field id) is also used as Key of chat history Score-Pair
-            // c.timestamp = Date.now()
-            await this.api.client.Zadd(await this.mmsidCur, this.id, new ScorePair(Date.now(), JSON.stringify(c)))
+            await this.api.client.Zadd(await this.mmsidCur, CHAT_HISTORY+c.id, new ScorePair(c.timestamp, ci))
+            // update timestamp of the current case
+            await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_FIELD, c.id, c);
             await this.backup()
         },
         async getChatHistory(pageNum?: number) {
             if (typeof pageNum === "undefined") {
+                // get every chat item
                 return await this.api.client.Zrevrange(await this.mmsid, this.id, 0, -1)
             }
             // get currut page of chat history
             const start = (pageNum!-1)*PAGE_SIZE
-            const ch:ChatItem[] = await this.api.client.Zrevrange(await this.mmsid, CASE_FIELD_KEY, start, start+PAGE_SIZE-1)
+            const ch:ChatItem[] = await this.api.client.Zrevrange(await this.mmsid, CHAT_CASE_FIELD, start, start+PAGE_SIZE-1)
             this.chatHistory.concat(ch)
         },
         async initCase(id: string) {
-            this._value = await this.api.client.Hget(await this.mmsid, CASE_FIELD_KEY, id)
-            this._template = JSON.parse(await this.api.client.Hget(await this.mmsid, TEMPLATE_KEY, id))
+            this._value = await this.api.client.Hget(await this.mmsid, CHAT_CASE_FIELD, id)
             await this.getChatHistory(1)
         }
     }
@@ -146,9 +124,9 @@ export const useCaseListStore = defineStore({
         mmsidCur: async function() :Promise<string> {
             return await this.api.client.MMOpen(this.api.sid, this.mid, "cur");
         },
-        allCases: async function() :Promise<LegalCase[]> {
+        allCases: async function() :Promise<ChatCase[]> {
             // get a sorted list of all cases information
-            const cases:LegalCase[] = await this.api.client.Hgetall(await this.mmsid, CASE_FIELD_KEY).map((e:any)=>e.value)
+            const cases:ChatCase[] = await this.api.client.Hgetall(await this.mmsid, CHAT_CASE_FIELD).map((e:any)=>e.value)
             cases.sort((a,b)=> b.timestamp-a.timestamp)
             return cases
         }
