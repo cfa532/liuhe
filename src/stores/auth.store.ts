@@ -13,14 +13,6 @@ export const useAuthStore = defineStore({
         user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) as UserAccount: null,
         returnUrl: null as unknown
     }),
-    getters: {
-        template: function(state) {
-            return state.user!.template
-        },
-        id: function(state) {
-            return state.user!.mid
-        }
-    },
     actions: {
         async login(username:string, password:string) {
             try {

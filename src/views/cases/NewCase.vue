@@ -9,29 +9,27 @@ import { useAlertStore, useCaseStore } from '@/stores';
 // const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
 const formValues = ref()
 const schema = Yup.object().shape({
-    title: Yup.string()
-        .required('案件标题必填'),
     brief: Yup.string()
         .required('案件简述必填'),
-    plaintiff: Yup.string()
-        .required('原告名必填'),
-    defendant: Yup.string()
-        .required("被告名必填"),
 });
 const emits = defineEmits(["newCaseAdded"])     // add new case to list
+const props = defineProps({
+    chatId : {type: String, required: false}    // only new chat
+})
 
 async function onSubmit(values:any) {
+    // send message to websoceket and wait for response
     const caseStore = useCaseStore()
     const alertStore = useAlertStore()
-    try {
+    if (!props.chatId) {
         const newId = await caseStore.createCase(values)
         alertStore.success("New case added, " + caseStore._value)
         // because store is singleton, the caseStore is updated with new data by now.
         emits("newCaseAdded", newId)    // To have case list updated
         router.push("/case/edit/"+newId)
-    } catch(err) {
-        console.error(err)
-        alertStore.error(err)
+    } else {
+        // load chat history
+        
     }
 }
 
@@ -42,7 +40,7 @@ onMounted(()=>{
 
 <template>
     <!-- <Uploader @newCaseValues="data=>formValues=data"></Uploader> -->
-    <div class="card m-3">
+    <div class="card">
         <h4 class="card-header">新建案件</h4>
         <!-- <div style="position: absolute; right: 0px; top:0px">
             <button type="button" data-bs-target="#myModal" class="btn btn-secondary btn-sm" data-bs-toggle="modal">初始化</button>
@@ -50,31 +48,6 @@ onMounted(()=>{
         <div class="card-body">
             <Form @submit="onSubmit" :validation-schema="schema" :initial-values="formValues" v-slot="{errors, isSubmitting}">
                 <div class="form-group">
-                    <label>标题：</label>
-                    <Field name="title" type="text" class="form-control" :class="{ 'is-invalid': errors.title }" />
-                    <div class="invalid-feedback">{{ errors.title }}</div>
-                </div>
-                <div class="form-group mt-2">
-                    <label>原告：</label>
-                    <Field name="plaintiff" type="text" class="form-control" :class="{ 'is-invalid': errors.plaintiff }" />
-                    <div class="invalid-feedback">{{ errors.plaintiff }}</div>
-                </div>
-                <div class="form-group mt-2">
-                    <label>被告：</label>
-                    <Field name="defendant" type="text" class="form-control" :class="{ 'is-invalid': errors.defendant }" />
-                    <div class="invalid-feedback">{{ errors.defendant }}</div>
-                </div>
-                <div class="form-group mt-2">
-                    <label>主审法官：</label>
-                    <Field name="judge" type="text" class="form-control" :class="{ 'is-invalid': errors.judge }" />
-                    <div class="invalid-feedback">{{ errors.judge }}</div>
-                </div>
-                <div class="form-group mt-2">
-                    <label>律师：</label>
-                    <Field name="attorney" type="text" class="form-control" :class="{ 'is-invalid': errors.attorney }" />
-                    <div class="invalid-feedback">{{ errors.attorney }}</div>
-                </div>
-                <div class="form-group mt-2">
                     <label>诉求：</label>
                     <Field name="brief" rows="8" as="textarea" class="form-control" :class="{ 'is-invalid': errors.brief }" />
                     <div class="invalid-feedback">{{ errors.brief }}</div>
@@ -82,11 +55,20 @@ onMounted(()=>{
                 <div class="form-group mt-2">
                     <button class="btn btn-primary" :disabled="isSubmitting">
                         <span v-show="isSubmitting" class="spinner-border spinner-border-sm mr-1"></span>
-                        注册
+                        提交
                     </button>
                     <router-link to="login" class="btn btn-link" style="float: right;">取消</router-link>
                 </div>
             </Form>
+            <div class="form-group mt-4">
+                <div>
+                    <label>You：</label>
+                    <div>What is your name</div>
+                    <label>AI：</label>
+                    <div>Chat GPT
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>

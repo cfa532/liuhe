@@ -13,12 +13,12 @@ export const useCaseStore = defineStore({
         api: window.lapi,    // Leither api handle
         _mid: "",            // Mimei database to hold all the cases of a user
         _mmsid: "",          // session id for the current user Mimei
-        _value: {} as LegalCase,
+        _value: {} as ChatCase,
         _template: null as any,       // case specific template value
         chatHistory: [] as ChatItem[]
     }),
     getters: {
-        id: function(): string {
+        id: function(): number {
             return this._value.id
         },
         mid: function(state) {
@@ -57,10 +57,7 @@ export const useCaseStore = defineStore({
         },
         async createCase(c:LegalCase):Promise<string> {
             // add a new Case to database FV and return the Field. Use
-            const hk = await this.api.client.MMCreate(this.api.sid, "LeitherAI", '', c.title, 1, 0x07276705)
-            if (await this.api.client.Hget(await this.mmsid, CASE_FIELD_KEY, hk)) {
-                throw new Error("Case title already exists")
-            }
+            const hk = await this.api.client.MMCreate(this.api.sid, "LeitherAI", '', "{{auto}}", 1, 0x07276705)
             // also use this hashkey as chat_history key and template FV key
             c.id = hk
             c.mid = this._mid

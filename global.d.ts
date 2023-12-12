@@ -7,33 +7,25 @@ interface Window {
 }
 
 interface ChatItem {
-    AI: string;
-    Human: string;
+    Q: string;      // query
+    A: string;      // answer by AI
 }
-interface LegalCase {
-    role: string,       // plaintiff or defendant, or judge
-    mid: string,        // Mimei Id of the current user, which holds all the cases
-    id: string,         // hashcode of the Case title, also used as Key to Field_Value for saving result of each template item
-    title: string,
-    brief: string,
-    plaintiff: string,      // str[]
-    defendant: string,      // need to change to str[]
-    attorney:string,
-    judge:string,
-    // templateKey: string,  // this.id used as Key
-    chatHistoryKey: string,  // this.id is used as Key to the chat history Score_Pair
-    // chatHistory: [timestamp: {AI:string, Human:string}],
+interface ChatCase {       // chat
+    // this.id is used as Key to the chat history Score_Pair
     // human ask, and AI reply. Within Mimei DB, each chat item is stored as ScorePair.
     // score: timestamp when the item is created, which means AI answered a question.
+    id: number,         // increment of chat items length
     timestamp: number,      // date and time this leagal case is created in the system. Updated every time change is made
+                            // used to sort the chat case list
 }
 interface UserAccount {
     username: string,
     familyName: string,
     givenName: string,
     password: string,
-    mid: string,            // Mimei id for this user db, everything of the user
-    template: string,      // stringified json object
+    mid: string,            // Mimei id for this user's db, everything of the user is stored in the Mimei
+    role: string,           // 用户身份：分析师，交易员，财务？
+    // template: string,      // stringified json object
 }
 
 // Mimei data structures
