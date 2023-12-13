@@ -8,7 +8,7 @@ const props=defineProps({
     newId: {type: String, required: false},
 })
 
-let allCases = shallowRef([] as LegalCase[])
+let allCases = shallowRef([] as ChatCase[])
 const caseListStore = storeToRefs(useCaseListStore())
 watch(()=>props.newId, (nv)=>{
     if (nv) {
@@ -19,11 +19,13 @@ watch(()=>props.newId, (nv)=>{
 })
 onMounted(async ()=>{
     // get list of cases of the user
+    console.log("case list mounted")
     allCases.value = await caseListStore.allCases.value
     console.log("all cases:", caseListStore.activeId.value, allCases.value)
 })
-function selectCase(c:LegalCase) {
-    // highlight current case and 
+function selectCase(c:ChatCase) {
+    // highlight current case and
+    console.log(c) 
     useCaseListStore().setActiveId(c.id)
     router.push("/case/edit/"+c.id)
 }
@@ -32,7 +34,7 @@ function addNewCase() {
     useCaseListStore().setActiveId("")
     router.push('/case/add')
 }
-function btnClass(c:LegalCase) {
+function btnClass(c:ChatCase) {
     return "btn btn-light text-nowrap btn-outline-secondary " + (c.id==caseListStore.activeId.value? "active":"")
 }
 </script>
@@ -42,7 +44,7 @@ function btnClass(c:LegalCase) {
         <button @click="addNewCase" type="button" class="btn btn-light text-nowrap btn-outline-primary">
             <span class="text-decoration-underline">&nbsp;新建&nbsp;</span>
         </button>
-        <button @click="selectCase(c)" v-for="(c,i) in allCases" :key="i.toString()" type="button" :class="btnClass(c)">{{c.title}}</button>
+        <button @click="selectCase(c)" v-for="(c,i) in allCases" :key="i" type="button" :class="btnClass(c)">{{c.brief}}</button>
     </div>
 </div>
 </template>

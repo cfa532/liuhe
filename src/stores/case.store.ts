@@ -3,7 +3,6 @@ import { useAuthStore } from '@/stores';
 
 const PAGE_SIZE = 50        // chat items diplayed per page
 const CHAT_CASE_FIELD = "CHAT_CASE_INFORMATION"
-const TEMPLATE_KEY = "CASE_TEMPLATE"
 const CHAT_HISTORY = "CHAT_HISTORY_"
 
 export const useCaseStore = defineStore({
@@ -11,7 +10,7 @@ export const useCaseStore = defineStore({
     id: "CaseMimei",
     state: ()=>({
         api: window.lapi,    // Leither api handle
-        _mid: "",            // Mimei database to hold all the cases of a user
+        _mid: "",            // Mimei database to hold all the cases of the user
         _mmsid: "",          // session id for the current user Mimei
         _value: {} as ChatCase,
         chatHistory: [] as ChatItem[]
@@ -60,7 +59,7 @@ export const useCaseStore = defineStore({
             c.id = c.timestamp.toString()
             c.brief = ci.Q
             // create a new Chat Case in Mimei
-            await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_FIELD, c.id, JSON.stringify(c));     // to get case list quickly
+            await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_FIELD, c.id, c);     // to get case list quickly
             // add a chat item to chat history of the current case
             await this.api.client.Zadd(await this.mmsidCur, CHAT_HISTORY+c.id, {"score":c.timestamp, "member":JSON.stringify(ci)})
             await this.backup()
@@ -76,21 +75,27 @@ export const useCaseStore = defineStore({
             // update timestamp of the current case
             await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_FIELD, c.id, c);
             await this.backup()
-            this.chatHistory.push(ci)
+            this.chatHistory.unshift(ci)
         },
-        async getChatHistory(pageNum?: number) {
-            if (typeof pageNum === "undefined") {
+        async getChatHistory(pageNum: number=-1) {
+            if (pageNum === -1) {
                 // get every chat item
-                return await this.api.client.Zrevrange(await this.mmsid, this.id, 0, -1)
+                this.chatHistory = await this.api.client.Zrevrange(await this.mmsid, CHAT_HISTORY+this.id, 0, -1).map((x:any)=>JSON.parse(x.member))
+            } else {
+                // get currut page of chat history
+                const start = (pageNum-1)*PAGE_SIZE
+                const ch:ChatItem[] = await this.api.client.Zrevrange(await this.mmsid, CHAT_HISTORY+this.id, start, start+PAGE_SIZE-1)
+                this.chatHistory.concat(ch)
             }
-            // get currut page of chat history
-            const start = (pageNum!-1)*PAGE_SIZE
-            const ch:ChatItem[] = await this.api.client.Zrevrange(await this.mmsid, CHAT_CASE_FIELD, start, start+PAGE_SIZE-1)
-            this.chatHistory.concat(ch)
         },
         async initCase(id: string) {
-            this._value = await this.api.client.Hget(await this.mmsid, CHAT_CASE_FIELD, id)
-            await this.getChatHistory(1)
+            if (id) {
+                this._value = await this.api.client.Hget(await this.mmsid, CHAT_CASE_FIELD, id)
+                await this.getChatHistory()
+            } else {
+                this._value = {} as ChatCase
+                this.chatHistory = []
+            }
         }
     }
 })
@@ -130,7 +135,8 @@ export const useCaseListStore = defineStore({
         },
         allCases: async function() :Promise<ChatCase[]> {
             // get a sorted list of all cases information
-            const cases:ChatCase[] = await this.api.client.Hgetall(await this.mmsid, CHAT_CASE_FIELD).map((e:any)=>e.value)
+            const t = await this.api.client.Hgetall(await this.mmsid, CHAT_CASE_FIELD)
+            const cases:ChatCase[] = t.map((e:any)=>e.value)
             cases.sort((a,b)=> b.timestamp-a.timestamp)
             return cases
         }
