@@ -30,15 +30,13 @@ interface UserAccount {
 }
 
 // Mimei data structures
-declare class ScorePair {
-    score: number;
-    member: any;
-    constructor(score: number, member: any) {
-      this.score = score;
-      this.member = member;
-    }
-};
-// export const ScorePair = new  ScorePair()
+interface ScorePair { 
+    score: number
+    member: string 
+}
+// function ScorePair(score: number, member: string) {
+//     return {score, member}
+// }
 
 interface FVPair {
     field: string       // usually the Mimei Id

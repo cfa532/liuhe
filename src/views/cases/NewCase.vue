@@ -1,80 +1,77 @@
 <script setup lang="ts">
-import { Form, Field } from 'vee-validate';
-import * as Yup from 'yup';
 import { onMounted, ref } from 'vue';
-import { Uploader } from '@/components';
 import { router } from '@/router'
 import { useAlertStore, useCaseStore } from '@/stores';
+import { io, Socket } from "socket.io-client"
 
 // const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
-const formValues = ref()
-const schema = Yup.object().shape({
-    brief: Yup.string()
-        .required('案件简述必填'),
-});
+const query = ref()
 const emits = defineEmits(["newCaseAdded"])     // add new case to list
 const props = defineProps({
     chatId : {type: String, required: false}    // only new chat
 })
+const spinner = ref("提交")
+const btnSubmit = ref()
 
-async function onSubmit(values:any) {
+async function onSubmit() {
     // send message to websoceket and wait for response
-    console.log("Submit value: ", values)
+    console.log("Submit value: ", query.value)
     const caseStore = useCaseStore()
     const alertStore = useAlertStore()
+    const socket:Socket = io(import.meta.env.VITE_LLM_URL)
 
-    // submit query to AI and wait for reply
     const ci = {} as ChatItem
-    ci.Q = values.query;        // query submitted to AI
-    ci.A = "Hello, Human"
+    ci.Q = query.value? query.value : "query";        // query submitted to AI
+    ci.A = ""
     if (!props.chatId) {
-        const newId = await caseStore.createCase(ci)
-        alertStore.success("New case added, " + caseStore._value)
-        // because store is singleton, the caseStore is updated with new data by now.
-        emits("newCaseAdded", newId)    // To have case list updated
-        router.push("/case/edit/"+newId)
+        // submit query to AI websocket and wait for reply
+        socket.emit("gpt_api", caseStore.chatHistory, ci.Q, async (resp:any)=>{
+            // console.log(resp)   // {query: refined query str, result: AI result}
+            ci.A = resp
+            const newId = await caseStore.createCase(ci)
+            alertStore.success("New case added, " + caseStore.case)
+            emits("newCaseAdded", newId)    // To have case list updated
+            router.push("/case/edit/"+newId)
+        })
     } else {
         // load chat history
         
     }
 }
-
 onMounted(()=>{
-    console.log("New Case Mounted")
+    console.log("New Case Mounted", props.chatId)
 })
 </script>
 
 <template>
-    <!-- <Uploader @newCaseValues="data=>formValues=data"></Uploader> -->
-    <div class="card">
-        <h4 class="card-header">对话框</h4>
-        <!-- <div style="position: absolute; right: 0px; top:0px">
-            <button type="button" data-bs-target="#myModal" class="btn btn-secondary btn-sm" data-bs-toggle="modal">初始化</button>
-        </div> -->
-        <div class="card-body">
-            <Form @submit="onSubmit" :validation-schema="schema" :initial-values="formValues" v-slot="{errors, isSubmitting}">
-                <div class="form-group">
-                    <label>Query :</label>
-                    <Field name="query" rows="8" as="textarea" class="form-control" :class="{ 'is-invalid': errors.brief }" />
-                    <div class="invalid-feedback">{{ errors.brief }}</div>
-                </div>
-                <div class="form-group mt-2">
-                    <button class="btn btn-primary" :disabled="isSubmitting">
-                        <span v-show="isSubmitting" class="spinner-border spinner-border-sm mr-1"></span>
-                        提交
-                    </button>
-                    <router-link to="login" class="btn btn-link" style="float: right;">取消</router-link>
-                </div>
-            </Form>
-            <div class="form-group mt-4">
-                <div>
-                    <label>You：</label>
-                    <div>What is your name</div>
-                    <label>AI：</label>
-                    <div>Chat GPT
-                    </div>
+<!-- <Uploader @newCaseValues="data=>formValues=data"></Uploader> -->
+<form>
+<div class="container d-grid row-gap-3">
+    <div class="row">
+        <div class="col">
+        <div class="card fs-6">
+            <div class="card-header">
+                人机对话
+                <div style="position: absolute; right: 0px; top:1px">
+                    <button type="button" data-bs-target="#myModal" class="btn btn-link" data-bs-toggle="modal">&nbsp;添加文件</button>
                 </div>
             </div>
         </div>
+        </div>
     </div>
+    <div class="row mt-2">
+        <textarea rows="8" class="col" v-model="query" placeholder="tips"></textarea>
+        <p></p>
+        <div class="col">
+            <button ref="btnSubmit" @click.prevent="onSubmit" type="button" style="position: relative; float: right;" class="btn btn-primary" v-html="spinner"></button>
+        </div>
+    </div>
+</div>
+</form>
+
+<div class="row text-secondary mt-4">
+    <div class="col">
+        <!-- <div>{{ queryResult }}</div> -->
+    </div>
+</div>
 </template>
