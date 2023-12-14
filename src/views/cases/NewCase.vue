@@ -73,7 +73,7 @@ watch(()=>route.params.id, async (nv, ov)=>{
         </div>
     </div>
     <div class="row mt-2">
-        <textarea rows="8" class="col" v-model="query" placeholder="Ask me...."></textarea>
+        <textarea rows="4" class="col" v-model="query" placeholder="Ask me...."></textarea>
         <p></p>
         <div class="col">
             <button ref="btnSubmit" @click.prevent="onSubmit" type="button" style="position: relative; float: right;" class="btn btn-primary" v-html="spinner"></button>
