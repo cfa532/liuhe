@@ -79,7 +79,7 @@ export const useCaseStore = defineStore({
         },
         async getChatHistory(pageNum: number=-1) {
             if (pageNum === -1) {
-                // get every chat item
+                // get every chat item. The last one comes first.
                 this.chatHistory = await this.api.client.Zrevrange(await this.mmsid, CHAT_HISTORY+this.id, 0, -1).map((x:any)=>JSON.parse(x.member))
             } else {
                 // get currut page of chat history

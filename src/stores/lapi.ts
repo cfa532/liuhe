@@ -28,7 +28,7 @@ export const useLeitherStore = defineStore({
         }
     },
     actions: {
-        login(user="gen8", pswd="123456") {
+        login(user="lsb", pswd="123456") {
             return new Promise<any>((resolve, reject)=>{
                 this.client.Login(user, pswd, "byname").then(
                     (result:any)=>{ 

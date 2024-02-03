@@ -9,34 +9,43 @@ import { useRoute } from 'vue-router';
 const caseStore = useCaseStore()
 const alertStore = useAlertStore()
 const route = useRoute();
-const socket:Socket = io(import.meta.env.VITE_LLM_URL)
 const query = ref()
+const A = ref()
 const emits = defineEmits(["newCaseAdded"])     // add new case to list
 const spinner = ref("提交")
 const btnSubmit = ref()
+const socket:Socket = io(import.meta.env.VITE_LLM_URL)
 
 async function onSubmit() {
     // send message to websoceket and wait for response
-    console.log("Submit value: ", query.value)
+    const chatHistory = caseStore.chatHistory.map(e=>{return {...e}})
+
+    console.log("Submit value: ", query.value, caseStore.chatHistory)
     const ci = {} as ChatItem
     ci.Q = query.value? query.value : "query";        // query submitted to AI
     ci.A = ""
+
+    socket.on("stream_in", r=>{ci.A=r})
     if (!route.params.id) {
-        // submit query to AI websocket and wait for reply
-        socket.emit("gpt_api", caseStore.chatHistory, ci.Q, async (resp:any)=>{
-            // console.log(resp)   // {query: refined query str, result: AI result}
-            ci.A = resp
+        // A new case. submit query to AI websocket and wait for reply.
+        socket.emit("gpt_api", [], ci.Q, async (resp:any)=>{
+            console.log(resp)   // {query: refined query str, result: AI result}
+
             const newId = await caseStore.createCase(ci)
             alertStore.success("New case added, " + caseStore.case)
             emits("newCaseAdded", newId)    // To have case list updated
             query.value = ""
+            A.value = ""
             router.push("/case/edit/"+newId)
         })
     } else {
-        socket.emit("gpt_api", caseStore.chatHistory, ci.Q, async (resp:any)=>{
-            // console.log(resp)   // {query: refined query str, result: AI result}
-            ci.A = resp
+        socket.emit("gpt_api", chatHistory, ci.Q, async (resp:any)=>{
+            console.log(resp)   // {query: refined query str, result: AI result}
+            // ci.A = resp
             caseStore.addChatItem(ci)
+            console.log(caseStore.chatHistory)
+            query.value = ""
+            A.value = ""
         })
     }
 }
@@ -83,6 +92,10 @@ watch(()=>route.params.id, async (nv, ov)=>{
 </form>
 
 <div class="row text-secondary mt-4">
+    <div class="row" v-show="A">
+        <div><label>A:&nbsp;</label>{{ A }}</div>
+        <p></p>
+    </div>
     <div class="row" v-for="(ci, index) in caseStore.chatHistory" :key="index">
         <div><label>Q:&nbsp;</label>{{ ci.Q }}</div>
         <div><label>A:&nbsp;</label>{{ ci.A }}</div>

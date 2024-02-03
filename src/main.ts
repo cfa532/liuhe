@@ -23,4 +23,5 @@ useLeitherStore().login().then((api)=>{
 }, (err)=>{
     console.error(err)
     window.alert(err)
+    router.push("/account")
 })
