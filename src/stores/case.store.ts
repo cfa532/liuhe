@@ -50,14 +50,14 @@ export const useCaseStore = defineStore({
                 throw new Error(err)
             }
         },
-        async createCase(ci:ChatItem):Promise<string> {
+        async createCase(ci:ChatItem, caption:string):Promise<string> {
             // A new case created when the 1st round of chat is finished and a chat item passed it.
             // add a new Case to database FV and return the Field. Use
             // also use this hashkey as chat_history key and template FV key
             const c = this._value
             c.timestamp = Date.now()
             c.id = c.timestamp.toString()
-            c.brief = ci.Q
+            c.brief = caption ? caption : ci.Q
             // create a new Chat Case in Mimei
             await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_FIELD, c.id, c);     // to get case list quickly
             // add a chat item to chat history of the current case
@@ -139,12 +139,31 @@ export const useCaseListStore = defineStore({
             const cases:ChatCase[] = t.map((e:any)=>e.value)
             cases.sort((a,b)=> b.timestamp-a.timestamp)
             return cases
-        }
+        },
     },
     actions: {
+        async backup(mid: string="") {
+            if (!mid) mid = this.mid;       // use this mid by default
+            try {
+                const newVer = await this.api.client.MMBackup(this.api.sid, mid, '')
+                this.$state._mmsid = await this.api.client.MMOpen(this.api.sid, mid, "last");
+                // now publish a new version of database Mimei
+                const ret:DhtReply = this.api.client.MiMeiPublish(this.api.sid, "", mid)
+                console.log("Case Mimei publish []DhtReply=", ret, this._mmsid, "newVer="+newVer)
+            } catch(err:any) {
+                throw new Error(err)
+            }
+        },
         setActiveId(id:string) {
             localStorage["activeId"] = id
             this._activeId = id
+        },
+        async deleteCase(id:string) {
+            // id must be activeId
+            await this.api.client.Hdel(await this.mmsidCur, CHAT_CASE_FIELD, id)
+            // this.api.client.Zremrangebyscore(await this.mmsidCur, CHAT_HISTORY+id, -1)
+            await this.backup()
+            localStorage.removeItem(id)
         }
     }
 })

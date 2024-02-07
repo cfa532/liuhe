@@ -10,42 +10,50 @@ const caseStore = useCaseStore()
 const alertStore = useAlertStore()
 const route = useRoute();
 const query = ref()
-const A = ref()
+const caption=ref()
+const stream_in = ref("")
+const stream_key = ref(Date.now())
+
 const emits = defineEmits(["newCaseAdded"])     // add new case to list
 const spinner = ref("提交")
 const btnSubmit = ref()
 const socket:Socket = io(import.meta.env.VITE_LLM_URL)
+socket.on("stream_in", r=>{
+        stream_in.value=r;
+        console.log(stream_in.value)
+        stream_key.value=Date.now()
+    })
 
 async function onSubmit() {
     // send message to websoceket and wait for response
     const chatHistory = caseStore.chatHistory.map(e=>{return {...e}})
-
+    stream_in.value = " "
     console.log("Submit value: ", query.value, caseStore.chatHistory)
     const ci = {} as ChatItem
-    ci.Q = query.value? query.value : "query";        // query submitted to AI
+    ci.Q = query.value? query.value : "Hello";        // query submitted to AI
     ci.A = ""
-
-    socket.on("stream_in", r=>{ci.A=r})
+    // caseStore.chatHistory.unshift(ci)
     if (!route.params.id) {
         // A new case. submit query to AI websocket and wait for reply.
         socket.emit("gpt_api", [], ci.Q, async (resp:any)=>{
             console.log(resp)   // {query: refined query str, result: AI result}
+            ci.A = resp
 
-            const newId = await caseStore.createCase(ci)
+            const newId = await caseStore.createCase(ci, caption.value)
             alertStore.success("New case added, " + caseStore.case)
             emits("newCaseAdded", newId)    // To have case list updated
             query.value = ""
-            A.value = ""
+            stream_in.value = ""
             router.push("/case/edit/"+newId)
         })
     } else {
         socket.emit("gpt_api", chatHistory, ci.Q, async (resp:any)=>{
             console.log(resp)   // {query: refined query str, result: AI result}
-            // ci.A = resp
+            ci.A = resp
             caseStore.addChatItem(ci)
             console.log(caseStore.chatHistory)
             query.value = ""
-            A.value = ""
+            stream_in.value = ""
         })
     }
 }
@@ -72,17 +80,12 @@ watch(()=>route.params.id, async (nv, ov)=>{
     <div class="row">
         <div class="col">
         <div class="card fs-6">
-            <div class="card-header">
-                人机对话
-                <div style="position: absolute; right: 0px; top:1px">
-                    <button type="button" data-bs-target="#myModal" class="btn btn-link" data-bs-toggle="modal">&nbsp;添加文件</button>
-                </div>
-            </div>
+            <input v-model="caption" placeholder="对话标题..."/>
         </div>
         </div>
     </div>
     <div class="row mt-2">
-        <textarea rows="4" class="col" v-model="query" placeholder="Ask me...."></textarea>
+        <textarea rows="4" class="col" v-model="query" placeholder="提问内容...."></textarea>
         <p></p>
         <div class="col">
             <button ref="btnSubmit" @click.prevent="onSubmit" type="button" style="position: relative; float: right;" class="btn btn-primary" v-html="spinner"></button>
@@ -92,8 +95,8 @@ watch(()=>route.params.id, async (nv, ov)=>{
 </form>
 
 <div class="row text-secondary mt-4">
-    <div class="row" v-show="A">
-        <div><label>A:&nbsp;</label>{{ A }}</div>
+    <div class="row" v-if="stream_in.length>0">
+        <div :key="stream_key"><label>A:&nbsp;</label>{{ stream_in }}</div>
         <p></p>
     </div>
     <div class="row" v-for="(ci, index) in caseStore.chatHistory" :key="index">

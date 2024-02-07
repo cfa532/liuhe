@@ -18,7 +18,7 @@ function newCaseAdded(id:string) {
             <CaseList :newId="newCaseId"></CaseList>
         </div>
         <div class="col-8">
-            <router-view  @newCaseAdded="newCaseAdded"></router-view>
+            <router-view @newCaseAdded="newCaseAdded"></router-view>
         </div>
         <div class="col-2">Chat with AI</div>
       </div>

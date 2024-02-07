@@ -12,7 +12,7 @@ let allCases = shallowRef([] as ChatCase[])
 const caseListStore = storeToRefs(useCaseListStore())
 watch(()=>props.newId, (nv)=>{
     if (nv) {
-        if (allCases.value.findIndex(c=>c.id==props.newId) == -1)
+        if (allCases.value.findIndex(c=>c.id==nv) == -1)
             allCases.value.unshift(useCaseStore()._value)
         useCaseListStore().setActiveId(nv)
     }
