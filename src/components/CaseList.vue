@@ -5,23 +5,26 @@ import { useCaseListStore, useCaseStore } from "@/stores";
 import { router } from '@/router'
 
 const props=defineProps({
-    newId: {type: String, required: false},
+    caseId: {type: String, required: false},
 })
 
 let allCases = shallowRef([] as ChatCase[])
 const caseListStore = storeToRefs(useCaseListStore())
-watch(()=>props.newId, (nv)=>{
-    if (nv) {
+watch(()=>props.caseId, async (nv, ov)=>{
+    console.log("Watch caseId:",nv, ov)
+    if (nv && nv!=='0') {
         if (allCases.value.findIndex(c=>c.id==nv) == -1)
             allCases.value.unshift(useCaseStore()._value)
         useCaseListStore().setActiveId(nv)
+    } else {
+        allCases.value = await caseListStore.allCases.value
+        router.push("/case")
     }
 })
 onMounted(async ()=>{
     // get list of cases of the user
-    console.log("case list mounted")
     allCases.value = await caseListStore.allCases.value
-    console.log("all cases:", caseListStore.activeId.value, allCases.value)
+    console.log("case list mounted", caseListStore.activeId.value, allCases.value)
 })
 function selectCase(c:ChatCase) {
     // highlight current case and

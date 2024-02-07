@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { CaseList } from '@/components';
-const newCaseId = ref("")
-function newCaseAdded(id:string) {
-  if (id)
-    newCaseId.value = id
-}
+const caseId = ref("")
+// function newCase(id:string) {
+//   console.log("new case id", id)
+//   if (id)
+//     caseId.value = id
+//   else {
+//     // if ID is null, means the case is deleted, reload case list
+//     caseId.value = ""
+//   }
+// }
 </script>
 <template>
     <!-- <div class="p-4">
@@ -15,10 +20,10 @@ function newCaseAdded(id:string) {
     <div class="container-fluid text-left" style="position: absolute; left: 0px; padding: 5px;">
       <div class="row justify-content-start">
         <div  class="col-2 align-self-start">
-            <CaseList :newId="newCaseId"></CaseList>
+            <CaseList :caseId="caseId"></CaseList>
         </div>
         <div class="col-8">
-            <router-view @newCaseAdded="newCaseAdded"></router-view>
+            <router-view @newCaseId="(id:string)=>caseId=id"></router-view>
         </div>
         <div class="col-2">Chat with AI</div>
       </div>

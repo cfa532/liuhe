@@ -7,7 +7,7 @@ import { useRoute } from 'vue-router';
 import { Share } from '@/components'
 
 // const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
-const emits = defineEmits(["newCaseAdded"])     // add new case to list
+const emits = defineEmits(["newCaseId"])     // add new case to list
 const caseList = useCaseListStore()
 const caseStore = useCaseStore()
 const route = useRoute();
@@ -50,15 +50,14 @@ onMounted(()=>{
 })
 watch(()=>route.params.id, async (nv, ov)=>{
     // force changing of user case
-    if (nv!=ov) {
+    if (nv && nv!=ov) {
         await caseStore.initCase(nv as string)
         console.log(caseStore.case)
     }},
 )
 async function deletePost() {
     await caseList.deleteCase(route.params.id as string)
-    await caseList.allCases
-    router.push("/case")
+    emits("newCaseId", "0")
 }
 </script>
 

@@ -14,7 +14,7 @@ const caption=ref()
 const stream_in = ref("")
 const stream_key = ref(Date.now())
 
-const emits = defineEmits(["newCaseAdded"])     // add new case to list
+const emits = defineEmits(["newCaseId"])     // add new case to list
 const spinner = ref("提交")
 const btnSubmit = ref()
 const socket:Socket = io(import.meta.env.VITE_LLM_URL)
@@ -41,7 +41,7 @@ async function onSubmit() {
 
             const newId = await caseStore.createCase(ci, caption.value)
             alertStore.success("New case added, " + caseStore.case)
-            emits("newCaseAdded", newId)    // To have case list updated
+            emits("newCaseId", newId)    // To have case list updated
             query.value = ""
             stream_in.value = ""
             router.push("/case/edit/"+newId)
