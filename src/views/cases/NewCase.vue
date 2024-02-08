@@ -93,16 +93,4 @@ watch(()=>route.params.id, async (nv, ov)=>{
     </div>
 </div>
 </form>
-
-<div class="row text-secondary mt-4">
-    <div class="row" v-if="stream_in.length>0">
-        <div :key="stream_key"><label>A:&nbsp;</label>{{ stream_in }}</div>
-        <p></p>
-    </div>
-    <div class="row" v-for="(ci, index) in caseStore.chatHistory" :key="index">
-        <div><label>Q:&nbsp;</label>{{ ci.Q }}</div>
-        <div><label>A:&nbsp;</label>{{ ci.A }}</div>
-        <p></p>
-    </div>
-</div>
 </template>
