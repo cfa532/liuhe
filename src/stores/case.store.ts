@@ -41,7 +41,7 @@ export const useCaseStore = defineStore({
         async backup(mid: string="") {
             if (!mid) mid = this.mid;       // use this mid by default
             try {
-                const newVer = await this.api.client.MMBackup(this.api.sid, mid, '')
+                const newVer = await this.api.client.MMBackup(this.api.sid, mid, '', "delref=true")
                 this.$state._mmsid = await this.api.client.MMOpen(this.api.sid, mid, "last");
                 // now publish a new version of database Mimei
                 const ret:DhtReply = this.api.client.MiMeiPublish(this.api.sid, "", mid)
@@ -145,7 +145,7 @@ export const useCaseListStore = defineStore({
         async backup(mid: string="") {
             if (!mid) mid = this.mid;       // use this mid by default
             try {
-                const newVer = await this.api.client.MMBackup(this.api.sid, mid, '')
+                const newVer = await this.api.client.MMBackup(this.api.sid, mid, '', "delref=true")
                 this.$state._mmsid = await this.api.client.MMOpen(this.api.sid, mid, "last");
                 // now publish a new version of database Mimei
                 const ret:DhtReply = this.api.client.MiMeiPublish(this.api.sid, "", mid)
