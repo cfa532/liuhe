@@ -26,6 +26,8 @@ socket.on("stream_in", r=>{
 
 async function onSubmit() {
     // send message to websoceket and wait for response
+    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+    btnSubmit.value.disabled = true
     const chatHistory = caseStore.chatHistory.map(e=>{return {...e}})
     stream_in.value = " "
     console.log("Submit value: ", query.value, caseStore.chatHistory)
@@ -42,8 +44,10 @@ async function onSubmit() {
             const newId = await caseStore.createCase(ci, caption.value)
             alertStore.success("New case added, " + caseStore.case)
             emits("newCaseId", newId)    // To have case list updated
-            query.value = ""
             stream_in.value = ""
+            query.value = ""
+            spinner.value = "提交"
+            btnSubmit.value.disabled = false
             router.push("/case/edit/"+newId)
         })
     } else {

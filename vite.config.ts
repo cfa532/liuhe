@@ -1,5 +1,7 @@
-import { fileURLToPath, URL } from 'node:url'
+
+/// <reference types="vitest" />
 import { defineConfig } from 'vite'
+import { fileURLToPath, URL } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import { viteSingleFile } from "vite-plugin-singlefile"
 

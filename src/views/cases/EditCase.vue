@@ -23,6 +23,8 @@ socket.on("stream_in", r=>{
 
 async function onSubmit() {
     // send message to websoceket and wait for response
+    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+    btnSubmit.value.disabled = true
     const chatHistory = caseStore.chatHistory.map(e=>{return {...e}})
     stream_in.value = ""
     console.log("Submit value: ", query.value, caseStore.chatHistory)
@@ -38,6 +40,8 @@ async function onSubmit() {
         // console.log(caseStore.chatHistory)
         query.value = ""
         stream_in.value = ""
+        spinner.value = "提交"
+        btnSubmit.value.disabled = false
     })
 }
 onMounted(()=>{
