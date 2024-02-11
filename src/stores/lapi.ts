@@ -22,7 +22,7 @@ export const useLeitherStore = defineStore({
         client: (state) => window.hprose.Client.create(state.hostUrl, ayApi),       // Hprose client
         sid: (state) => {
             if (sessionStorage.getItem("sid")) {
-                state._sid = sessionStorage.getItem("sid")!
+                state._sid = sessionStorage.getItem("sid") as string
             }
             return state._sid;
         }
@@ -87,9 +87,9 @@ export const useMainStore = defineStore({
         },
     },
     actions: {
-        init(api:any, mid:string) {
+        init(api:any) {
             this.$state.api = api;        // leither api object
-            this.$state.mid = mid          // mimei id for Main user database
+            this.$state.mid =  import.meta.env.VITE_MIMEI_DB          // mimei id for Main user database
             window.mmInfo = this.$state;    // for easy testing
         },
         async backup(mid: string="") {

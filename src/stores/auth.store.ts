@@ -11,7 +11,7 @@ export const useAuthStore = defineStore({
     state: () => ({
         // initialize state from local storage to enable user to stay logged in
         user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) as UserAccount: null,
-        returnUrl: null as unknown
+        returnUrl: '/',
     }),
     getters: {
         id: function(state) {
@@ -40,12 +40,12 @@ export const useAuthStore = defineStore({
             localStorage.setItem('user', JSON.stringify(this.user));
         },
         logout() {
-            this.user = null;
             useCaseStore().$reset()
             useCaseListStore().$reset()
             localStorage.removeItem('user');
             localStorage.removeItem('activeId');
             router.push('/account/login');
+            this.user = null;
         }
     }
 });

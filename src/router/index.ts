@@ -29,7 +29,6 @@ router.beforeEach(async (to) => {
     const publicPages = ['/account/login', '/account/register'];
     const authRequired = !publicPages.includes(to.path);
     const authStore = useAuthStore();
-
     if (authRequired && !authStore.user) {
         authStore.returnUrl = to.fullPath;
         return '/account/login';
