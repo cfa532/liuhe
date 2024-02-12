@@ -23,22 +23,17 @@ function getcurips() {
         ips = window.location.host
         console.log("window.location", ips)
     }
-    { //for test
-        // ips = "192.168.0.5:8002"
-        // ips = "192.168.0.4:8000"     //台湾盒子
-        // ips = "192.168.1.5:4800"     // ks-box
-        // ips = "122.231.126.230:8002"
-    }
     return ips
 };
 const ips = getcurips();
+// const hostIP = 
 
 export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler', 
     state: ()=>({
         _sid: "",
         ips: ips,
-        hostUrl: "ws://" + import.meta.env.VITE_LEITHER_IP +"/ws/",         // IP:port, where leither service runs
+        hostUrl: import.meta.env.VITE_LEITHER_IP ? "ws://" + import.meta.env.VITE_LEITHER_IP +"/ws/" : "ws://" + ips +"/ws/",         // IP:port, where leither service runs
     }),
     getters: {
         client: (state) => window.hprose.Client.create(state.hostUrl, ayApi),       // Hprose client

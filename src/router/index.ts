@@ -21,7 +21,8 @@ export const router = createRouter({
     ]
 });
 
-router.beforeEach(async (to) => {
+router.beforeEach((to) => {
+    console.log("to:", to, window.location.origin)
     // clear alert on route change
     const alertStore = useAlertStore();
     alertStore.clear();
