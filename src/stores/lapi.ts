@@ -12,10 +12,32 @@ const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "Getnodeip", "SwarmL
     "MMSum", "MiMeiSync", "IpfsAdd", "MMAddRef", "Hdel", "Hgetall"
 ];
 
+function getcurips() {
+    let ips = "127.0.0.1:4800"
+    // getParam is a Leither function
+    if (window.getParam != null){
+        const p=window.getParam()
+        ips = p["ips"][p.CurNode]
+        console.log("window.getParam", ips, p)
+    } else if (window.location.host != ""){
+        ips = window.location.host
+        console.log("window.location", ips)
+    }
+    { //for test
+        // ips = "192.168.0.5:8002"
+        // ips = "192.168.0.4:8000"     //台湾盒子
+        // ips = "192.168.1.5:4800"     // ks-box
+        // ips = "122.231.126.230:8002"
+    }
+    return ips
+};
+const ips = getcurips();
+
 export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler', 
     state: ()=>({
         _sid: "",
+        ips: ips,
         hostUrl: "ws://" + import.meta.env.VITE_LEITHER_IP +"/ws/",         // IP:port, where leither service runs
     }),
     getters: {

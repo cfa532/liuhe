@@ -26,40 +26,36 @@ socket.on("stream_in", r=>{
 
 async function onSubmit() {
     // send message to websoceket and wait for response
+    console.log("Submit query to AI: ", query.value)
+
     spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
     btnSubmit.value.disabled = true
-    const chatHistory = caseStore.chatHistory.map(e=>{return {...e}})
     stream_in.value = " "
-    console.log("Submit value: ", query.value, caseStore.chatHistory)
     const ci = {} as ChatItem
     ci.Q = query.value? query.value : "Hello";        // query submitted to AI
     ci.A = ""
     // caseStore.chatHistory.unshift(ci)
-    if (!route.params.id) {
-        // A new case. submit query to AI websocket and wait for reply.
-        socket.emit("gpt_api", [], ci.Q, async (resp:any)=>{
-            console.log(resp)   // {query: refined query str, result: AI result}
-            ci.A = resp
+    const timer = window.setTimeout(()=>{
+        // alert user to reload
+        window.alert("如果等待超时，可以试试刷新页面，重新提交。")
+    }, 60000)
 
-            const newId = await caseStore.createCase(ci, caption.value)
-            alertStore.success("New case added, " + caseStore.case)
-            emits("newCaseId", newId)    // To have case list updated
-            stream_in.value = ""
-            query.value = ""
-            spinner.value = "提交"
-            btnSubmit.value.disabled = false
-            router.push("/case/edit/"+newId)
-        })
-    } else {
-        socket.emit("gpt_api", chatHistory, ci.Q, async (resp:any)=>{
-            console.log(resp)   // {query: refined query str, result: AI result}
-            ci.A = resp
-            caseStore.addChatItem(ci)
-            console.log(caseStore.chatHistory)
-            query.value = ""
-            stream_in.value = ""
-        })
-    }
+    // A new case. submit query to AI websocket and wait for reply.
+    socket.emit("gpt_api", [], ci.Q, async (resp:any)=>{
+        window.clearTimeout(timer)
+        console.log(resp)   // {query: refined query str, result: AI result}
+        ci.A = resp
+
+        const newId = await caseStore.createCase(ci, caption.value)
+        alertStore.success("New case added, " + caseStore.case)
+        emits("newCaseId", newId)    // To have case list updated
+        stream_in.value = ""
+        query.value = ""
+        spinner.value = "提交"
+        btnSubmit.value.disabled = false
+        router.push("/case/edit/"+newId)
+    })
+
 }
 onMounted(()=>{
     console.log("Case Mounted", caseStore.mid)

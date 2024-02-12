@@ -23,21 +23,25 @@ socket.on("stream_in", r=>{
 
 async function onSubmit() {
     // send message to websoceket and wait for response
+    const chatHistory = caseStore.chatHistory.map(e=>{return {...e}})
+    console.log("Submit query to AI: ", query.value, chatHistory)
+
     spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
     btnSubmit.value.disabled = true
-    const chatHistory = caseStore.chatHistory.map(e=>{return {...e}})
     stream_in.value = ""
-    console.log("Submit value: ", query.value, caseStore.chatHistory)
+
     const ci = {} as ChatItem
     ci.Q = query.value? query.value : "Hello";        // query submitted to AI
     ci.A = ""
-    // caseStore.chatHistory.unshift(ci)
-
+    const timer = window.setTimeout(()=>{
+        // alert user to reload
+        window.alert("如果等待超时，可以试试刷新页面，重新提交。")
+    }, 60000)
     socket.emit("gpt_api", chatHistory, ci.Q, async (resp:any)=>{
+        window.clearTimeout(timer)
         console.log(resp)   // {query: refined query str, result: AI result}
         ci.A = resp
         caseStore.addChatItem(ci)
-        // console.log(caseStore.chatHistory)
         query.value = ""
         stream_in.value = ""
         spinner.value = "提交"

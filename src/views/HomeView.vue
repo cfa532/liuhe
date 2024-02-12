@@ -2,8 +2,17 @@
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores';
 import { CaseList } from '@/components';
+import { onMounted } from 'vue';
+import { useMainStore as useMimei, useLeitherStore as useLeither } from "../stores/lapi"
+
+const api = useLeither();
+const mmInfo = useMimei();
 const { user } = storeToRefs(useAuthStore());
 
+onMounted(()=>{
+  mmInfo.init(api)
+  console.log("main page mounted", mmInfo.$state)
+})
 </script>
 
 <template>
@@ -14,9 +23,9 @@ const { user } = storeToRefs(useAuthStore());
         </div>
         <div class="col-8">
             <h3 v-if="user">Hi, {{user.givenName}}</h3>
-            <p>点击左侧“新建”按钮后，上传诉状，系统会自动登记案件信息。如有错误，请手动输入正确信息。然后提交。</p>
-            <p>新案件登记完成后，随时上传案件相关文件，以便系统建立完善的案件数据库。</p>
-            <p>点击左侧的案件列表，选择工作案例</p>
+            <br>
+            <p>点击左侧“新建”按钮后，建立新主题，然后提交。<br><br>
+            点击左侧的主题列表，继续对话。最近使用的主题会自动排在首位。</p>
         </div>
         <div class="col-2">Chat with AI</div>
       </div>
