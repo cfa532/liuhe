@@ -3,7 +3,7 @@ import { fetchWrapper } from '@/helpers';
 import { useAuthStore } from '@/stores';
 
 // const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
-const baseUrl = window.location.origin+'/users'
+const baseUrl = '/users'
 export const useUsersStore = defineStore({
     id: 'users',
     state: () => ({

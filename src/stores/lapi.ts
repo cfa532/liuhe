@@ -26,7 +26,6 @@ function getcurips() {
     return ips
 };
 const ips = getcurips();
-// const hostIP = 
 
 export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler', 
@@ -45,7 +44,7 @@ export const useLeitherStore = defineStore({
         }
     },
     actions: {
-        login(user="lsb", pswd="123456") {
+        login(user=import.meta.env.VITE_LEITHER_USERNAME, pswd=import.meta.env.VITE_LEITHER_PASSWD) {
             return new Promise<any>((resolve, reject)=>{
                 this.client.Login(user, pswd, "byname").then(
                     (result:any)=>{ 
@@ -89,7 +88,7 @@ export const useMainStore = defineStore({
     id: 'MainMimei',      // Mimei to store all users' profile
     state: ()=>({
         api: {} as any,      // leither api handler, entrance to all Leither functions
-        mid: "",             // main database Mimei ID, for all users' profile data
+        mid: import.meta.env.VITE_MIMEI_DB,             // main database Mimei ID, for all users' profile data
         // populated after user login. The Id is read from main database Mimei, store all cases handled by the current user
         _mmsid: "",         // session id for the current user Mimei
         key: "USER_ACCOUNTS",
@@ -106,7 +105,6 @@ export const useMainStore = defineStore({
     actions: {
         init(api:any) {
             this.$state.api = api;        // leither api object
-            this.$state.mid =  import.meta.env.VITE_MIMEI_DB          // mimei id for Main user database
             window.mmInfo = this.$state;    // for easy testing
         },
         async backup(mid: string="") {

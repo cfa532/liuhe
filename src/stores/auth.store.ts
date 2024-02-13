@@ -5,7 +5,7 @@ import { router } from '@/router';
 import { useAlertStore, useCaseStore, useCaseListStore } from '@/stores';
 
 // const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
-const baseUrl = window.location.origin+'/users'
+const baseUrl = '/users'
 
 export const useAuthStore = defineStore({
     id: 'auth',

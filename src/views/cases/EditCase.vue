@@ -33,19 +33,18 @@ async function onSubmit() {
     const ci = {} as ChatItem
     ci.Q = query.value? query.value : "Hello";        // query submitted to AI
     ci.A = ""
-    const timer = window.setTimeout(()=>{
-        // alert user to reload
-        window.alert("如果等待超时，可以试试刷新页面，重新提交。")
-    }, 60000)
-    socket.emit("gpt_api", chatHistory, ci.Q, async (resp:any)=>{
-        window.clearTimeout(timer)
-        console.log(resp)   // {query: refined query str, result: AI result}
-        ci.A = resp
-        caseStore.addChatItem(ci)
-        query.value = ""
-        stream_in.value = ""
-        spinner.value = "提交"
-        btnSubmit.value.disabled = false
+    socket.timeout(120000).emit("gpt_api", chatHistory, ci.Q, async (err:any, resp:any)=>{
+        if (err) {
+            window.alert("如果等待超时，可以试试刷新页面，重新提交。")
+        } else {
+            console.log(resp)   // {query: refined query str, result: AI result}
+            ci.A = resp
+            caseStore.addChatItem(ci)
+            query.value = ""
+            stream_in.value = ""
+            spinner.value = "提交"
+            btnSubmit.value.disabled = false
+        }
     })
 }
 onMounted(()=>{
