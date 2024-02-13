@@ -9,7 +9,8 @@ const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "Getnodeip", "SwarmL
     "MFGetData", "MMCreate", "MMOpen", "Hset", "Hget", "Hmset", "Hmget", "Zadd", "Zrangebyscore", "Zrange", "MFOpenMacFile",
     "MFReaddir", "MFGetMimeType", "MFSetObject", "MFGetObject", "Zcount", "Zrevrange", "Hlen", "Hscan", "Hrevscan",
     "MMRelease", "MMBackup", "MFStat", "Zrem", "Zremrangebyscore", "MiMeiPublish", "PullMsg", "MFTemp2Ipfs", "MFSetCid",
-    "MMSum", "MiMeiSync", "IpfsAdd", "MMAddRef", "Hdel", "Hgetall"
+    "MMSum", "MiMeiSync", "IpfsAdd", "MMAddRef", "MMDelRef", "MMDelVers", "MMRelease", "MMGetRef", "MMGetRefs", "Hdel",
+    "Hgetall"
 ];
 
 function getcurips() {
