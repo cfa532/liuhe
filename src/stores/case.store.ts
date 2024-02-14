@@ -12,11 +12,9 @@ function lengthInUtf8Bytes(str:string) {
 }
 function trim(ci: ChatItem) {
     // temp solution. Reduce str to < 1K to fit in ScorePair's member
-            console.log(ci)
-            for (let i=ci.A.length; i>=0; i--) {
+    for (let i=ci.A.length; i>=0; i--) {
         if (lengthInUtf8Bytes(ci.Q+ci.A.substring(0, i)) < 980) {
             ci.A = ci.A.substring(0, i)
-            console.log(ci)
             break
         }
     }
