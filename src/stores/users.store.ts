@@ -2,8 +2,8 @@ import { defineStore } from 'pinia';
 import { fetchWrapper } from '@/helpers';
 import { useAuthStore } from '@/stores';
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
-
+// const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
+const baseUrl = '/users'
 export const useUsersStore = defineStore({
     id: 'users',
     state: () => ({
@@ -36,9 +36,9 @@ export const useUsersStore = defineStore({
 
             // update stored user if the logged in user updated their own record
             const authStore = useAuthStore();
-            if (id === authStore.user.id) {
+            if (id === authStore.user!.username) {
                 // update local storage
-                const user = { ...authStore.user, ...params };
+                const user = { ...authStore.user, ...params } as UserAccount;
                 localStorage.setItem('user', JSON.stringify(user));
 
                 // update auth user in pinia state
@@ -47,6 +47,7 @@ export const useUsersStore = defineStore({
         },
         // depreciated
         async delete(id:string) {
+            console.log(id)
             return 
             
             // // add isDeleting prop to user being deleted

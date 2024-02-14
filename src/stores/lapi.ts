@@ -9,26 +9,43 @@ const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "Getnodeip", "SwarmL
     "MFGetData", "MMCreate", "MMOpen", "Hset", "Hget", "Hmset", "Hmget", "Zadd", "Zrangebyscore", "Zrange", "MFOpenMacFile",
     "MFReaddir", "MFGetMimeType", "MFSetObject", "MFGetObject", "Zcount", "Zrevrange", "Hlen", "Hscan", "Hrevscan",
     "MMRelease", "MMBackup", "MFStat", "Zrem", "Zremrangebyscore", "MiMeiPublish", "PullMsg", "MFTemp2Ipfs", "MFSetCid",
-    "MMSum", "MiMeiSync", "IpfsAdd", "MMAddRef", "Hdel", "Hgetall"
+    "MMSum", "MiMeiSync", "IpfsAdd", "MMAddRef", "MMDelRef", "MMDelVers", "MMRelease", "MMGetRef", "MMGetRefs", "Hdel",
+    "Hgetall"
 ];
+
+function getcurips() {
+    let ips = "127.0.0.1:4800"
+    // getParam is a Leither function
+    if (window.getParam != null){
+        const p=window.getParam()
+        ips = p["ips"][p.CurNode]
+        console.log("window.getParam", ips, p)
+    } else if (window.location.host != ""){
+        ips = window.location.host
+        console.log("window.location", ips)
+    }
+    return ips
+};
+const ips = getcurips();
 
 export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler', 
     state: ()=>({
         _sid: "",
-        hostUrl: "ws://" + import.meta.env.VITE_LEITHER_IP +"/ws/",         // IP:port, where leither service runs
+        ips: ips,
+        hostUrl: import.meta.env.VITE_LEITHER_IP ? "ws://" + import.meta.env.VITE_LEITHER_IP +"/ws/" : "ws://" + ips +"/ws/",         // IP:port, where leither service runs
     }),
     getters: {
         client: (state) => window.hprose.Client.create(state.hostUrl, ayApi),       // Hprose client
         sid: (state) => {
             if (sessionStorage.getItem("sid")) {
-                state._sid = sessionStorage.getItem("sid")!
+                state._sid = sessionStorage.getItem("sid") as string
             }
             return state._sid;
         }
     },
     actions: {
-        login(user="gen8", pswd="123456") {
+        login(user=import.meta.env.VITE_LEITHER_USERNAME, pswd=import.meta.env.VITE_LEITHER_PASSWD) {
             return new Promise<any>((resolve, reject)=>{
                 this.client.Login(user, pswd, "byname").then(
                     (result:any)=>{ 
@@ -72,7 +89,7 @@ export const useMainStore = defineStore({
     id: 'MainMimei',      // Mimei to store all users' profile
     state: ()=>({
         api: {} as any,      // leither api handler, entrance to all Leither functions
-        mid: "",             // main database Mimei ID, for all users' profile data
+        mid: import.meta.env.VITE_MIMEI_DB,             // main database Mimei ID, for all users' profile data
         // populated after user login. The Id is read from main database Mimei, store all cases handled by the current user
         _mmsid: "",         // session id for the current user Mimei
         key: "USER_ACCOUNTS",
@@ -87,15 +104,14 @@ export const useMainStore = defineStore({
         },
     },
     actions: {
-        init(api:any, mid:string) {
+        init(api:any) {
             this.$state.api = api;        // leither api object
-            this.$state.mid = mid          // mimei id for Main user database
             window.mmInfo = this.$state;    // for easy testing
         },
         async backup(mid: string="") {
             if (!mid) mid = this.mid;
             try {
-                const newVer = await this.api.client.MMBackup(this.api.sid, mid, '')
+                const newVer = await this.api.client.MMBackup(this.api.sid, mid, '', "delref=true")
                 this.$state._mmsid = await this.api.client.MMOpen(this.api.sid, mid, "last");
                 // now publish a new version of database Mimei
                 const ret:DhtReply = this.api.client.MiMeiPublish(this.api.sid, "", mid)
