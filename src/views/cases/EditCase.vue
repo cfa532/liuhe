@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { useCaseStore, useCaseListStore } from '@/stores';
-import { io, Socket } from "socket.io-client"
 import { useRoute } from 'vue-router';
 import { Share } from '@/components'
 
@@ -12,40 +11,47 @@ const caseStore = useCaseStore()
 const route = useRoute();
 const query = ref()
 const stream_in = ref("")
-
+const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
 const spinner = ref("提交")
 const btnSubmit = ref()
-const socket:Socket = io(import.meta.env.VITE_LLM_URL)
-socket.on("stream_in", r=>{
-        stream_in.value += r;
-        // console.log(r)
-    })
+const ci = {} as ChatItem
 
-async function onSubmit() {
-    // send message to websoceket and wait for response
-    const chatHistory = caseStore.chatHistory.map(e=>{return {...e}})
-    console.log("Submit query to AI: ", query.value, chatHistory)
+socket.addEventListener('open', function(event) {
+  console.log("Connected to server");
+});
 
-    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
-    btnSubmit.value.disabled = true
-    stream_in.value = ""
-
-    const ci = {} as ChatItem
-    ci.Q = query.value? query.value : "Hello";        // query submitted to AI
-    ci.A = ""
-    socket.timeout(120000).emit("gpt_api", chatHistory, ci.Q, async (err:any, resp:any)=>{
-        if (err) {
-            window.alert("如果等待超时，可以试试刷新页面，重新提交。")
-        } else {
-            console.log(resp)   // {query: refined query str, result: AI result}
-            ci.A = resp
-            caseStore.addChatItem(ci)
+socket.addEventListener("message", async ({data}) => {
+    const event = JSON.parse(data as string)
+    switch(event.type) {
+        case "stream":
+            stream_in.value += event.data;
+            console.log(event.data)
+            break
+        case "result":
+            ci.A = event.answer
+            await caseStore.addChatItem(ci)
             query.value = ""
             stream_in.value = ""
             spinner.value = "提交"
             btnSubmit.value.disabled = false
-        }
-    })
+            break
+        case "error":
+            console.log("Error")
+            break
+        default:
+            throw new Error(`Unsupported event type: ${event.type}.`);
+    }
+})
+
+async function onSubmit() {
+    // send message to websoceket and wait for response
+    console.log("Submit query to AI: ", query.value)
+    ci.Q = query.value? query.value : "Hello";        // query submitted to AI
+    ci.A = ""
+    socket.send(JSON.stringify({"type":"gpt_api", "query":ci.Q}))
+    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+    btnSubmit.value.disabled = true
+    stream_in.value = ""
 }
 onMounted(()=>{
     console.log("Case Mounted", caseStore.mid)
