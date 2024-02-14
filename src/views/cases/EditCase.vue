@@ -29,7 +29,7 @@ socket.addEventListener("message", async ({data}) => {
             ci.Q = query.value
             ci.A = event.answer
             chatHistory.value!.unshift(ci)
-            await caseStore.addChatItem(ci)
+            await caseStore.addChatItem({...ci})
             query.value = ""
             stream_in.value = ""
             spinner.value = "提交"
