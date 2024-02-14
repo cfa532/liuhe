@@ -14,14 +14,11 @@ const stream_in = ref("")
 const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
 const spinner = ref("提交")
 const btnSubmit = ref()
-const ci = {} as ChatItem
-
-socket.addEventListener('open', function(event) {
-  console.log("Connected to server");
-});
+const chatHistory = ref<ChatItem[]>()
 
 socket.addEventListener("message", async ({data}) => {
     const event = JSON.parse(data as string)
+    const ci = {} as ChatItem
     switch(event.type) {
         case "stream":
             stream_in.value += event.data;
@@ -29,11 +26,9 @@ socket.addEventListener("message", async ({data}) => {
             break
         case "result":
             console.log("Ws received:", event)
+            ci.Q = query.value
             ci.A = event.answer
-            // limit chat item size < 1K
-            if (ci.Q.length+ci.A.length > 1000) {
-                ci.A = ci.A.substring(0, 1000-ci.Q.length)
-            }
+            chatHistory.value!.unshift(ci)
             await caseStore.addChatItem(ci)
             query.value = ""
             stream_in.value = ""
@@ -52,6 +47,7 @@ socket.addEventListener("message", async ({data}) => {
 async function onSubmit() {
     // send message to websoceket and wait for response
     console.log("Submit query to AI: ", query.value)
+    const ci = {} as ChatItem
     ci.Q = query.value? query.value : "Hello";        // query submitted to AI
     ci.A = ""
     try {
@@ -65,10 +61,11 @@ async function onSubmit() {
         btnSubmit.value.disabled = false
     }
 }
-onMounted(()=>{
+onMounted(async ()=>{
     console.log("Case Mounted", caseStore.mid)
     // load chat history of a particular case
-    caseStore.initCase(route.params.id as string)
+    await caseStore.initCase(route.params.id as string)
+    chatHistory.value = caseStore.chatHistory
 })
 watch(()=>route.params.id, async (nv, ov)=>{
     // force changing of user case
@@ -114,7 +111,7 @@ async function deletePost() {
         <p></p>
         <hr/>
     </div>
-    <div class="row" v-for="(ci, index) in caseStore.chatHistory" :key="index">
+    <div class="row" v-for="(ci, index) in chatHistory" :key="index">
         <div><label>Q:&nbsp;</label>{{ ci.Q }}</div>
         <div style="white-space: pre-wrap;"><label>A:&nbsp;</label>{{ ci.A }}</div>
         <p></p>

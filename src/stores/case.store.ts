@@ -5,6 +5,23 @@ const PAGE_SIZE = 50        // chat items diplayed per page
 const CHAT_CASE_FIELD = "CHAT_CASE_INFORMATION"
 const CHAT_HISTORY = "CHAT_HISTORY_"
 
+function lengthInUtf8Bytes(str:string) {
+    // Matches only the 10.. bytes that are non-initial characters in a multi-byte sequence.
+    const m = encodeURIComponent(str).match(/%[89ABab]/g);
+    return str.length + (m ? m.length : 0);
+}
+function trim(ci: ChatItem) {
+    // temp solution. Reduce str to < 1K to fit in ScorePair's member
+            console.log(ci)
+            for (let i=ci.A.length; i>=0; i--) {
+        if (lengthInUtf8Bytes(ci.Q+ci.A.substring(0, i)) < 980) {
+            ci.A = ci.A.substring(0, i)
+            console.log(ci)
+            break
+        }
+    }
+}
+
 export const useCaseStore = defineStore({
     // holding all cases of the current user, in a FV database
     id: "CaseMimei",
@@ -60,7 +77,9 @@ export const useCaseStore = defineStore({
             c.brief = caption ? caption : ci.Q
             // create a new Chat Case in Mimei
             await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_FIELD, c.id, c);     // to get case list quickly
+
             // add a chat item to chat history of the current case
+            trim(ci)
             await this.api.client.Zadd(await this.mmsidCur, CHAT_HISTORY+c.id, {"score":c.timestamp, "member":JSON.stringify(ci)})
             await this.backup()
             this.chatHistory.push(ci)
@@ -71,11 +90,13 @@ export const useCaseStore = defineStore({
             // add a chat item to chat history of the current case
             const c = this._value
             c.timestamp = Date.now()
+            trim(ci)
             await this.api.client.Zadd(await this.mmsidCur, CHAT_HISTORY+c.id, {"score":c.timestamp, "member":JSON.stringify(ci)})
             // update timestamp of the current case
             await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_FIELD, c.id, c);
             await this.backup()
-            this.chatHistory.unshift(ci)
+            // this.chatHistory.unshift(ci)
+            // await this.getChatHistory()
         },
         async getChatHistory(pageNum: number=-1) {
             if (pageNum === -1) {
