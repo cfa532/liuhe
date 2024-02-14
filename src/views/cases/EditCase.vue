@@ -25,10 +25,15 @@ socket.addEventListener("message", async ({data}) => {
     switch(event.type) {
         case "stream":
             stream_in.value += event.data;
-            console.log(event.data)
+            // console.log(event.data)
             break
         case "result":
+            console.log("Ws received:", event)
             ci.A = event.answer
+            // limit chat item size < 1K
+            if (ci.Q.length+ci.A.length > 1000) {
+                ci.A = ci.A.substring(0, 1000-ci.Q.length)
+            }
             await caseStore.addChatItem(ci)
             query.value = ""
             stream_in.value = ""
@@ -36,9 +41,10 @@ socket.addEventListener("message", async ({data}) => {
             btnSubmit.value.disabled = false
             break
         case "error":
-            console.log("Error")
+            console.error("Ws error:", event)
             break
         default:
+            console.warn("Ws default:", event)
             throw new Error(`Unsupported event type: ${event.type}.`);
     }
 })
@@ -48,10 +54,16 @@ async function onSubmit() {
     console.log("Submit query to AI: ", query.value)
     ci.Q = query.value? query.value : "Hello";        // query submitted to AI
     ci.A = ""
-    socket.send(JSON.stringify({"type":"gpt_api", "query":ci.Q}))
-    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
-    btnSubmit.value.disabled = true
-    stream_in.value = ""
+    try {
+        socket.send(JSON.stringify({"type":"gpt_api", "query":ci.Q}))
+        spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+        btnSubmit.value.disabled = true
+        stream_in.value = ""
+    } catch(err) {
+        console.error(err)
+        spinner.value = "提交"
+        btnSubmit.value.disabled = false
+    }
 }
 onMounted(()=>{
     console.log("Case Mounted", caseStore.mid)
@@ -98,8 +110,9 @@ async function deletePost() {
 
 <div class="row text-secondary mt-4">
     <div class="row" v-if="stream_in.length>0">
-        <div style="white-space: pre-wrap;"><label>A:&nbsp;</label>{{ stream_in }}</div>
+        <div style="white-space: pre-wrap; color: black;"><label>A:&nbsp;</label>{{ stream_in }}</div>
         <p></p>
+        <hr/>
     </div>
     <div class="row" v-for="(ci, index) in caseStore.chatHistory" :key="index">
         <div><label>Q:&nbsp;</label>{{ ci.Q }}</div>
