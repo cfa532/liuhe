@@ -15,12 +15,14 @@ const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
 const spinner = ref("提交")
 const btnSubmit = ref()
 const chatHistory = ref<ChatItem[]>()
+let timer = 0
 
 socket.addEventListener("message", async ({data}) => {
     const event = JSON.parse(data as string)
     const ci = {} as ChatItem
     switch(event.type) {
         case "stream":
+            window.clearTimeout(timer)
             stream_in.value += event.data;
             // console.log(event.data)
             break
@@ -36,15 +38,22 @@ socket.addEventListener("message", async ({data}) => {
             btnSubmit.value.disabled = false
             break
         case "error":
+            window.clearTimeout(timer)
             console.error("Ws error:", event)
             break
         default:
+            window.clearTimeout(timer)
             console.warn("Ws default:", event)
             throw new Error(`Unsupported event type: ${event.type}.`);
     }
 })
 
 async function onSubmit() {
+    timer = window.setTimeout(()=>{
+        // alert user to reload
+        window.alert("如果等待超时，可以试试刷新页面，重新提交。")
+    }, 120000)
+
     // send message to websoceket and wait for response
     console.log("Submit query to AI: ", query.value)
     const ci = {} as ChatItem
@@ -71,6 +80,7 @@ watch(()=>route.params.id, async (nv, ov)=>{
     // force changing of user case
     if (nv && nv!=ov) {
         await caseStore.initCase(nv as string)
+        chatHistory.value = caseStore.chatHistory
         console.log(caseStore.case)
     }},
 )

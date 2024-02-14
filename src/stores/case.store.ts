@@ -67,23 +67,19 @@ export const useCaseStore = defineStore({
                 throw new Error(err)
             }
         },
-        async createCase(ci:ChatItem, caption:string):Promise<string> {
+        async createCase(caption:string):Promise<string> {
             // A new case created when the 1st round of chat is finished and a chat item passed it.
             // add a new Case to database FV and return the Field. Use
             // also use this hashkey as chat_history key and template FV key
             const c = this._value
             c.timestamp = Date.now()
             c.id = c.timestamp.toString()
-            c.brief = caption ? caption : ci.Q
+            c.brief = caption
+
             // create a new Chat Case in Mimei
             await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_FIELD, c.id, c);     // to get case list quickly
-
-            // add a chat item to chat history of the current case
-            trim(ci)
-            await this.api.client.Zadd(await this.mmsidCur, CHAT_HISTORY+c.id, {"score":c.timestamp, "member":JSON.stringify(ci)})
             await this.backup()
-            this.chatHistory.push(ci)
-            console.log(ci, c)
+            this.chatHistory = []
             return c.id
         },
         async addChatItem(ci:ChatItem) {
