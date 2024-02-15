@@ -21,7 +21,7 @@ async function onSubmit(values: any) {
         <h4 class="card-header">Login</h4>
         <div class="card-body">
             <Form @submit="onSubmit" :validation-schema="schema" v-slot="{ errors, isSubmitting }">
-                <div class="form-group">
+                <div class="form-group" style="margin-top: 0px;">
                     <label>Username</label>
                     <Field name="username" type="text" class="form-control" :class="{ 'is-invalid': errors.username }" />
                     <div class="invalid-feedback">{{ errors.username }}</div>
@@ -42,3 +42,8 @@ async function onSubmit(values: any) {
         </div>
     </div>
 </template>
+<style>
+.form-group {
+    margin-top: 10px;
+}
+</style>
