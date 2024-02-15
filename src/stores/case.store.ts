@@ -2,9 +2,8 @@ import { defineStore } from 'pinia';
 import { useAuthStore } from '@/stores';
 
 const PAGE_SIZE = 50        // chat items diplayed per page
-const CASE_FIELD_KEY = "CASE_INFO"
-const TEMPLATE_KEY = "CASE_TEMPLATE"
-const CHAT_HISTORY_KEY = "CASE_CHAT_HISTORY"
+const CHAT_CASE_FIELD = "CHAT_CASE_INFORMATION"
+const CHAT_HISTORY = "CHAT_HISTORY_"
 
 export const useCaseStore = defineStore({
     // holding all cases of the current user, in a FV database
@@ -160,6 +159,28 @@ export const useCaseListStore = defineStore({
         setActiveId(id:string) {
             localStorage["activeId"] = id
             this._activeId = id
+        },
+        async deleteCase(id:string) {
+            // id must be activeId
+            await this.api.client.Hdel(await this.mmsidCur, CHAT_CASE_FIELD, id)
+            // this.api.client.Zremrangebyscore(await this.mmsidCur, CHAT_HISTORY+id, -1)
+            await this.backup()
+            localStorage.removeItem(id)
         }
     }
 })
+
+function lengthInUtf8Bytes(str:string) {
+    // Matches only the 10.. bytes that are non-initial characters in a multi-byte sequence.
+    const m = encodeURIComponent(str).match(/%[89ABab]/g);
+    return str.length + (m ? m.length : 0);
+}
+function trim(ci: ChatItem) {
+    // temp solution. Reduce str to < 1K to fit in ScorePair's member
+    for (let i=ci.A.length; i>=0; i--) {
+        if (lengthInUtf8Bytes(ci.Q+ci.A.substring(0, i)) < 980) {
+            ci.A = ci.A.substring(0, i)
+            break
+        }
+    }
+}
