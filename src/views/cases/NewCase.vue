@@ -27,7 +27,7 @@ onMounted(()=>{
 <template>
 <!-- <Uploader @newCaseValues="data=>formValues=data"></Uploader> -->
 <form>
-<div class="container d-grid row-gap-3">
+<div class="container d-grid row-gap-3" style="max-width: 600px; float: left;">
     <div class="row">
         <div class="col">
             <div class="card fs-6">

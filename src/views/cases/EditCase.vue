@@ -91,6 +91,7 @@ async function deletePost() {
 </script>
 
 <template>
+<div style="max-width: 800px;">
 <form>
 <div class="container d-grid row-gap-3">
     <div class="row">
@@ -121,6 +122,7 @@ async function deletePost() {
         <p></p>
         <hr/>
     </div>
+</div>
 </div>
 </template>
 <style>
