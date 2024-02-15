@@ -19,7 +19,7 @@ const caseId = ref("")
     </div> -->
     <div class="container-fluid text-left" style="position: absolute; left: 0px; padding: 5px;">
       <div class="row justify-content-start">
-        <div  class="col-2 align-self-start">
+        <div  class="col-2 col-xs-4 align-self-start">
             <CaseList :caseId="caseId"></CaseList>
         </div>
         <div class="col">
