@@ -100,7 +100,6 @@ function leitherBackend() {
                     console.error("update failed:", err)
                     error("Update failed, "+err)
                 })
-
             }
 
             function deleteUser() {
@@ -153,5 +152,6 @@ function leitherBackend() {
             }
         });
     }
-    window.fetch = leitherFetch as any     // to get rid of the type error message, which prevent building from success
+    // to get rid of the type error message
+    window.fetch = leitherFetch as any
 }

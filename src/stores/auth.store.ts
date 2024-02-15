@@ -4,19 +4,17 @@ import { fetchWrapper } from '@/helpers';
 import { router } from '@/router';
 import { useAlertStore, useCaseStore, useCaseListStore } from '@/stores';
 
-const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
+// const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
+const baseUrl = '/users'
 
 export const useAuthStore = defineStore({
     id: 'auth',
     state: () => ({
         // initialize state from local storage to enable user to stay logged in
         user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) as UserAccount: null,
-        returnUrl: null as unknown
+        returnUrl: '/',
     }),
     getters: {
-        template: function(state) {
-            return state.user!.template
-        },
         id: function(state) {
             return state.user!.mid
         }
@@ -43,12 +41,12 @@ export const useAuthStore = defineStore({
             localStorage.setItem('user', JSON.stringify(this.user));
         },
         logout() {
-            this.user = null;
             useCaseStore().$reset()
             useCaseListStore().$reset()
             localStorage.removeItem('user');
             localStorage.removeItem('activeId');
             router.push('/account/login');
+            this.user = null;
         }
     }
 });

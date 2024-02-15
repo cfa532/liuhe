@@ -40,7 +40,7 @@ async function onSubmit(values:any) {
     try {
         let message;
         if (user.value) {
-            await usersStore.update(user.value.id, values)
+            await usersStore.update(user.value.username, values)
             message = 'User updated';
         } else {
             await usersStore.register(values);

@@ -5,13 +5,14 @@ import { useAuthStore, useAlertStore } from '@/stores';
 import accountRoutes from '@/router/account';
 import usersRoutes from '@/router/users';
 import caseRoutes from '@/router/case'
-import { Home } from '@/views';
+import { Home, IPs } from '@/views';
 
 export const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     linkActiveClass: 'active',
     routes: [
         { path: '/', component: Home },
+        { path: '/IPs', component: IPs},
         { ...caseRoutes },
         { ...accountRoutes },
         { ...usersRoutes },
@@ -20,7 +21,8 @@ export const router = createRouter({
     ]
 });
 
-router.beforeEach(async (to) => {
+router.beforeEach((to) => {
+    // console.log("to:", to, window.location.origin)
     // clear alert on route change
     const alertStore = useAlertStore();
     alertStore.clear();
@@ -29,7 +31,6 @@ router.beforeEach(async (to) => {
     const publicPages = ['/account/login', '/account/register'];
     const authRequired = !publicPages.includes(to.path);
     const authStore = useAuthStore();
-
     if (authRequired && !authStore.user) {
         authStore.returnUrl = to.fullPath;
         return '/account/login';
