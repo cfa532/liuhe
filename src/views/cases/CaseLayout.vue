@@ -22,10 +22,10 @@ const caseId = ref("")
         <div  class="col-2 align-self-start">
             <CaseList :caseId="caseId"></CaseList>
         </div>
-        <div class="col-8">
+        <div class="col">
             <router-view @newCaseId="(id:string)=>caseId=id"></router-view>
         </div>
-        <div class="col-2">Chat with AI</div>
+        <div style="width: 5px;"></div>
       </div>
     </div>
 </template>

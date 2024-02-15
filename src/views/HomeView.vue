@@ -21,13 +21,13 @@ onMounted(()=>{
         <div  class="col-2 align-self-start">
             <CaseList></CaseList>
         </div>
-        <div class="col-8">
+        <div class="col-9">
             <h3 v-if="user">Hi, {{user.givenName}}</h3>
             <br>
             <p>点击左侧“新建”按钮后，建立新主题，然后提交。<br><br>
             点击左侧的主题列表，继续对话。最近使用的主题会自动排在首位。</p>
         </div>
-        <div class="col-2">Chat with AI</div>
+        <div class="col-1"></div>
       </div>
     </div>
 </template>

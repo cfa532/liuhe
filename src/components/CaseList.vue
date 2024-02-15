@@ -8,8 +8,9 @@ const props=defineProps({
     caseId: {type: String, required: false},
 })
 
-let allCases = shallowRef([] as ChatCase[])
+const allCases = shallowRef([] as ChatCase[])
 const caseListStore = storeToRefs(useCaseListStore())
+
 watch(()=>props.caseId, async (nv, ov)=>{
     console.log("Watch caseId:",nv, ov)
     if (nv && nv!=='0') {
@@ -44,10 +45,16 @@ function btnClass(c:ChatCase) {
 <template>
 <div>
     <div class="btn-group-vertical btn-group-sm d-grid gap-1" role="group" aria-label="Small button group">
-        <button style="min-width: 120px;" @click="addNewCase" type="button" class="btn btn-light text-nowrap btn-outline-primary">
+        <button @click="addNewCase" type="button" class="btn btn-light text-nowrap btn-outline-primary">
             <span class="text-decoration-underline">&nbsp;新建&nbsp;</span>
         </button>
         <button @click="selectCase(c)" v-for="(c,i) in allCases" :key="i" type="button" :class="btnClass(c)">{{c.brief}}</button>
     </div>
 </div>
 </template>
+<style>
+.btn {
+    max-width: 160px;
+    overflow:hidden;
+}
+</style>
