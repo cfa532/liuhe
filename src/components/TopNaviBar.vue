@@ -13,3 +13,8 @@ const authStore = useAuthStore();
         </div>
     </nav>
 </template>
+<style>
+.navbar {
+    height: 40px;
+}
+</style>

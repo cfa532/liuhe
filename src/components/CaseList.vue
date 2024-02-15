@@ -56,5 +56,6 @@ function btnClass(c:ChatCase) {
 .btn {
     max-width: 160px;
     overflow:hidden;
+    text-wrap: balance;
 }
 </style>

@@ -12,7 +12,7 @@ const authStore = useAuthStore();
     <Alert />
     <div class="container-fluid text-left" style="position: absolute; left: 0px; padding: 5px;">
       <div class="row justify-content-start">
-        <div class="col pt-4 pb-4">
+        <div class="col pt-2 pb-4">
           <router-view />
         </div>
       </div>
