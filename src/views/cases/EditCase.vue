@@ -4,7 +4,6 @@ import { useCaseStore, useCaseListStore } from '@/stores';
 import { useRoute } from 'vue-router';
 import { Share } from '@/components'
 
-// const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
 const emits = defineEmits(["newCaseId"])     // add new case to list
 const caseList = useCaseListStore()
 const caseStore = useCaseStore()

@@ -2,12 +2,13 @@
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores';
 import { CaseList } from '@/components';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useMainStore as useMimei, useLeitherStore as useLeither } from "../stores/lapi"
 
 const api = useLeither();
 const mmInfo = useMimei();
 const { user } = storeToRefs(useAuthStore());
+const sideNav = ref<HTMLDivElement>()
 
 onMounted(()=>{
   mmInfo.init(api)
@@ -18,7 +19,7 @@ onMounted(()=>{
 <template>
     <div class="container-fluid text-left" style="position: absolute; left: 0px; padding: 5px;">
       <div class="row justify-content-start">
-        <div  class="col-2 align-self-start">
+        <div ref="sideNav" class="col-2 align-self-start">
             <CaseList></CaseList>
         </div>
         <div class="col">

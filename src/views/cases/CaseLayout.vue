@@ -11,6 +11,10 @@ const caseId = ref("")
 //     caseId.value = ""
 //   }
 // }
+const sideNav = ref<HTMLDivElement>()
+function shrink() {
+  sideNav.value!.style.width = "25px"
+}
 </script>
 <template>
     <!-- <div class="p-4">
@@ -19,8 +23,8 @@ const caseId = ref("")
     </div> -->
     <div class="container-fluid text-left" style="position: absolute; left: 0px; padding: 5px;">
       <div class="row justify-content-start">
-        <div  class="col-2 col-xs-4 align-self-start">
-            <CaseList :caseId="caseId"></CaseList>
+        <div ref="sideNav" class="col-2 align-self-start">
+            <CaseList @side-nav-closed="shrink" :caseId="caseId"></CaseList>
         </div>
         <div class="col">
             <router-view @newCaseId="(id:string)=>caseId=id"></router-view>
