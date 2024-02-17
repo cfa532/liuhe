@@ -80,11 +80,11 @@ export const useCaseStore = defineStore({
             const arrFields = (await this.api.client.Hkeys(await this.mmsid, CHAT_HISTORY_KEY+this.id)).sort((a: number, b: number) => a>b? -1:1)
             if (pageNum === -1) {
                 // get 50 past chat items. The last one comes first.
-                this.chatHistory = await this.api.client.Hmget(await this.mmsid, CHAT_HISTORY_KEY+this.id, ...arrFields)  //.map((x:any)=>JSON.parse(x))
+                this.chatHistory = await this.api.client.Hmget(await this.mmsid, CHAT_HISTORY_KEY+this.id, ...arrFields.slice(0, 50))
             } else {
                 // get currut page of chat history
                 const start = (pageNum-1)*PAGE_SIZE
-                const ch:ChatItem[] = await this.api.client.Hmget(await this.mmsid, CHAT_HISTORY_KEY+this.id, ...arrFields) //.map((x:any)=>JSON.parse(x))
+                const ch:ChatItem[] = await this.api.client.Hmget(await this.mmsid, CHAT_HISTORY_KEY+this.id, ...arrFields)
                 this.chatHistory.concat(ch)
             }
         },
