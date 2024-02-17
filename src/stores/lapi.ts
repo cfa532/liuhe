@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-// import { useRouter} from 'vue-router';
 import { router } from '@/router'
 
 // const router = useRouter();
@@ -10,7 +9,7 @@ const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "Getnodeip", "SwarmL
     "MFReaddir", "MFGetMimeType", "MFSetObject", "MFGetObject", "Zcount", "Zrevrange", "Hlen", "Hscan", "Hrevscan",
     "MMRelease", "MMBackup", "MFStat", "Zrem", "Zremrangebyscore", "MiMeiPublish", "PullMsg", "MFTemp2Ipfs", "MFSetCid",
     "MMSum", "MiMeiSync", "IpfsAdd", "MMAddRef", "MMDelRef", "MMDelVers", "MMRelease", "MMGetRef", "MMGetRefs", "Hdel",
-    "Hgetall"
+    "Hgetall", "Hkeys", "Del"
 ];
 
 function getcurips() {
@@ -24,32 +23,27 @@ function getcurips() {
         ips = window.location.host
         console.log("window.location", ips)
     }
-    return ips
+    return import.meta.env.VITE_LEITHER_IP ? import.meta.env.VITE_LEITHER_IP : ips
 };
 const ips = getcurips();
 
 export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler', 
     state: ()=>({
-        _sid: "",
+        _sid: "",       // if sid="", MM read only
         ips: ips,
-        hostUrl: import.meta.env.VITE_LEITHER_IP ? "ws://" + import.meta.env.VITE_LEITHER_IP +"/ws/" : "ws://" + ips +"/ws/",         // IP:port, where leither service runs
+        hostUrl: "ws://" + ips +"/ws/",         // IP:port, where leither service runs
     }),
     getters: {
         client: (state) => window.hprose.Client.create(state.hostUrl, ayApi),       // Hprose client
-        sid: (state) => {
-            if (sessionStorage.getItem("sid")) {
-                state._sid = sessionStorage.getItem("sid") as string
-            }
-            return state._sid;
-        }
+        sid: (state) => state._sid ? state._sid : sessionStorage["sid"]
     },
     actions: {
         login(user=import.meta.env.VITE_LEITHER_USERNAME, pswd=import.meta.env.VITE_LEITHER_PASSWD) {
             return new Promise<any>((resolve, reject)=>{
                 this.client.Login(user, pswd, "byname").then(
                     (result:any)=>{ 
-                        this._sid = result.sid
+                        this._sid = result.sid      // set State sid
                         sessionStorage.setItem("sid", result.sid)
                         this.client.SignPPT(this._sid, {
                             CertFor: "Self",
@@ -88,11 +82,11 @@ export const useLeitherStore = defineStore({
 export const useMainStore = defineStore({
     id: 'MainMimei',      // Mimei to store all users' profile
     state: ()=>({
-        api: {} as any,      // leither api handler, entrance to all Leither functions
+        api: useLeitherStore(),      // leither api handler, must be inited beforehand
         mid: import.meta.env.VITE_MIMEI_DB,             // main database Mimei ID, for all users' profile data
         // populated after user login. The Id is read from main database Mimei, store all cases handled by the current user
-        _mmsid: "",         // session id for the current user Mimei
-        key: "USER_ACCOUNTS",
+        _mmsid: "",         // session id for reading only access
+        user_key: import.meta.env.VITE_USER_ACCOUNTS_KEY,
     }),
     getters: {
         mmsid: async function(state) :Promise<string> {
@@ -121,7 +115,7 @@ export const useMainStore = defineStore({
             }
         },
         async authenticate(username:string, password:string) :Promise<UserAccount> {
-            const u = await this.api.client.Hget(await this.mmsid, this.key, username)
+            const u = await this.api.client.Hget(await this.mmsid, this.user_key, username)
             if (u) {
                 if (u.password === password) {
                     return u
@@ -132,27 +126,33 @@ export const useMainStore = defineStore({
         async registerUser(user: UserAccount):Promise<UserAccount> {
             // add a new user account into system.
             // first check if the username is taken
-            if (await this.api.client.Hget(await this.mmsid, this.key, user.username)) {
+            if (await this.api.client.Hget(await this.mmsid, this.user_key, user.username)) {
                 throw new Error("The username is taken.")
             }
             // create a new Mimei to store user cases information
-            user.mid = await this.api.client.MMCreate(this.api.sid, '', '', "liuhe_leither_ai_"+user.username, 2, 0x07276707);
-            await this.api.client.Hset(await this.mmsidCur, this.key, user.username, user)
+            user.mid = await this.api.client.MMCreate(this.api.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+user.username, 2, 0x07276707);
+            await this.api.client.Hset(await this.mmsidCur, this.user_key, user.username, user)
             await this.api.client.MMAddRef(this.api.sid, this.mid, user.mid)        // associate the new MM with Main MMM
             await this.backup()
             return user
         },
+        async getUsers() :Promise<UserAccount[]> {
+            return await this.api.client.Hgetall(await this.mmsid, this.user_key).map((e:FVPair)=>e.value)
+        },
+        async getUser(username:string) :Promise<UserAccount> {
+            return await this.api.client.Hget(await this.mmsid, this.user_key, username).value
+        },
         async deleteUser(username: string) {
-            await this.api.client.Hdel(await this.mmsidCur, this.key, username)
-            await this.api.backup()
+            await this.api.client.Hdel(await this.mmsidCur, this.user_key, username)
+            await this.backup()
         },
         async editUser(user: UserAccount) {
             // edit user information such as name, email...
             // first check if the username is taken
-            if (!await this.api.client.Hget(await this.mmsid, this.key, user.username)) {
+            if (!await this.api.client.Hget(await this.mmsid, this.user_key, user.username)) {
                 throw new Error("The user does not exist.")
             }
-            await this.api.client.Hset(await this.mmsidCur, this.key, user.username, user)
+            await this.api.client.Hset(await this.mmsidCur, this.user_key, user.username, user)
             await this.backup()
         }
     }

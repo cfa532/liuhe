@@ -17,5 +17,9 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  define: {
+    // declare it in env.d.ts, otherwise won't build
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()), 
   }
 })

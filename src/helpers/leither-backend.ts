@@ -1,11 +1,11 @@
 import { useAlertStore, useMainStore, useAuthStore } from "@/stores";
-import lawTemplate from '../assets/template.json'
+// import lawTemplate from '../assets/template.json'
 export { leitherBackend };
 
 // array in local storage for registered users
-// const usersKey = 'vue-3-pinia-registration-login-example-users';
 
 function leitherBackend() {
+    const userMimei = useMainStore()
     const realFetch = window.fetch;     // monkey patching
     const leitherFetch = function (url:string, opts:any):Promise<Response> {
         return new Promise((resolve, reject) => {
@@ -38,7 +38,8 @@ function leitherBackend() {
             async function authenticate() {
                 const { username, password } = body();
                 try {
-                    const user = await useMainStore().authenticate(username, password)
+                    const user = await userMimei.authenticate(username, password)
+                    console.log(user)
                     return ok({
                         ...basicDetails(user),
                         token: 'fake-jwt-token'     // JWT token of authentication
@@ -50,12 +51,12 @@ function leitherBackend() {
             }
 
             function register() {
-                const user = body();
+                const user:UserAccount = body();    // http request body
+                // register a system admin
+                user.role = user.username=="admin" ? "admin" : "user"
 
-                // check Main DB to see if username exists
-                const userDb = useMainStore()
-                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password, "mid":user.mid, "template": JSON.stringify(lawTemplate)}
-                userDb.registerUser(ua).then((u:UserAccount)=>{
+                // registerUser will check if username exists
+                userMimei.registerUser(user).then((u:UserAccount)=>{
                     console.log("New Leither user=", u)
                     return ok();
                 }, err=>{
@@ -64,18 +65,21 @@ function leitherBackend() {
                 })
             }
 
-            function getUsers() {
+            async function getUsers() {
                 if (!isAuthenticated()) return unauthorized();
-                const arr = new Array()
-                // arr[0] = basicDetails(JSON.parse(localStorage.getItem(usersKey)!))
-                arr[0] = useAuthStore().user
-                return ok(arr)
+
+                const users =  await userMimei.getUsers()
+                const user = useAuthStore().user
+                if (user?.role === 'admin')
+                    return ok(users.map(x => basicDetails(x)));
+                return ok(new Array(user))
             }
 
-            function getUserById() {
+            async function getUserById() {
                 if (!isAuthenticated()) return unauthorized();
 
-                // return ok(basicDetails(JSON.parse(localStorage.getItem(usersKey)!)));
+                const user = await userMimei.getUser(idFromUrl())
+                return ok(basicDetails(user));
             }
 
             function updateUser() {
@@ -91,9 +95,9 @@ function leitherBackend() {
                 
                 const user = useAuthStore().user!
                 Object.assign(user, params);
-                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password, "mid":user.mid, "template": JSON.stringify(lawTemplate)}    // a tempt solution to change user template
+                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password, "mid":user.mid}    // a tempt solution to change user template
                 console.log(ua)
-                useMainStore().editUser(ua).then(()=>{
+                userMimei.editUser(ua).then(()=>{
                     localStorage.setItem('user', JSON.stringify(ua));
                     return ok();
                 }, err=>{
@@ -123,8 +127,8 @@ function leitherBackend() {
             }
 
             function basicDetails(user: any) {
-                const { username, familyName, givenName, mid, template } = user;
-                return { username, familyName, givenName, mid, "template":JSON.parse(template) };
+                const { familyName, givenName, mid, username, role } = user;  // take a subset of User Acccount obj
+                return { username, familyName, givenName, mid, role };
             }
 
             function isAuthenticated() {
@@ -136,10 +140,10 @@ function leitherBackend() {
                 return opts.body && JSON.parse(opts.body);
             }
 
-            // function idFromUrl() {
-            //     const urlParts = url.split('/');
-            //     return urlParts[urlParts.length - 1];
-            // }
+            function idFromUrl() {
+                const urlParts = url.split('/');
+                return urlParts[urlParts.length - 1];
+            }
 
             function headers() {
                 return {

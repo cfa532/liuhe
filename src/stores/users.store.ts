@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { fetchWrapper } from '@/helpers';
 import { useAuthStore } from '@/stores';
 
+
 // const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
 const baseUrl = '/users'
 export const useUsersStore = defineStore({
@@ -15,8 +16,6 @@ export const useUsersStore = defineStore({
             await fetchWrapper.post(`${baseUrl}/register`, user);
         },
         async getAll() {
-            // only get current login user
-            this.users = { loading: true };
             try {
                 this.users = await fetchWrapper.get(baseUrl);
             } catch (error) {

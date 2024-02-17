@@ -1,26 +1,31 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { router } from '@/router'
-import { useLeitherStore, useMainStore } from "@/stores"
+import { useLeitherStore } from "@/stores"
 import App from './App.vue'
-// import "bootstrap/dist/css/bootstrap.min.css"
-// import "bootstrap"
 
 // setup Leither backend as database
 import { leitherBackend } from './helpers';
-leitherBackend();
 
 const app = createApp(App)
 app.use(createPinia())
+leitherBackend();   // init backend after Pinia
 app.use(router)
+console.warn("main.ts built....on " + __BUILD_TIME__)
 
-useLeitherStore().login().then((api)=>{
-    window.lapi = api
-    // Main DB is also initiated with a Leither object API
-    useMainStore().init(api)
-    app.mount('#app')
-}, (err)=>{
+try {
+    const lapi = useLeitherStore()
+    if (lapi.sid) {
+        console.log(lapi.$state, "sid=", lapi.sid)
+        app.mount('#app')
+    } else {
+        lapi.login().then(()=>{
+            console.log(lapi.$state)
+            app.mount('#app')
+        })
+    }
+} catch(err) {
     console.error(err)
     window.alert(err)
     router.push("/account")
-})
+}

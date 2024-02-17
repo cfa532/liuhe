@@ -22,7 +22,7 @@ function closeNav() {
     emits("sideNavClosed")
 }
 watch(()=>props.caseId, async (nv, ov)=>{
-    console.log("Watch caseId:",nv, ov)
+    console.log("caseId:",nv, ov)
     if (nv && nv!=='0') {
         if (allCases.value.findIndex(c=>c.id==nv) == -1)
             allCases.value.unshift(useCaseStore()._value)

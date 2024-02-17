@@ -5,14 +5,14 @@ import { CaseList } from '@/components';
 import { onMounted, ref } from 'vue';
 import { useMainStore as useMimei, useLeitherStore as useLeither } from "../stores/lapi"
 
-const api = useLeither();
+// const api = useLeither();
 const mmInfo = useMimei();
 const { user } = storeToRefs(useAuthStore());
 const sideNav = ref<HTMLDivElement>()
 
-onMounted(()=>{
-  mmInfo.init(api)
-  console.log("main page mounted", mmInfo.$state)
+onMounted(async ()=>{
+  // mmInfo.init(api)
+  console.log("main page mounted", mmInfo.$state, await mmInfo.mmsid)
 })
 </script>
 

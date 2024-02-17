@@ -26,11 +26,11 @@ socket.addEventListener("message", async ({data}) => {
             // console.log(event.data)
             break
         case "result":
-            console.log("Ws received:", event)
+            console.log("Ws received:", event, ci)
             ci.Q = query.value
             ci.A = event.answer
             chatHistory.value!.unshift(ci)
-            await caseStore.addChatItem({...ci})
+            await caseStore.addChatItem(ci)
             query.value = ""
             stream_in.value = ""
             spinner.value = "提交"
@@ -56,8 +56,10 @@ async function onSubmit() {
     // send message to websoceket and wait for response
     console.log("Submit query to AI: ", query.value)
     const ci = {} as ChatItem
-    ci.Q = query.value? query.value : "Hello";        // query submitted to AI
+    query.value = typeof query.value =="undefined" ? "Hello" : query.value;        // query submitted to AI
+    ci.Q = query.value
     ci.A = ""
+    console.log(ci)
     try {
         socket.send(JSON.stringify({"type":"gpt_api", "query":ci.Q}))
         spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
@@ -70,9 +72,9 @@ async function onSubmit() {
     }
 }
 onMounted(async ()=>{
-    console.log("Case Mounted", caseStore.mid)
     // load chat history of a particular case
     await caseStore.initCase(route.params.id as string)
+    console.log("Case Mounted", caseStore.$state)
     chatHistory.value = caseStore.chatHistory
 })
 watch(()=>route.params.id, async (nv, ov)=>{

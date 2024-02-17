@@ -11,13 +11,13 @@ export const useAuthStore = defineStore({
     id: 'auth',
     state: () => ({
         // initialize state from local storage to enable user to stay logged in
-        user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) as UserAccount: null,
+        user: JSON.parse(localStorage.getItem('user')!),
         returnUrl: '/',
     }),
     getters: {
-        id: function(state) {
-            return state.user!.mid
-        }
+        mid: function(state) {
+            return state.user?.mid
+        },
     },
     actions: {
         async login(username:string, password:string) {
@@ -31,7 +31,7 @@ export const useAuthStore = defineStore({
                 localStorage.setItem('user', JSON.stringify(user));
 
                 // redirect to previous url or default to home page
-                router.push(this.returnUrl || '/');
+                // router.push(this.returnUrl || '/');
             } catch (error) {
                 const alertStore = useAlertStore();
                 alertStore.error(error);                
