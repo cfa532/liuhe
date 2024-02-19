@@ -14,6 +14,10 @@ const btnSubmit = ref()
 
 async function onSubmit() {
     // send message to websoceket and wait for response
+    if (typeof caption.value=="undefined" || caption.value.trim()=="") {
+        alertStore.error("标题必填")
+        return
+    }
     const newId = await caseStore.createCase(caption.value)
     alertStore.success("New case added, " + caseStore.case)
     emits("newCaseId", newId)    // To have case list updated

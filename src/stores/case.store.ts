@@ -161,7 +161,7 @@ export const useCaseListStore = defineStore({
         async deleteCase(id:string) {
             // id must be activeId
             await this.api.client.Hdel(await this.mmsidCur, CHAT_CASE_KEY, id)
-            this.api.client.Del(await this.mmsidCur, CHAT_HISTORY_KEY+id)
+            await this.api.client.Del(await this.mmsidCur, CHAT_HISTORY_KEY+id)
             await this.backup()
             localStorage.removeItem(id)
         }
