@@ -50,7 +50,7 @@ socket.addEventListener("message", async ({data}) => {
 async function onSubmit() {
     timer = window.setTimeout(()=>{
         // alert user to reload
-        window.alert("如果等待超时，可以试试刷新页面，重新提交。")
+        window.alert("如果等待超时，刷新页面，重新提交。")
     }, 120000)
 
     // send message to websoceket and wait for response
