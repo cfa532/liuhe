@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onErrorCaptured, onMounted, ref, watch } from 'vue';
 import { useCaseStore, useCaseListStore } from '@/stores';
 import { useRoute } from 'vue-router';
 import { Share } from '@/components'
@@ -85,6 +85,10 @@ watch(()=>route.params.id, async (nv, ov)=>{
         console.log(caseStore.case)
     }},
 )
+onErrorCaptured((err)=>{
+    console.error(err)
+    return false
+})
 async function deletePost() {
     await caseList.deleteCase(route.params.id as string)
     emits("newCaseId", "0")
