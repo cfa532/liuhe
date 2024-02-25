@@ -12,9 +12,9 @@ app.use(createPinia())
 leitherBackend();   // init backend after Pinia
 app.use(router)
 console.warn("main.ts built....on " + __BUILD_TIME__, "ver:"+import.meta.env.VITE_APP_VERSION)
+const lapi = useLeitherStore()
 
 try {
-    const lapi = useLeitherStore()
     if (lapi.sid) {
         console.log(lapi.$state, "sid="+lapi.sid)
         app.mount('#app')
@@ -25,6 +25,7 @@ try {
         })
     }
 } catch(err) {
+    lapi.logout()
     console.error(err)
     window.alert(err)
     router.push("/account")

@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia';
-import { router } from '@/router'
 
-// const router = useRouter();
 // Hprose API
 const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "Getnodeip", "SwarmLocal", "DhtGetAllKeys","MFOpenByPath",
     "DhtGet", "DhtGets", "SignPPT", "RequestService", "SwarmAddrs", "MFOpenTempFile", "MFTemp2MacFile", "MFSetData",
@@ -21,7 +19,7 @@ function getcurips() {
         console.log("window.getParam", ips, p)
     } else if (window.location.host != ""){
         ips = window.location.host
-        console.log("window.location", ips)
+        console.log("window.location", ips, window.location)
     }
     return import.meta.env.VITE_LEITHER_IP ? import.meta.env.VITE_LEITHER_IP : ips
 };
@@ -74,7 +72,6 @@ export const useLeitherStore = defineStore({
         logout() {
             sessionStorage.setItem("sid", "");
             this._sid = "";
-            router.push({name: "main"});
         }
     }
 })
