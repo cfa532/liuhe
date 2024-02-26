@@ -11,11 +11,14 @@ const app = createApp(App)
 app.use(createPinia())
 leitherBackend();   // init backend after Pinia
 app.use(router)
-app.config.errorHandler = (err, instance, info) => {
+app.config.errorHandler = async (err, instance, info) => {
     // Handle the error globally
     console.error("Global error:", err);
     console.log("Vue instance:", instance);
     console.log("Error info:", info);
+
+    sessionStorage.removeItem("sid")
+    await lapi.login()
 }
 console.warn("main.ts built....on " + __BUILD_TIME__, "ver:"+import.meta.env.VITE_APP_VERSION)
 const lapi = useLeitherStore()
