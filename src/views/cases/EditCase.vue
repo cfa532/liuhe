@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onErrorCaptured, onMounted, ref, watch } from 'vue';
+import { onBeforeUnmount, onErrorCaptured, onMounted, ref, watch } from 'vue';
 import { useCaseStore, useCaseListStore } from '@/stores';
 import { useRoute } from 'vue-router';
 import { Share } from '@/components'
@@ -93,6 +93,9 @@ async function deletePost() {
     await caseList.deleteCase(route.params.id as string)
     emits("newCaseId", "0")
 }
+onBeforeUnmount(()=>{
+    socket.close(1000, "Job done")
+})
 </script>
 
 <template>

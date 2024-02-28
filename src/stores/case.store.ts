@@ -69,7 +69,6 @@ export const useCaseStore = defineStore({
             // add a chat item to chat history of the current case
             const c = this._value
             c.timestamp = Date.now()
-            console.log(ci, c)
             await this.api.client.Hset(await this.mmsidCur, CHAT_HISTORY_KEY+c.id, c.timestamp, ci)
             // update timestamp of the current case
             await this.backup()
