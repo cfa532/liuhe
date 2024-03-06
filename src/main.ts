@@ -14,6 +14,7 @@ app.use(router)
 app.config.errorHandler = async (err, instance, info) => {
     // Handle the error globally
     console.error("Global error:", err);
+    window.alert(err)
     console.log("Vue instance:", instance);
     console.log("Error info:", info);
 

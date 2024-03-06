@@ -19,11 +19,10 @@ let timer = 0
 socket.addEventListener("message", async ({data}) => {
     const event = JSON.parse(data as string)
     const ci = {} as ChatItem
+    window.clearTimeout(timer)
     switch(event.type) {
         case "stream":
-            window.clearTimeout(timer)
             stream_in.value += event.data;
-            // console.log(event.data)
             break
         case "result":
             console.log("Ws received:", event, ci)
@@ -36,21 +35,23 @@ socket.addEventListener("message", async ({data}) => {
             spinner.value = "提交"
             btnSubmit.value.disabled = false
             break
-        case "error":
-            window.clearTimeout(timer)
-            console.error("Ws error:", event)
-            break
         default:
-            window.clearTimeout(timer)
             console.warn("Ws default:", event)
             throw new Error(`Unsupported event type: ${event.type}.`);
     }
 })
+socket.onerror = err=>{
+    console.error(err)
+    spinner.value = "提交"
+    btnSubmit.value.disabled = false
+}
 
 async function onSubmit() {
     timer = window.setTimeout(()=>{
         // alert user to reload
         window.alert("如果等待超时，刷新页面，重新提交。")
+        spinner.value = "提交"
+        btnSubmit.value.disabled = false
     }, 120000)
 
     // send message to websoceket and wait for response
@@ -60,16 +61,11 @@ async function onSubmit() {
     ci.Q = query.value
     ci.A = ""
     console.log(ci)
-    try {
-        socket.send(JSON.stringify({"type":"gpt_api", "query":ci.Q}))
-        spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
-        btnSubmit.value.disabled = true
-        stream_in.value = ""
-    } catch(err) {
-        console.error(err)
-        spinner.value = "提交"
-        btnSubmit.value.disabled = false
-    }
+
+    socket.send(JSON.stringify({"type":"gpt_api", "query":ci.Q}))
+    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+    btnSubmit.value.disabled = true
+    stream_in.value = ""
 }
 onMounted(async ()=>{
     // load chat history of a particular case
