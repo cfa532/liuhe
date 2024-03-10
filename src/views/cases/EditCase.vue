@@ -115,12 +115,12 @@ onBeforeUnmount(()=>{
 </form>
 
 <div class="row text-secondary mt-4">
-    <div class="row" v-if="stream_in.length>0">
+    <div v-if="stream_in.length>0">
         <div style="white-space: pre-wrap; color: black;"><label>A:&nbsp;</label>{{ stream_in }}</div>
         <p></p>
         <hr/>
     </div>
-    <div style="margin-left: 1px;" class="row" v-for="(ci, index) in chatHistory" :key="index">
+    <div style="margin-left: 1px;" v-for="(ci, index) in chatHistory" :key="index">
         <div><label>Q:&nbsp;</label>{{ ci.Q }}</div>
         <div style="white-space: pre-wrap;"><label>A:&nbsp;</label>{{ ci.A }}</div>
         <p></p>
@@ -135,5 +135,9 @@ onBeforeUnmount(()=>{
     padding: 5px;
     border-radius: 5px;
     /* border: 1px solid #73AD21; */
-} 
+}
+.text-secondary {
+    /* --bs-text-opacity: 1; */
+    color: rgb(53 57 62) !important;
+}
 </style>
