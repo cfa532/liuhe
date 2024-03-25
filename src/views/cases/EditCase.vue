@@ -49,7 +49,7 @@ socket.onerror = err=>{
 async function onSubmit() {
     timer = window.setTimeout(()=>{
         // alert user to reload
-        window.alert("如果等待超时，尝试重新提交。")
+        window.alert("如果等待超时，尝试刷新页面后重新提交。")
         spinner.value = "提交"
         btnSubmit.value.disabled = false
     }, 120000)

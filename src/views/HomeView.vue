@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useAuthStore } from '@/stores';
 import { CaseList } from '@/components';
 import { onMounted, ref } from 'vue';
-import { useMainStore as useMimei, useLeitherStore as useLeither } from "../stores/lapi"
+import { useMainStore as useMimei } from "../stores/lapi"
 
 // const api = useLeither();
 const mmInfo = useMimei();
@@ -11,7 +11,6 @@ const { user } = storeToRefs(useAuthStore());
 const sideNav = ref<HTMLDivElement>()
 
 onMounted(async ()=>{
-  // mmInfo.init(api)
   console.log("main page mounted", mmInfo.$state, await mmInfo.mmsid)
 })
 </script>
