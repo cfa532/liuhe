@@ -62,7 +62,7 @@ async function onSubmit() {
     ci.A = ""
     console.log(ci)
 
-    socket.send(JSON.stringify({"type":"gpt_api", "query":ci.Q}))
+    socket.send(JSON.stringify({type:"query", query:ci.Q}))
     spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
     btnSubmit.value.disabled = true
     stream_in.value = ""

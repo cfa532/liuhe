@@ -1,5 +1,5 @@
 import { useAlertStore, useMainStore, useAuthStore } from "@/stores";
-// import lawTemplate from '../assets/template.json'
+import llmTemplate from '../assets/template.json'
 export { leitherBackend };
 
 // array in local storage for registered users
@@ -40,6 +40,7 @@ function leitherBackend() {
                 try {
                     const user = await userMimei.authenticate(username, password)
                     console.log(user)
+                    // user.template = user.template ? JSON.parse(user.template) : {}   // parse the stringified Json
                     return ok({
                         ...basicDetails(user),
                         token: 'fake-jwt-token'     // JWT token of authentication
@@ -51,12 +52,13 @@ function leitherBackend() {
             }
 
             function register() {
-                const user:UserAccount = body();    // http request body
+                const user = body();    // http request body
+
                 // register a system admin
                 user.role = user.username=="admin" ? "admin" : "user"
-
+                user.template = llmTemplate
                 // registerUser will check if username exists
-                userMimei.registerUser(user).then((u:UserAccount)=>{
+                userMimei.registerUser(user).then((u)=>{
                     console.log("New Leither user=", u)
                     return ok();
                 }, err=>{
@@ -86,19 +88,22 @@ function leitherBackend() {
                 if (!isAuthenticated()) return unauthorized();
 
                 const params = body();
+                // username cannot be changed, remove it from params
+                delete params.username
+
                 // only update password if entered
                 if (!params.password) {
                     delete params.password;
                 }
-                // username cannot be changed, remove it from params
-                delete params.username
                 
-                const user = useAuthStore().user!
+                const user = useAuthStore().user
                 Object.assign(user, params);
-                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName, "password":user.password, "mid":user.mid}    // a tempt solution to change user template
-                console.log(ua)
+
+                // make a DEEP copy of user, because userMimei makes change to ua
+                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName,
+                    "password":user.password, "mid":user.mid, template: user.template}    // a tempt solution to change user template
                 userMimei.editUser(ua).then(()=>{
-                    localStorage.setItem('user', JSON.stringify(ua));
+                    localStorage.setItem('user', JSON.stringify(user));
                     return ok();
                 }, err=>{
                     console.error("update failed:", err)
@@ -127,8 +132,9 @@ function leitherBackend() {
             }
 
             function basicDetails(user: any) {
-                const { familyName, givenName, mid, username, role } = user;  // take a subset of User Acccount obj
-                return { username, familyName, givenName, mid, role };
+                const { familyName, givenName, mid, username, role, password, template } = user;  // take a subset of User Acccount obj
+                // template is stored as string in DB, parse it here
+                return { username, familyName, givenName, mid, role, password, template };
             }
 
             function isAuthenticated() {
@@ -136,7 +142,7 @@ function leitherBackend() {
             }
 
             function body() {
-                console.log("return body=", JSON.parse(opts.body))
+                console.log("body()", JSON.parse(opts.body))
                 return opts.body && JSON.parse(opts.body);
             }
 

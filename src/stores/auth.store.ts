@@ -15,9 +15,7 @@ export const useAuthStore = defineStore({
         returnUrl: '/',
     }),
     getters: {
-        mid: function(state) {
-            return state.user?.mid
-        },
+        mid: function(state) { return state.user.mid },
     },
     actions: {
         async login(username:string, password:string) {
@@ -37,16 +35,23 @@ export const useAuthStore = defineStore({
                 alertStore.error(error);                
             }
         },
-        update() {
-            localStorage.setItem('user', JSON.stringify(this.user));
-        },
+
         logout() {
             useCaseStore().$reset()
             useCaseListStore().$reset()
             localStorage.removeItem('user');
             localStorage.removeItem('activeId');
             router.push('/account/login');
-            this.user = null;
+            this.user = null as any;
         }
     }
 });
+
+function deepParse(u: UserAccount) {
+    if (u) {
+        console.log(u)
+        // u.template = JSON.parse(u.template)
+        return JSON.parse(JSON.stringify(u))
+    }
+    return u
+}

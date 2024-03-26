@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia';
 import { fetchWrapper } from '@/helpers';
-import { useAuthStore } from '@/stores';
-
 
 // const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
 const baseUrl = '/users'
@@ -30,21 +28,22 @@ export const useUsersStore = defineStore({
                 this.user = { error };
             }
         },
-        async update(id:string, params:[]) {
+        async update(id:string, params:any) {
             await fetchWrapper.put(`${baseUrl}/${id}`, params);
 
-            // update stored user if the logged in user updated their own record
-            const authStore = useAuthStore();
-            if (id === authStore.user!.username) {
-                // update local storage
-                const user = { ...authStore.user, ...params } as UserAccount;
-                localStorage.setItem('user', JSON.stringify(user));
+            // // update stored user if the logged in user updated their own record
+            // const authStore = useAuthStore();
+            // if (id === authStore.user!.username) {
+            //     // update local storage
+            //     const user = { ...authStore.user, ...params } as UserAccount;
+            //     console.log(params, authStore.user, user)
+            //     localStorage.setItem('user', JSON.stringify(user));
 
-                // update auth user in pinia state
-                authStore.user = user;
-            }
+            //     // update auth user in pinia state
+            //     authStore.user = user;
+            // }
         },
-        // depreciated
+        // deprecated
         async delete(id:string) {
             console.log(id)
             return 

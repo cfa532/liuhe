@@ -112,10 +112,11 @@ export const useMainStore = defineStore({
             }
         },
         async authenticate(username:string, password:string) :Promise<UserAccount> {
-            const u = await this.api.client.Hget(await this.mmsid, this.user_key, username)
-            if (u) {
-                if (u.password === password) {
-                    return u
+            const str = await this.api.client.Hget(await this.mmsid, this.user_key, username)
+            if (str) {
+                const user = JSON.parse(str)
+                if (user.password === password) {
+                    return user
                 }
             }
             throw new Error("Username and password do not match")
@@ -127,17 +128,18 @@ export const useMainStore = defineStore({
                 throw new Error("The username is taken.")
             }
             // create a new Mimei to store user cases information
-            user.mid = await this.api.client.MMCreate(this.api.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+user.username, 2, 0x07276707);
-            await this.api.client.Hset(await this.mmsidCur, this.user_key, user.username, user)
+            user.mid = await this.api.client.MMCreate(this.api.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+user.username, 2, 0x07276704);
+            await this.api.client.Hset(await this.mmsidCur, this.user_key, user.username, JSON.stringify(user))
             await this.api.client.MMAddRef(this.api.sid, this.mid, user.mid)        // associate the new MM with Main MMM
             await this.backup()
             return user
         },
         async getUsers() :Promise<UserAccount[]> {
-            return await this.api.client.Hgetall(await this.mmsid, this.user_key).map((e:FVPair)=>e.value)
+            return await this.api.client.Hgetall(await this.mmsid, this.user_key).map((e:FVPair) => JSON.parse(e.value))
         },
         async getUser(username:string) :Promise<UserAccount> {
-            return await this.api.client.Hget(await this.mmsid, this.user_key, username).value
+            const user = await this.api.client.Hget(await this.mmsid, this.user_key, username).value
+            return JSON.parse(user)
         },
         async deleteUser(username: string) {
             await this.api.client.Hdel(await this.mmsidCur, this.user_key, username)
@@ -149,7 +151,7 @@ export const useMainStore = defineStore({
             if (!await this.api.client.Hget(await this.mmsid, this.user_key, user.username)) {
                 throw new Error("The user does not exist.")
             }
-            await this.api.client.Hset(await this.mmsidCur, this.user_key, user.username, user)
+            await this.api.client.Hset(await this.mmsidCur, this.user_key, user.username, JSON.stringify(user))
             await this.backup()
         }
     }

@@ -26,7 +26,7 @@ interface UserAccount {
     password: string,
     mid: string,            // Mimei id for this user's db, everything of the user is stored in the Mimei
     role?: string,           // 用户身份：分析师，交易员，财务？
-    template?: string,      // stringified json object
+    template?: any,         // dictionary that hold user settings of LLM
     token?: string,
 }
 
