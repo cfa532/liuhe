@@ -8,7 +8,7 @@ import { onMounted, ref } from 'vue';
 const mmInfo = useMimei();
 const { user } = storeToRefs(useAuthStore());
 const sideNav = ref<HTMLDivElement>()
-const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
+// const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
 const divOpenai = ref()
 const selectLLM = ref()
 const settings = ref(user.value.template ? user.value.template : {llm: "openai", temperature: "0.0"})
@@ -20,6 +20,7 @@ async function onSubmit() {
   user.value.template = settings.value
   user.value.role = "admin"
   await useUsersStore().update(user.value.username, user.value)
+  // socket.send(JSON.stringify({type: "service", parameters: {llm: settings.value.llm, temperature: settings.value.temperature}}))
 }
 </script>
 

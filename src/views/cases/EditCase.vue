@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onErrorCaptured, onMounted, ref, watch } from 'vue';
-import { useCaseStore, useCaseListStore } from '@/stores';
+import { useAuthStore, useCaseStore, useCaseListStore } from '@/stores';
 import { useRoute } from 'vue-router';
 import { Share } from '@/components'
 
 const emits = defineEmits(["newCaseId"])     // add new case to list
 const caseList = useCaseListStore()
 const caseStore = useCaseStore()
+const { user } = useAuthStore()
 const route = useRoute();
 const query = ref()
 const stream_in = ref("")
@@ -62,7 +63,7 @@ async function onSubmit() {
     ci.A = ""
     console.log(ci)
 
-    socket.send(JSON.stringify({type:"query", query:ci.Q}))
+    socket.send(JSON.stringify({type:"query", query:ci.Q, parameters: user.template}))
     spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
     btnSubmit.value.disabled = true
     stream_in.value = ""
