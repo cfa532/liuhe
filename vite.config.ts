@@ -11,7 +11,12 @@ export default defineConfig({
   plugins: [vue(), viteSingleFile({inlinePattern: ["*.css"]})],
   build: {
     assetsDir: '.',
-    cssCodeSplit: true
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        entryFileNames: "index_entry.js"
+      }
+    }
   },
   resolve: {
     alias: {
