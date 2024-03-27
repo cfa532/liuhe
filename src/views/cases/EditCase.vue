@@ -95,17 +95,13 @@ async function deletePost() {
 </script>
 
 <template>
-<div style="max-width: 800px;">
+<div class="col-md-10 col-sm-12">
 <form>
 <div class="container d-grid row-gap-3">
-    <div class="row">
-        <div class="col-12">
-            <span>&nbsp;&nbsp;{{ caseStore.case.brief }}</span>
-            <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="deletePost"></Share>
-        </div>
-    </div>
+    <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="deletePost"></Share>
+
     <div class="row mt-2">
-        <textarea class="col" rows="4" v-model="query" placeholder="Ask me...."></textarea>
+        <textarea class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
         <p></p>
         <div class="col">
             <button ref="btnSubmit" @click.prevent="onSubmit" type="button" style="position: relative; float: right;" class="btn btn-primary" v-html="spinner"></button>
@@ -121,8 +117,8 @@ async function deletePost() {
         <hr/>
     </div>
     <div style="margin-left: 1px;" v-for="(ci, index) in chatHistory" :key="index">
-        <div><label>Q:&nbsp;</label>{{ ci.Q }}</div>
-        <div style="white-space: pre-wrap;"><label>A:&nbsp;</label>{{ ci.A }}</div>
+        <div class="Q"><label>Q:&nbsp;</label>{{ ci.Q }}</div>
+        <div class="A"><label>A:&nbsp;</label>{{ ci.A }}</div>
         <p></p>
         <hr/>
     </div>
@@ -130,8 +126,20 @@ async function deletePost() {
 </div>
 </template>
 <style>
+div.Q {
+    background-color:rgb(238, 238, 213);
+    /* border: 1px solid blue; */
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 10px;
+
+}
+div.A {
+    white-space: pre-wrap;
+    color: rgb(33, 31, 31);
+}
 .col-12 {
-    background-color: rgb(246, 244, 240);
+    background-color: rgb(199, 187, 163);
     padding: 5px;
     border-radius: 5px;
     /* border: 1px solid #73AD21; */
