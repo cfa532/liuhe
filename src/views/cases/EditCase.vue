@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onErrorCaptured, onMounted, ref, watch } from 'vue';
+import { onErrorCaptured, onMounted, ref, watch } from 'vue';
 import { useAuthStore, useCaseStore, useCaseListStore } from '@/stores';
 import { useRoute } from 'vue-router';
 import { Share } from '@/components'
@@ -11,62 +11,64 @@ const { user } = useAuthStore()
 const route = useRoute();
 const query = ref()
 const stream_in = ref("")
-const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
 const spinner = ref("提交")
 const btnSubmit = ref()
 const chatHistory = ref<ChatItem[]>()
-let timer = 0
-
-socket.addEventListener("message", async ({data}) => {
-    const event = JSON.parse(data as string)
-    const ci = {} as ChatItem
-    window.clearTimeout(timer)
-    switch(event.type) {
-        case "stream":
-            stream_in.value += event.data;
-            break
-        case "result":
-            console.log("Ws received:", event, ci)
-            ci.Q = query.value
-            ci.A = event.answer
-            chatHistory.value!.unshift(ci)
-            await caseStore.addChatItem(ci)
-            query.value = ""
-            stream_in.value = ""
-            spinner.value = "提交"
-            btnSubmit.value.disabled = false
-            break
-        default:
-            console.warn("Ws default:", event)
-            throw new Error(`Unsupported event type: ${event.type}.`);
-    }
-})
-socket.onerror = err=>{
-    console.error(err)
-    spinner.value = "提交"
-    btnSubmit.value.disabled = false
-}
 
 async function onSubmit() {
-    timer = window.setTimeout(()=>{
+    const timer = window.setTimeout(()=>{
         // alert user to reload
         window.alert("如果等待超时，尝试刷新页面后重新提交。")
         spinner.value = "提交"
         btnSubmit.value.disabled = false
     }, 120000)
 
-    // send message to websoceket and wait for response
-    console.log("Submit query to AI: ", query.value)
-    const ci = {} as ChatItem
-    query.value = typeof query.value =="undefined" ? "Hello" : query.value;        // query submitted to AI
-    ci.Q = query.value
-    ci.A = ""
-    console.log(ci)
+    const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
+    socket.onmessage = ({ data }) => {
+        const event = JSON.parse(data)
+        const ci = {} as ChatItem
+        window.clearTimeout(timer)
+        switch (event.type) {
+            case "stream":
+                stream_in.value += event.data;
+                break
+            case "result":
+                console.log("Ws received:", event, ci)
+                ci.Q = query.value
+                ci.A = event.answer
+                chatHistory.value!.unshift(ci)
+                caseStore.addChatItem(ci)
+                query.value = ""
+                stream_in.value = ""
+                spinner.value = "提交"
+                btnSubmit.value.disabled = false
+                socket.close(1000, "Job done")
+                break
+            default:
+                console.warn("Ws default:", data)
+                socket.close(1001, "Job done")
+                throw new Error(`Unsupported event type: ${event.type}.`);
+        }
+    }
+    socket.onerror = err => {
+        console.error(err)
+        spinner.value = "提交"
+        btnSubmit.value.disabled = false
+        socket.close(1000, "Job done")
+    }
+    socket.onopen = ()=>{
+        // send message to websoceket and wait for response
+        console.log("Submit query to AI: ", query.value)
+        const ci = {} as ChatItem
+        query.value = typeof query.value =="undefined" ? "Hello" : query.value;        // query submitted to AI
+        ci.Q = query.value
+        ci.A = ""
+        socket.send(JSON.stringify({type:"query", query:ci.Q, parameters: user.template}))
 
-    socket.send(JSON.stringify({type:"query", query:ci.Q, parameters: user.template}))
-    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
-    btnSubmit.value.disabled = true
-    stream_in.value = ""
+        spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+        btnSubmit.value.disabled = true
+        stream_in.value = ""
+    }
 }
 onMounted(async ()=>{
     // load chat history of a particular case
@@ -90,23 +92,16 @@ async function deletePost() {
     await caseList.deleteCase(route.params.id as string)
     emits("newCaseId", "0")
 }
-onBeforeUnmount(()=>{
-    socket.close(1000, "Job done")
-})
 </script>
 
 <template>
-<div style="max-width: 800px;">
+<div class="col-md-10 col-sm-12">
 <form>
 <div class="container d-grid row-gap-3">
-    <div class="row">
-        <div class="col-12">
-            <span>&nbsp;&nbsp;{{ caseStore.case.brief }}</span>
-            <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="deletePost"></Share>
-        </div>
-    </div>
+    <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="deletePost"></Share>
+
     <div class="row mt-2">
-        <textarea class="col" rows="4" v-model="query" placeholder="Ask me...."></textarea>
+        <textarea class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
         <p></p>
         <div class="col">
             <button ref="btnSubmit" @click.prevent="onSubmit" type="button" style="position: relative; float: right;" class="btn btn-primary" v-html="spinner"></button>
@@ -122,8 +117,8 @@ onBeforeUnmount(()=>{
         <hr/>
     </div>
     <div style="margin-left: 1px;" v-for="(ci, index) in chatHistory" :key="index">
-        <div><label>Q:&nbsp;</label>{{ ci.Q }}</div>
-        <div style="white-space: pre-wrap;"><label>A:&nbsp;</label>{{ ci.A }}</div>
+        <div class="Q"><label>Q:&nbsp;</label>{{ ci.Q }}</div>
+        <div class="A"><label>A:&nbsp;</label>{{ ci.A }}</div>
         <p></p>
         <hr/>
     </div>
@@ -131,8 +126,20 @@ onBeforeUnmount(()=>{
 </div>
 </template>
 <style>
+div.Q {
+    background-color:rgb(238, 238, 213);
+    /* border: 1px solid blue; */
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 10px;
+
+}
+div.A {
+    white-space: pre-wrap;
+    color: rgb(33, 31, 31);
+}
 .col-12 {
-    background-color: rgb(246, 244, 240);
+    background-color: rgb(199, 187, 163);
     padding: 5px;
     border-radius: 5px;
     /* border: 1px solid #73AD21; */
