@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onErrorCaptured, onMounted, ref, watch } from 'vue';
+import { onErrorCaptured, onMounted, ref, watch } from 'vue';
 import { useAuthStore, useCaseStore, useCaseListStore } from '@/stores';
 import { useRoute } from 'vue-router';
 import { Share } from '@/components'
@@ -11,62 +11,64 @@ const { user } = useAuthStore()
 const route = useRoute();
 const query = ref()
 const stream_in = ref("")
-const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
 const spinner = ref("提交")
 const btnSubmit = ref()
 const chatHistory = ref<ChatItem[]>()
-let timer = 0
-
-socket.addEventListener("message", async ({data}) => {
-    const event = JSON.parse(data as string)
-    const ci = {} as ChatItem
-    window.clearTimeout(timer)
-    switch(event.type) {
-        case "stream":
-            stream_in.value += event.data;
-            break
-        case "result":
-            console.log("Ws received:", event, ci)
-            ci.Q = query.value
-            ci.A = event.answer
-            chatHistory.value!.unshift(ci)
-            await caseStore.addChatItem(ci)
-            query.value = ""
-            stream_in.value = ""
-            spinner.value = "提交"
-            btnSubmit.value.disabled = false
-            break
-        default:
-            console.warn("Ws default:", event)
-            throw new Error(`Unsupported event type: ${event.type}.`);
-    }
-})
-socket.onerror = err=>{
-    console.error(err)
-    spinner.value = "提交"
-    btnSubmit.value.disabled = false
-}
 
 async function onSubmit() {
-    timer = window.setTimeout(()=>{
+    const timer = window.setTimeout(()=>{
         // alert user to reload
         window.alert("如果等待超时，尝试刷新页面后重新提交。")
         spinner.value = "提交"
         btnSubmit.value.disabled = false
     }, 120000)
 
-    // send message to websoceket and wait for response
-    console.log("Submit query to AI: ", query.value)
-    const ci = {} as ChatItem
-    query.value = typeof query.value =="undefined" ? "Hello" : query.value;        // query submitted to AI
-    ci.Q = query.value
-    ci.A = ""
-    console.log(ci)
+    const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
+    socket.onmessage = ({ data }) => {
+        const event = JSON.parse(data)
+        const ci = {} as ChatItem
+        window.clearTimeout(timer)
+        switch (event.type) {
+            case "stream":
+                stream_in.value += event.data;
+                break
+            case "result":
+                console.log("Ws received:", event, ci)
+                ci.Q = query.value
+                ci.A = event.answer
+                chatHistory.value!.unshift(ci)
+                caseStore.addChatItem(ci)
+                query.value = ""
+                stream_in.value = ""
+                spinner.value = "提交"
+                btnSubmit.value.disabled = false
+                socket.close(1000, "Job done")
+                break
+            default:
+                console.warn("Ws default:", data)
+                socket.close(1001, "Job done")
+                throw new Error(`Unsupported event type: ${event.type}.`);
+        }
+    }
+    socket.onerror = err => {
+        console.error(err)
+        spinner.value = "提交"
+        btnSubmit.value.disabled = false
+        socket.close(1000, "Job done")
+    }
+    socket.onopen = ()=>{
+        // send message to websoceket and wait for response
+        console.log("Submit query to AI: ", query.value)
+        const ci = {} as ChatItem
+        query.value = typeof query.value =="undefined" ? "Hello" : query.value;        // query submitted to AI
+        ci.Q = query.value
+        ci.A = ""
+        socket.send(JSON.stringify({type:"query", query:ci.Q, parameters: user.template}))
 
-    socket.send(JSON.stringify({type:"query", query:ci.Q, parameters: user.template}))
-    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
-    btnSubmit.value.disabled = true
-    stream_in.value = ""
+        spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+        btnSubmit.value.disabled = true
+        stream_in.value = ""
+    }
 }
 onMounted(async ()=>{
     // load chat history of a particular case
@@ -90,9 +92,6 @@ async function deletePost() {
     await caseList.deleteCase(route.params.id as string)
     emits("newCaseId", "0")
 }
-onBeforeUnmount(()=>{
-    socket.close(1000, "Job done")
-})
 </script>
 
 <template>
