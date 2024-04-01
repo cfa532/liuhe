@@ -13,7 +13,7 @@ const query = ref()
 const stream_in = ref("")
 const spinner = ref("提交")
 const btnSubmit = ref()
-const chatHistory = ref<ChatItem[]>()
+const chatHistory = ref<ChatItem[]>([])
 
 async function onSubmit() {
     const timer = window.setTimeout(()=>{
@@ -43,10 +43,11 @@ async function onSubmit() {
                 spinner.value = "提交"
                 btnSubmit.value.disabled = false
                 socket.close(1000, "Job done")
+                window.setTimeout(()=>socket.close(), 1000)     // try to fix no close frame received or sent exception
                 break
             default:
                 console.warn("Ws default:", data)
-                socket.close(1001, "Job done")
+                socket.close()
                 throw new Error(`Unsupported event type: ${event.type}.`);
         }
     }
@@ -63,8 +64,15 @@ async function onSubmit() {
         query.value = typeof query.value =="undefined" ? "Hello" : query.value;        // query submitted to AI
         ci.Q = query.value
         ci.A = ""
-        socket.send(JSON.stringify({type:"query", query:ci.Q, parameters: user.template}))
+        console.log(ci)
 
+        const qwh: any = {input: ci.Q, history: [] as Array<ChatItem>}   // query with history
+        for (let i=0; i<Math.min(6, chatHistory.value.length); i++) {
+            qwh.history.push(chatHistory.value[i])
+        }
+        console.log(qwh)
+        
+        socket.send(JSON.stringify({type:"query", query: qwh, parameters: user.template}))
         spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
         btnSubmit.value.disabled = true
         stream_in.value = ""
