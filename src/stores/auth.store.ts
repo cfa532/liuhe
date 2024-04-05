@@ -46,12 +46,3 @@ export const useAuthStore = defineStore({
         }
     }
 });
-
-function deepParse(u: UserAccount) {
-    if (u) {
-        console.log(u)
-        // u.template = JSON.parse(u.template)
-        return JSON.parse(JSON.stringify(u))
-    }
-    return u
-}

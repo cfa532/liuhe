@@ -1,4 +1,5 @@
     {
         "llm": "openai",
-        "temperature": "0.0"
+        "temperature": "0.0",
+        "client": "browser"
     }

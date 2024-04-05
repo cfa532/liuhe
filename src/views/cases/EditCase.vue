@@ -66,13 +66,13 @@ async function onSubmit() {
         ci.A = ""
         console.log(ci)
 
-        const qwh: any = {input: ci.Q, history: [] as Array<ChatItem>}   // query with history
+        const qwh: any = {query: ci.Q, history: [] as Array<ChatItem>}   // query with history
         for (let i=0; i<Math.min(6, chatHistory.value.length); i++) {
             qwh.history.push(chatHistory.value[i])
         }
-        console.log(qwh)
+        console.log(qwh, user.template)
         
-        socket.send(JSON.stringify({type:"query", query: qwh, parameters: user.template}))
+        socket.send(JSON.stringify({input: qwh, parameters: user.template}))
         spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
         btnSubmit.value.disabled = true
         stream_in.value = ""

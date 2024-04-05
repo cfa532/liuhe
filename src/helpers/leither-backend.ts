@@ -101,7 +101,7 @@ function leitherBackend() {
 
                 // make a DEEP copy of user, because userMimei makes change to ua
                 const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName,
-                    "password":user.password, "mid":user.mid, template: user.template}    // a tempt solution to change user template
+                    "password":user.password, "mid":user.mid, template: llmTemplate}    // a tempt solution to change user template
                 userMimei.editUser(ua).then(()=>{
                     localStorage.setItem('user', JSON.stringify(user));
                     return ok();
