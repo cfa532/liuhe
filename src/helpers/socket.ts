@@ -9,7 +9,8 @@ export const state = reactive({
 
 // "undefined" means the URL will be computed from the `window.location` object
 // const URL = "http://localhost:8080";
-const URL = "http://125.229.161.122:4800";
+// const URL = "http://125.229.161.122:4800";
+const URL = "http://52.221.183.236:8505"
 
 export const socket = io(URL, {
     withCredentials: true,

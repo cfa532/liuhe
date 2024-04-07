@@ -23,6 +23,9 @@ async function onSubmit() {
         spinner.value = "提交"
         btnSubmit.value.disabled = false
     }, 120000)
+    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+    btnSubmit.value.disabled = true
+    stream_in.value = ""
 
     socket.connect();
     socket.on("stream", token => {
@@ -42,16 +45,12 @@ async function onSubmit() {
         query.value = typeof query.value =="undefined" ? "Hello" : query.value;        // query submitted to AI
         ci.Q = query.value
         ci.A = ""
-        console.log(ci)
 
         const qwh: any = {query: ci.Q, history: [] as Array<ChatItem>}   // query with history
         for (let i=0; i<Math.min(6, chatHistory.value.length); i++) {
             qwh.history.push(chatHistory.value[i])
         }
         
-        spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
-        btnSubmit.value.disabled = true
-        stream_in.value = ""
         socket.emit("query", ({input: qwh, parameters: user.template}),  (ret: any) => {
             console.log("Ws received:", ret)
             window.clearTimeout(timer)
