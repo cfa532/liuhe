@@ -28,6 +28,7 @@ function closeNav() {
 watch(()=>props.caseId, async (nv, ov)=>{
     console.log("caseId:",nv, ov)
     if (nv && nv!=='0') {
+        // caseId=0 means current case is a new one
         if (allCases.value.findIndex(c=>c.id==nv) == -1)
             allCases.value.unshift(useCaseStore()._value)
         useCaseListStore().setActiveId(nv)

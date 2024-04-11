@@ -1,5 +1,6 @@
     {
         "llm": "openai",
         "temperature": "0.0",
-        "client": "browser"
+        "client": "browser",
+        "model": "gpt-4"
     }

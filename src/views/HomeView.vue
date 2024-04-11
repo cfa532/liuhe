@@ -9,18 +9,17 @@ const mmInfo = useMimei();
 const { user } = storeToRefs(useAuthStore());
 const sideNav = ref<HTMLDivElement>()
 // const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
-const divOpenai = ref()
-const selectLLM = ref()
-const settings = ref(user.value.template ? user.value.template : {llm: "openai", temperature: "0.0"})
+// const divOpenai = ref()
+// const selectLLM = ref()
+// const selectModel = ref()
+const settings = ref(user.value.template ? user.value.template : {llm:"openai",temperature: "0.0",model:"gpt-4"})
 
 onMounted(async ()=>{
   console.log("main page mounted", mmInfo.$state, user.value)
 })
 async function onSubmit() {
   user.value.template = settings.value
-  user.value.role = "admin"
   await useUsersStore().update(user.value.username, user.value)
-  // socket.send(JSON.stringify({type: "service", parameters: {llm: settings.value.llm, temperature: settings.value.temperature}}))
 }
 </script>
 
@@ -37,14 +36,21 @@ async function onSubmit() {
           <div class="row">
             <div class="col-4">
               <label for="llm">选择大模型：</label>
-              <select v-model="settings.llm" ref="selectLLM" id="llm" class="form-select mt-2 mb-3">
-                <option value="openai">OpenAI</option>
+              <select v-model="settings.llm" id="llm" class="form-select mt-2 mb-3">
+                <option value="openai" selected>OpenAI</option>
                 <option value="qianfan">百度千帆</option>
+              </select>
+            </div>
+            <div class="col-4">
+              <label for="llm">选择模型：</label>
+              <select v-model="settings.model" id="llm" class="form-select mt-2 mb-3">
+                <option value="gpt-4" selected>GPT-4</option>
+                <option value="gpt-4 turbo">GPT-4 Turbo</option>
               </select>
             </div>
           </div>
           <label>设定参数：</label>
-          <div ref="divOpenai" class="form-floating mb-3 col-4">
+          <div class="form-floating mb-3 col-4">
             <input v-model="settings.temperature" type="text" id="temperature" class="form-control" placeholder="temperature: 0">
             <label for="temperature">Temperature:</label>
           </div>

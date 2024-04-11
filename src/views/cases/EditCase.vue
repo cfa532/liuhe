@@ -43,7 +43,6 @@ async function onSubmit() {
                 spinner.value = "提交"
                 btnSubmit.value.disabled = false
                 socket.close(1000, "Job done")
-                window.setTimeout(()=>socket.close(), 1000)     // try to fix no close frame received or sent exception
                 break
             default:
                 console.warn("Ws default:", data)

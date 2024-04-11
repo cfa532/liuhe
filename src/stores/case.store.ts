@@ -71,6 +71,7 @@ export const useCaseStore = defineStore({
             c.timestamp = Date.now()
             await this.api.client.Hset(await this.mmsidCur, CHAT_HISTORY_KEY+c.id, c.timestamp, ci)
             // update timestamp of the current case
+            await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_KEY, c.id, c);
             await this.backup()
             // this.chatHistory.unshift(ci)
             // await this.getChatHistory()
@@ -136,7 +137,7 @@ export const useCaseListStore = defineStore({
             // get a sorted list of all cases information
             const t = await this.api.client.Hgetall(await this.mmsid, CHAT_CASE_KEY)
             const cases:ChatCase[] = t.map((e:any)=>e.value)
-            cases.sort((a,b)=> b.timestamp-a.timestamp)
+            cases.sort((a,b)=> b.timestamp - a.timestamp)
             return cases
         },
     },
