@@ -8,16 +8,14 @@ import { onMounted, ref } from 'vue';
 const mmInfo = useMimei();
 const { user } = storeToRefs(useAuthStore());
 const sideNav = ref<HTMLDivElement>()
-// const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
-// const divOpenai = ref()
-// const selectLLM = ref()
-// const selectModel = ref()
 const settings = ref(user.value.template ? user.value.template : {llm:"openai",temperature: "0.0",model:"gpt-4"})
+const submitted = ref(true)
 
 onMounted(async ()=>{
   console.log("main page mounted", mmInfo.$state, user.value)
 })
 async function onSubmit() {
+  submitted.value = true
   user.value.template = settings.value
   await useUsersStore().update(user.value.username, user.value)
 }
@@ -32,7 +30,7 @@ async function onSubmit() {
       <div class="col">
         <h3 v-if="user">Hi, {{ user.givenName }}</h3>
         <br>
-        <form @submit.prevent="onSubmit">
+        <form @change.prevent="submitted=false" @submit.prevent="onSubmit">
           <div class="row">
             <div class="col-4">
               <label for="llm">选择大模型：</label>
@@ -45,7 +43,7 @@ async function onSubmit() {
               <label for="llm">选择模型：</label>
               <select v-model="settings.model" id="llm" class="form-select mt-2 mb-3">
                 <option value="gpt-4" selected>GPT-4</option>
-                <option value="gpt-4 turbo">GPT-4 Turbo</option>
+                <option value="gpt-4-turbo">GPT-4 Turbo</option>
               </select>
             </div>
           </div>
@@ -54,7 +52,7 @@ async function onSubmit() {
             <input v-model="settings.temperature" type="text" id="temperature" class="form-control" placeholder="temperature: 0">
             <label for="temperature">Temperature:</label>
           </div>
-          <button type="submit" class="btn btn-primary">提交</button>
+          <button type="submit" class="btn btn-primary" :disabled="submitted">提交</button>
         </form>
         <div class="row mt-4">
           <p>点击左侧“新建”按钮后，建立新主题，然后提交。<br><br>
