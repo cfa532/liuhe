@@ -16,6 +16,9 @@ const btnSubmit = ref()
 const chatHistory = ref<ChatItem[]>([])
 
 async function onSubmit() {
+    spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
+    btnSubmit.value.disabled = true
+
     const timer = window.setTimeout(()=>{
         // alert user to reload
         window.alert("如果等待超时，尝试刷新页面后重新提交。")
@@ -58,23 +61,18 @@ async function onSubmit() {
     }
     socket.onopen = ()=>{
         // send message to websoceket and wait for response
-        console.log("Submit query to AI: ", query.value)
         const ci = {} as ChatItem
         query.value = typeof query.value =="undefined" ? "Hello" : query.value;        // query submitted to AI
         ci.Q = query.value
         ci.A = ""
-        console.log(ci)
-
         const qwh: any = {query: ci.Q, history: [] as Array<ChatItem>}   // query with history
         for (let i=0; i<Math.min(6, chatHistory.value.length); i++) {
             qwh.history.push(chatHistory.value[i])
         }
         console.log(qwh, user.template)
         
-        socket.send(JSON.stringify({input: qwh, parameters: user.template}))
-        spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
-        btnSubmit.value.disabled = true
         stream_in.value = ""
+        socket.send(JSON.stringify({input: qwh, parameters: user.template}))
     }
 }
 onMounted(async ()=>{
