@@ -29,12 +29,27 @@ export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler', 
     state: ()=>({
         _sid: "",       // if sid="", MM read only
+        _timestamp: Date.now(),
         ips: ips,
         hostUrl: "ws://" + ips +"/ws/",         // IP:port, where leither service runs
     }),
     getters: {
         client: (state) => window.hprose.Client.create(state.hostUrl, ayApi),       // Hprose client
-        sid: (state) => state._sid ? state._sid : sessionStorage["sid"]
+        sid: (state) => {
+            if (!sessionStorage["sid"]) {
+                state._sid = ""
+                return state._sid
+            } else {
+                const s = JSON.parse(sessionStorage["sid"])
+                if (Date.now()-s._timestamp > 28800 ) {
+                    state._sid = ""
+                    sessionStorage.removeItem("sid")
+                    return state._sid
+                } else {
+                    return state._sid ? state._sid : s.sid
+                }
+            }
+        }
     },
     actions: {
         login(user=import.meta.env.VITE_LEITHER_USERNAME, pswd=import.meta.env.VITE_LEITHER_PASSWD) {
@@ -42,7 +57,7 @@ export const useLeitherStore = defineStore({
                 this.client.Login(user, pswd, "byname").then(
                     (result:any)=>{ 
                         this._sid = result.sid      // set State sid
-                        sessionStorage.setItem("sid", result.sid)
+                        sessionStorage.setItem("sid", JSON.stringify({sid: result.sid, uid: result.uid, timestamp:Date.now()}) )
                         this.client.SignPPT(this._sid, {
                             CertFor: "Self",
                             Userid: result.uid,
@@ -70,7 +85,7 @@ export const useLeitherStore = defineStore({
             })
         },
         logout() {
-            sessionStorage.setItem("sid", "");
+            sessionStorage.removeItem("sid");
             this._sid = "";
         }
     }
