@@ -41,7 +41,7 @@ export const useLeitherStore = defineStore({
                 return state._sid
             } else {
                 const s = JSON.parse(sessionStorage["sid"])
-                if (Date.now()-s._timestamp > 28800 ) {
+                if (Date.now()-s.timestamp > 28800 ) {
                     state._sid = ""
                     sessionStorage.removeItem("sid")
                     return state._sid
