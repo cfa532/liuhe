@@ -115,6 +115,7 @@ export const useCaseListStore = defineStore({
         _mid: "", //user.user.mid,            // Mimei database to hold all the cases of a user
         _mmsid: "",         // session id for the current user Mimei
         _activeId: "",
+        _allcases: null as any
     }),
     getters: {
         activeId: function():string {
@@ -142,11 +143,14 @@ export const useCaseListStore = defineStore({
             return await this.api.client.MMOpen(this.api.sid, this.mid, "cur");
         },
         allCases: async function() :Promise<ChatCase[]> {
+            if (this._allcases)
+                return this._allcases
             // get a sorted list of all cases information
             const t = await this.api.client.Hgetall(await this.mmsid, CHAT_CASE_KEY)
             const cases:ChatCase[] = t.map((e:any)=>e.value)
             const validCases = cases.filter((e:any)=>e.show!=false)
             validCases.sort((a,b)=> b.timestamp - a.timestamp)
+            this._allcases = validCases
             return validCases
         },
     },
@@ -175,6 +179,8 @@ export const useCaseListStore = defineStore({
             // await this.api.client.Del(await this.mmsidCur, CHAT_HISTORY_KEY+id)
             await this.backup()
             localStorage.removeItem("activeId")
+            const result = this._allcases.filter((e:any)=>e.show!=false)
+            this._allcases = result
         }
     }
 })
