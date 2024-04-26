@@ -21,7 +21,7 @@ export const useUsersStore = defineStore({
                 this.users = { error };
             }
         },
-        async getById(id:string) {
+        async getById(id: string) {
             this.user = { loading: true };
             try {
                 this.user = await fetchWrapper.get(`${baseUrl}/${id}`);
@@ -29,7 +29,7 @@ export const useUsersStore = defineStore({
                 this.user = { error };
             }
         },
-        async update(id:string, params:any) {
+        async update(id: string, params: any) {
             console.log(id, params)
             await fetchWrapper.put(`${baseUrl}/${id}`, params);
 
@@ -45,20 +45,22 @@ export const useUsersStore = defineStore({
             //     authStore.user = user;
             // }
         },
-        async delete(id:string) {
-            console.log("Deleting user", id)
-            
-            // add isDeleting prop to user being deleted
-            this.users.find((x:any) => x.username === id).isDeleting = true;
-            await fetchWrapper.delete(`${baseUrl}/${id}`);
+        async delete(id: string) {
+            if (window.confirm("Are you sure?")) {
+                console.log("Deleting user", id)
 
-            // remove user from list after deleted
-            this.users = this.users.filter((x:any) => x.username !== id);
+                // add isDeleting prop to user being deleted
+                this.users.find((x: any) => x.username === id).isDeleting = true;
+                await fetchWrapper.delete(`${baseUrl}/${id}`);
 
-            // auto logout if the logged in user deleted their own record
-            const authStore = useAuthStore();
-            if (id === authStore.user.username) {
-                authStore.logout();
+                // remove user from list after deleted
+                this.users = this.users.filter((x: any) => x.username !== id);
+
+                // auto logout if the logged in user deleted their own record
+                const authStore = useAuthStore();
+                if (id === authStore.user.username) {
+                    authStore.logout();
+                }
             }
         }
     }
