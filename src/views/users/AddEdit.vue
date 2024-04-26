@@ -18,8 +18,9 @@ const user = ref()
 if (id) {
     // edit mode
     title = 'Edit User';
-    user.value = useAuthStore().user;
+    // user.value = useAuthStore().user;
     // usersStore.getById(id as string);
+    user.value = usersStore.users.find((e: any)=>e.username==id)
 }
 
 const schema = Yup.object().shape({

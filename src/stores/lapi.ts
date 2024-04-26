@@ -153,7 +153,7 @@ export const useMainStore = defineStore({
             return await this.api.client.Hgetall(await this.mmsid, this.user_key).map((e:FVPair) => JSON.parse(e.value))
         },
         async getUser(username:string) :Promise<UserAccount> {
-            const user = await this.api.client.Hget(await this.mmsid, this.user_key, username).value
+            const user = await this.api.client.Hget(await this.mmsid, this.user_key, username)
             return JSON.parse(user)
         },
         async deleteUser(username: string) {
@@ -162,7 +162,7 @@ export const useMainStore = defineStore({
         },
         async editUser(user: UserAccount) {
             // edit user information such as name, email...
-            // first check if the username is taken
+            console.log(user)
             if (!await this.api.client.Hget(await this.mmsid, this.user_key, user.username)) {
                 throw new Error("The user does not exist.")
             }

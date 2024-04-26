@@ -17,6 +17,7 @@ function request(method: string) {
             requestOptions.headers['Content-Type'] = 'application/json';
             requestOptions.body = JSON.stringify(body);
         }
+        console.log(url, requestOptions)
         return fetch(url, requestOptions).then(handleResponse);
         // fetch is monkey patched in fake-backend
     }
@@ -42,6 +43,7 @@ async function handleResponse(response:any) {
     const isJson = response.headers?.get('content-type')?.includes('application/json');
     const data = isJson ? await response.json() : null;
 
+    console.log(data)
     // check for error response
     if (!response.ok) {
         const { user, logout } = useAuthStore();

@@ -36,7 +36,7 @@ async function onSubmit() {
               <label for="llm">选择大模型：</label>
               <select v-model="settings.llm" id="llm" class="form-select mt-2 mb-3">
                 <option value="openai" selected>OpenAI</option>
-                <option value="qianfan">百度千帆</option>
+                <!-- <option value="qianfan">百度千帆</option> -->
               </select>
             </div>
             <div class="col-4">

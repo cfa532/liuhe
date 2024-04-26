@@ -80,7 +80,8 @@ function leitherBackend() {
             async function getUserById() {
                 if (!isAuthenticated()) return unauthorized();
 
-                const user = await userMimei.getUser(idFromUrl())
+                const user = await userMimei.getUser(idFromUrl()!)
+                console.log(user)
                 return ok(basicDetails(user));
             }
 
@@ -89,21 +90,27 @@ function leitherBackend() {
 
                 const params = body();
                 // username cannot be changed, remove it from params
-                delete params.username
-
+                // delete params.username
                 // only update password if entered
                 if (!params.password) {
                     delete params.password;
                 }
                 
-                const user = useAuthStore().user
-                Object.assign(user, params);
-
-                // make a DEEP copy of user, because userMimei makes change to ua
-                const ua = {"username":user.username, "familyName":user.familyName, "givenName":user.givenName,
-                    "password":user.password, "mid":user.mid, template: llmTemplate}    // a tempt solution to change user template
+                const user = useAuthStore().user    // get login user
+                let ua: UserAccount = {} as any
+                if (user.username !== params.username) {
+                    // happens only when admin is changing other user's information
+                    Object.assign(ua, params);
+                } else {
+                    // updating user self
+                    Object.assign(user, params);
+                    // make a DEEP copy of user, because userMimei makes change to ua
+                    ua = {username: user.username, familyName: user.familyName, givenName: user.givenName, role: user.role,
+                        password: user.password, mid: user.mid, template: llmTemplate}    // a tempt solution to change user template
+                }
                 userMimei.editUser(ua).then(()=>{
-                    localStorage.setItem('user', JSON.stringify(user));
+                    if (params.username == user.username)
+                        localStorage.setItem('user', JSON.stringify(user));
                     return ok();
                 }, err=>{
                     console.error("update failed:", err)
@@ -147,8 +154,7 @@ function leitherBackend() {
             }
 
             function idFromUrl() {
-                const urlParts = url.split('/');
-                return urlParts[urlParts.length - 1];
+                return url.split('/').pop();
             }
 
             function headers() {

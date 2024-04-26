@@ -29,6 +29,7 @@ export const useUsersStore = defineStore({
             }
         },
         async update(id:string, params:any) {
+            console.log(id, params)
             await fetchWrapper.put(`${baseUrl}/${id}`, params);
 
             // // update stored user if the logged in user updated their own record
