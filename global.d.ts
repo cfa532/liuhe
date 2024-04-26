@@ -9,6 +9,7 @@ interface Window {
 interface ChatItem {
     Q: string;      // query
     A: string;      // answer by AI
+    token?: number;   // token cost for this chat
 }
 interface ChatCase {       // chat
     // this.id is used as Key to the chat history Score_Pair
@@ -18,6 +19,7 @@ interface ChatCase {       // chat
     timestamp: number,      // date and time this leagal case is created in the system. Updated every time change is made
                             // used to sort the chat case list
     brief: string,          // brief description of the case
+    show?: boolean          // show or hide this case
 }
 interface UserAccount {
     username: string,
@@ -27,7 +29,7 @@ interface UserAccount {
     mid: string,            // Mimei id for this user's db, everything of the user is stored in the Mimei
     role?: string,           // 用户身份：分析师，交易员，财务？
     template?: any,         // dictionary that hold user settings of LLM
-    token?: string,
+    token?: number,         // total cost of tokens by this accout
 }
 
 // Mimei data structures

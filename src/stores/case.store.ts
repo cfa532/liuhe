@@ -54,28 +54,32 @@ export const useCaseStore = defineStore({
                 throw new Error(err)
             }
         },
-        async createCase(caption:string):Promise<string> {
+        async createCase(caption:string) :Promise<string> {
             // A new case created when the 1st round of chat is finished and a chat item passed it.
             // add a new Case to database FV and return the Field. Use
             // also use this hashkey as chat_history key and template FV key
-            const c = this._value
-            c.timestamp = Date.now()
-            c.id = c.timestamp.toString()
-            c.brief = caption
+            const kase = this._value
+            kase.timestamp = Date.now()
+            kase.id = kase.timestamp.toString()
+            kase.brief = caption
+            kase.show = true
 
             // create a new Chat Case in Mimei
-            await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_KEY, c.id, c);     // to get case list quickly
+            await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_KEY, kase.id, kase);     // to get case list quickly
             await this.backup()
             this.chatHistory = []
-            return c.id
+            return kase.id
         },
         async addChatItem(ci:ChatItem) {
             // add a chat item to chat history of the current case
-            const c = this._value
-            c.timestamp = Date.now()
-            await this.api.client.Hset(await this.mmsidCur, CHAT_HISTORY_KEY+c.id, c.timestamp, ci)
+            const kase = this._value
+            kase.timestamp = Date.now()
+            
+            // add a new ChatItem to the Case.
+            await this.api.client.Hset(await this.mmsidCur, CHAT_HISTORY_KEY+kase.id, kase.timestamp, ci)
+
             // update timestamp of the current case
-            await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_KEY, c.id, c);
+            await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_KEY, kase.id, kase);
             await this.backup()
             // this.chatHistory.unshift(ci)
             // await this.getChatHistory()
@@ -141,8 +145,9 @@ export const useCaseListStore = defineStore({
             // get a sorted list of all cases information
             const t = await this.api.client.Hgetall(await this.mmsid, CHAT_CASE_KEY)
             const cases:ChatCase[] = t.map((e:any)=>e.value)
-            cases.sort((a,b)=> b.timestamp - a.timestamp)
-            return cases
+            const validCases = cases.filter((e:any)=>e.show!=false)
+            validCases.sort((a,b)=> b.timestamp - a.timestamp)
+            return validCases
         },
     },
     actions: {
@@ -162,12 +167,14 @@ export const useCaseListStore = defineStore({
             localStorage["activeId"] = id
             this._activeId = id
         },
-        async deleteCase(id:string) {
+        async hideCase(id:string) {
             // id must be activeId
-            await this.api.client.Hdel(await this.mmsidCur, CHAT_CASE_KEY, id)
-            await this.api.client.Del(await this.mmsidCur, CHAT_HISTORY_KEY+id)
+            const kase = await this.api.client.Hget(await this.mmsid, CHAT_CASE_KEY, id)
+            kase.show = false
+            await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_KEY, id, kase)    // do NOT delete a case, just hide it.
+            // await this.api.client.Del(await this.mmsidCur, CHAT_HISTORY_KEY+id)
             await this.backup()
-            localStorage.removeItem(id)
+            localStorage.removeItem("activeId")
         }
     }
 })

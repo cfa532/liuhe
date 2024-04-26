@@ -86,7 +86,7 @@ onErrorCaptured((err)=>{
     return false
 })
 async function deletePost() {
-    await caseList.deleteCase(route.params.id as string)
+    await caseList.hideCase(route.params.id as string)
     emits("newCaseId", "0")
 }
 </script>
