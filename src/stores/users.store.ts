@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { fetchWrapper } from '@/helpers';
+import { useAuthStore } from '@/stores';
 
 // const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
 const baseUrl = '/users'
@@ -32,7 +33,7 @@ export const useUsersStore = defineStore({
             console.log(id, params)
             await fetchWrapper.put(`${baseUrl}/${id}`, params);
 
-            // // update stored user if the logged in user updated their own record
+            // update stored user if the logged in user updated their own record
             // const authStore = useAuthStore();
             // if (id === authStore.user!.username) {
             //     // update local storage
@@ -44,24 +45,21 @@ export const useUsersStore = defineStore({
             //     authStore.user = user;
             // }
         },
-        // deprecated
         async delete(id:string) {
-            console.log(id)
-            return 
+            console.log("Deleting user", id)
             
-            // // add isDeleting prop to user being deleted
-            // this.users.find((x:any) => x.id === id).isDeleting = true;
+            // add isDeleting prop to user being deleted
+            this.users.find((x:any) => x.username === id).isDeleting = true;
+            await fetchWrapper.delete(`${baseUrl}/${id}`);
 
-            // await fetchWrapper.delete(`${baseUrl}/${id}`);
+            // remove user from list after deleted
+            this.users = this.users.filter((x:any) => x.username !== id);
 
-            // // remove user from list after deleted
-            // this.users = this.users.filter((x:any) => x.id !== id);
-
-            // // auto logout if the logged in user deleted their own record
-            // const authStore = useAuthStore();
-            // if (id === authStore.user.id) {
-            //     authStore.logout();
-            // }
+            // auto logout if the logged in user deleted their own record
+            const authStore = useAuthStore();
+            if (id === authStore.user.username) {
+                authStore.logout();
+            }
         }
     }
 });

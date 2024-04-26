@@ -121,6 +121,9 @@ function leitherBackend() {
             function deleteUser() {
                 // do nothing for now
                 if (!isAuthenticated()) return unauthorized();
+                const id = idFromUrl()!
+                console.log(id)
+                userMimei.deleteUser(id)
                 return ok("");
             }
 
@@ -149,7 +152,8 @@ function leitherBackend() {
             }
 
             function body() {
-                console.log("body()", JSON.parse(opts.body))
+                // console.log("body()", JSON.parse(opts.body))
+                console.log(opts.body)
                 return opts.body && JSON.parse(opts.body);
             }
 

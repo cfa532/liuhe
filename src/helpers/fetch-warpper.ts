@@ -42,7 +42,6 @@ function authHeader(url:string) {
 async function handleResponse(response:any) {
     const isJson = response.headers?.get('content-type')?.includes('application/json');
     const data = isJson ? await response.json() : null;
-
     console.log(data)
     // check for error response
     if (!response.ok) {
