@@ -11,16 +11,15 @@ const usersStore = useUsersStore();
 const alertStore = useAlertStore();
 const route = useRoute();
 const id = route.params.id;
-
-let title = 'Add User';
-// let user:any = null;
 const user = ref()
+let title = 'Add User';
+
 if (id) {
     // edit mode
     title = 'Edit User';
+    user.value = usersStore.users.find((e: any)=>e.username==id)
     // user.value = useAuthStore().user;
     // usersStore.getById(id as string);
-    user.value = usersStore.users.find((e: any)=>e.username==id)
 }
 
 const schema = Yup.object().shape({
