@@ -6,10 +6,27 @@ interface Window {
     lapi: any         // Leither api handler
 }
 
+// User accounts are saved in Main DB in a seperate Mimei. Each user has an individual Mimei for its data.
+interface UserAccount {
+    username: string,
+    familyName: string,
+    givenName: string,
+    password: string,
+    mid: string,            // Mimei id for this user's db, everything of the user is stored in the Mimei
+    role?: string,           // 用户身份：分析师，交易员，财务？
+    template?: any,         // dictionary that hold user settings of LLM
+}
+
+interface Book {
+    date: string,       // Date formated in YYMMDD
+    token: number,      // number of tokens on the date
+}
+
 interface ChatItem {
     Q: string;      // query
     A: string;      // answer by AI
-    token?: number;   // token cost for this chat
+    tokens?: number;   // token cost for this chat
+    cost?: number;    // cost in $US
 }
 interface ChatCase {       // chat
     // this.id is used as Key to the chat history Score_Pair
@@ -21,17 +38,6 @@ interface ChatCase {       // chat
     brief: string,          // brief description of the case
     show?: boolean          // show or hide this case
 }
-interface UserAccount {
-    username: string,
-    familyName: string,
-    givenName: string,
-    password: string,
-    mid: string,            // Mimei id for this user's db, everything of the user is stored in the Mimei
-    role?: string,           // 用户身份：分析师，交易员，财务？
-    template?: any,         // dictionary that hold user settings of LLM
-    token?: number,         // total cost of tokens by this accout
-}
-
 // Mimei data structures
 interface ScorePair { 
     score: number

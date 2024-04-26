@@ -39,6 +39,8 @@ async function onSubmit() {
                 console.log("Ws received:", event, ci)
                 ci.Q = query.value
                 ci.A = event.answer
+                ci.token = event.tokens
+                ci.cost = event.cost
                 chatHistory.value!.unshift(ci)
                 caseStore.addChatItem(ci)
                 query.value = ""
