@@ -14,29 +14,68 @@ const stream_in = ref("")
 const spinner = ref("提交")
 const btnSubmit = ref()
 const chatHistory = ref<ChatItem[]>([])
+let socket: WebSocket
+let timer: any
+let startTime = 0       // time between sending message and receives first reply.
 
 async function onSubmit() {
     spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
     btnSubmit.value.disabled = true
 
-    const timer = window.setTimeout(()=>{
+    timer = window.setTimeout(()=>{
         // alert user to reload
         window.alert("如果等待超时，尝试刷新页面后重新提交。")
         spinner.value = "提交"
         btnSubmit.value.disabled = false
     }, 120000)
 
-    const socket = new WebSocket(import.meta.env.VITE_LLM_URL)
+    // send message to websoceket and wait for response
+    const ci = {} as ChatItem
+    query.value = typeof query.value =="undefined" ? "Hello" : query.value;        // query submitted to AI
+    ci.Q = query.value
+    ci.A = ""
+    const qwh: any = {query: ci.Q, history: [] as Array<ChatItem>}   // query with history
+    for (let i=0; i<Math.min(6, chatHistory.value.length); i++) {
+        qwh.history.push(chatHistory.value[i])
+    }
+    stream_in.value = ""
+
+    if (socket.readyState == WebSocket.OPEN) {
+        startTime = Date.now()
+        socket.send(JSON.stringify({input: qwh, parameters: user.template}))
+    }
+    else {
+        console.warn("Reopen websocket.")
+        openSocket()
+        window.setTimeout(()=>{
+            startTime = Date.now()
+            socket.send(JSON.stringify({input: qwh, parameters: user.template}))
+        }, 3000)
+    }
+}
+onMounted(async ()=>{
+    // load chat history of a particular case
+    await caseStore.initCase(route.params.id as string)
+    console.log("Case Mounted", caseStore.$state)
+    chatHistory.value = caseStore.chatHistory
+    openSocket()
+})
+function openSocket() {
+    console.log("New websocket created.")
+    socket = new WebSocket(import.meta.env.VITE_LLM_URL)
     socket.onmessage = ({ data }) => {
         const event = JSON.parse(data)
         const ci = {} as ChatItem
         window.clearTimeout(timer)
         switch (event.type) {
             case "stream":
+                if (startTime>0) {
+                    console.log("time diff=", Date.now()-startTime); startTime=0
+                }
                 stream_in.value += event.data;
                 break
             case "result":
-                console.log("Ws received:", event, ci)
+                console.log("Ws received:", event)
                 ci.Q = query.value
                 ci.A = event.answer
                 ci.tokens = event.tokens
@@ -47,7 +86,6 @@ async function onSubmit() {
                 stream_in.value = ""
                 spinner.value = "提交"
                 btnSubmit.value.disabled = false
-                socket.close(1000, "Job done")
                 break
             default:
                 console.warn("Ws default:", data)
@@ -61,28 +99,7 @@ async function onSubmit() {
         btnSubmit.value.disabled = false
         socket.close(1000, "Job done")
     }
-    socket.onopen = ()=>{
-        // send message to websoceket and wait for response
-        const ci = {} as ChatItem
-        query.value = typeof query.value =="undefined" ? "Hello" : query.value;        // query submitted to AI
-        ci.Q = query.value
-        ci.A = ""
-        const qwh: any = {query: ci.Q, history: [] as Array<ChatItem>}   // query with history
-        for (let i=0; i<Math.min(6, chatHistory.value.length); i++) {
-            qwh.history.push(chatHistory.value[i])
-        }
-        console.log(qwh, user.template)
-        
-        stream_in.value = ""
-        socket.send(JSON.stringify({input: qwh, parameters: user.template}))
-    }
 }
-onMounted(async ()=>{
-    // load chat history of a particular case
-    await caseStore.initCase(route.params.id as string)
-    console.log("Case Mounted", caseStore.$state)
-    chatHistory.value = caseStore.chatHistory
-})
 watch(()=>route.params.id, async (nv, ov)=>{
     // force changing of user case
     if (nv && nv!=ov) {
