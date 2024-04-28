@@ -53,7 +53,6 @@ function leitherBackend() {
 
             function register() {
                 const user = body();    // http request body
-
                 // register a system admin
                 user.role = user.username=="admin" ? "admin" : "user"
                 user.template = llmTemplate
@@ -105,6 +104,7 @@ function leitherBackend() {
                     // updating user self
                     Object.assign(user, params);
                     // make a DEEP copy of user, because userMimei makes change to ua
+                    // user.role = user.username=="admin" ? "admin" : "user"
                     ua = {username: user.username, familyName: user.familyName, givenName: user.givenName, role: user.role,
                         password: user.password, mid: user.mid, template: llmTemplate}    // a tempt solution to change user template
                 }
