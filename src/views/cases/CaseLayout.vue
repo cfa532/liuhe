@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { CaseList } from '@/components';
-const caseId = ref("")
+const caseId = ref()
 // function newCase(id:string) {
 //   console.log("new case id", id)
 //   if (id)
@@ -27,7 +27,7 @@ function shrink() {
             <CaseList @side-nav-closed="shrink" :caseId="caseId"></CaseList>
         </div>
         <div class="col">
-            <router-view @newCaseId="(id:string)=>caseId=id"></router-view>
+            <router-view @newCaseId="(id:string) => caseId=id"></router-view>
         </div>
         <div style="width: 5px;"></div>
       </div>

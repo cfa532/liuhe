@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { router } from '@/router'
-import { useAlertStore, useCaseStore } from '@/stores';
+import { useAlertStore, useCaseListStore } from '@/stores';
 
 // const formValues = ref({title:"田产地头纠纷",brief:"张三告李四多吃多占",plaintiff:"张三",defendant:"李四"})
-const caseStore = useCaseStore()
+const caseListStore = useCaseListStore()
 const alertStore = useAlertStore()
 const caption=ref()
 
@@ -18,13 +18,13 @@ async function onSubmit() {
         alertStore.error("标题必填")
         return
     }
-    const newId = await caseStore.createCase(caption.value)
-    alertStore.success("New case added, " + caseStore.case)
+    const newId = await caseListStore.addCase(caption.value)
+    // alertStore.success("New caseId="+newId)
     emits("newCaseId", newId)    // To have case list updated
     router.push("/case/edit/"+newId)
 }
 onMounted(()=>{
-    console.log("New Case Mounted", caseStore.mid)
+    console.log("New Case Mounted")
 })
 </script>
 

@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { onErrorCaptured, onMounted, ref, watch } from 'vue';
 import { useAuthStore, useCaseStore, useCaseListStore } from '@/stores';
+import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { Share } from '@/components'
 
 const emits = defineEmits(["newCaseId"])     // add new case to list
 const caseList = useCaseListStore()
 const caseStore = useCaseStore()
+const caseStoreRefs = storeToRefs(caseStore)
 const { user } = useAuthStore()
 const route = useRoute();
 const query = ref()
 const stream_in = ref("")
 const spinner = ref("提交")
 const btnSubmit = ref()
-const chatHistory = ref<ChatItem[]>([])
+// const chatHistory = ref<ChatItem[]>([])
 let socket: WebSocket
 let timer: any
 let startTime = 0       // time between sending message and receives first reply.
@@ -35,17 +37,16 @@ async function onSubmit() {
     ci.Q = query.value
     ci.A = ""
     const qwh: any = {query: ci.Q, history: [] as Array<ChatItem>}   // query with history
-    for (let i=0; i<Math.min(6, chatHistory.value.length); i++) {
-        qwh.history.push(chatHistory.value[i])
+    for (let i=0; i<Math.min(6, caseStoreRefs.chatHistory.value.length); i++) {
+        qwh.history.push(caseStoreRefs.chatHistory.value[i])
     }
     stream_in.value = ""
 
-    if (socket.readyState == WebSocket.OPEN) {
+    if (socket && socket.readyState == WebSocket.OPEN) {
         startTime = Date.now()
         socket.send(JSON.stringify({input: qwh, parameters: user.template}))
     }
     else {
-        console.warn("Reopen websocket.")
         openSocket()
         window.setTimeout(()=>{
             startTime = Date.now()
@@ -56,12 +57,11 @@ async function onSubmit() {
 onMounted(async ()=>{
     // load chat history of a particular case
     await caseStore.initCase(route.params.id as string)
-    console.log("Case Mounted", caseStore.$state)
-    chatHistory.value = caseStore.chatHistory
-    openSocket()
+    console.log("Case Mounted")
+    // openSocket()
 })
 function openSocket() {
-    console.log("New websocket created.")
+    console.log("Open socket")
     socket = new WebSocket(import.meta.env.VITE_LLM_URL)
     socket.onmessage = ({ data }) => {
         const event = JSON.parse(data)
@@ -80,7 +80,7 @@ function openSocket() {
                 ci.A = event.answer
                 ci.tokens = event.tokens
                 ci.cost = event.cost
-                chatHistory.value!.unshift(ci)
+                caseStoreRefs.chatHistory.value!.unshift(ci)
                 caseStore.addChatItem(ci)
                 query.value = ""
                 stream_in.value = ""
@@ -104,17 +104,17 @@ watch(()=>route.params.id, async (nv, ov)=>{
     // force changing of user case
     if (nv && nv!=ov) {
         await caseStore.initCase(nv as string)
-        chatHistory.value = caseStore.chatHistory
-        console.log(caseStore.case)
+        console.log(caseStoreRefs.case.value, nv, ov)
     }},
 )
 onErrorCaptured((err)=>{
     console.error(err)
     return false
 })
-async function deletePost() {
+async function hideCase() {
+    console.log("hide case", route.params.id)
     await caseList.hideCase(route.params.id as string)
-    emits("newCaseId", "0")
+    emits("newCaseId", "-"+route.params.id)
 }
 </script>
 
@@ -122,7 +122,7 @@ async function deletePost() {
 <div class="col-md-10 col-sm-12">
 <form>
 <div class="container d-grid row-gap-3">
-    <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="deletePost"></Share>
+    <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="hideCase"></Share>
 
     <div class="row mt-2">
         <textarea class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
@@ -140,7 +140,7 @@ async function deletePost() {
         <p></p>
         <hr/>
     </div>
-    <div style="margin-left: 1px;" v-for="(ci, index) in chatHistory" :key="index">
+    <div style="margin-left: 1px;" v-for="(ci, index) in caseStoreRefs.chatHistory.value" :key="index">
         <div class="Q"><label>Q:&nbsp;</label>{{ ci.Q }}</div>
         <div class="A"><label>A:&nbsp;</label>{{ ci.A }}</div>
         <p></p>
