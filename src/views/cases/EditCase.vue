@@ -42,12 +42,13 @@ async function onSubmit() {
     if (checkedItems.value.length > 0) {
         for (let i=0; i<Math.min(6, checkedItems.value.length); i++) {
             const item: ChatItem = checkedItems.value[i]
-            qwh.history.push({Q: item.Q.replace(/"/g, "'"), A:item.A.replace(/"/g, "'")})
+            qwh.history.push({Q: item.Q.replace(/"/g, "'"), A:item.A.replace(/"/g, "'").replace(/\s+/g, " ")})
         }
     } else {
         for (let i=0; i<Math.min(6, caseStoreRefs.chatHistory.value.length); i++) {
             const item: ChatItem = caseStoreRefs.chatHistory.value[i]
-            qwh.history.push({Q: item.Q.replace(/"/g, "'"), A:item.A.replace(/"/g, "'")})        }
+            qwh.history.push({Q: item.Q.replace(/"/g, "'"), A:item.A.replace(/"/g, "'").replace(/\s+/g, " ")})
+        }
     }
     console.log(qwh, checkedItems.value)
     stream_in.value = ""
