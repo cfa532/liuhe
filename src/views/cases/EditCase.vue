@@ -15,6 +15,8 @@ const query = ref()
 const stream_in = ref("")
 const spinner = ref("提交")
 const btnSubmit = ref()
+const checkedItems = ref([])
+
 // const chatHistory = ref<ChatItem[]>([])
 let socket: WebSocket
 let timer: any
@@ -37,9 +39,17 @@ async function onSubmit() {
     ci.Q = query.value
     ci.A = ""
     const qwh: any = {query: ci.Q, history: [] as Array<ChatItem>}   // query with history
-    for (let i=0; i<Math.min(6, caseStoreRefs.chatHistory.value.length); i++) {
-        qwh.history.push(caseStoreRefs.chatHistory.value[i])
+    if (checkedItems.value.length > 0) {
+        for (let i=0; i<Math.min(6, checkedItems.value.length); i++) {
+            const item: ChatItem = checkedItems.value[i]
+            qwh.history.push({Q: item.Q.replace(/"/g, "'"), A:item.A.replace(/"/g, "'")})
+        }
+    } else {
+        for (let i=0; i<Math.min(6, caseStoreRefs.chatHistory.value.length); i++) {
+            const item: ChatItem = caseStoreRefs.chatHistory.value[i]
+            qwh.history.push({Q: item.Q.replace(/"/g, "'"), A:item.A.replace(/"/g, "'")})        }
     }
+    console.log(qwh, checkedItems.value)
     stream_in.value = ""
 
     if (socket && socket.readyState == WebSocket.OPEN) {
@@ -86,6 +96,7 @@ function openSocket() {
                 stream_in.value = ""
                 spinner.value = "提交"
                 btnSubmit.value.disabled = false
+                checkedItems.value = []
                 break
             default:
                 console.warn("Ws default:", data)
@@ -119,35 +130,38 @@ async function hideCase() {
 </script>
 
 <template>
-<div class="col-md-10 col-sm-12">
-<form>
-<div class="container d-grid row-gap-3">
-    <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="hideCase"></Share>
+    <div class="col-md-10 col-sm-12">
+        <form>
+            <div class="container d-grid row-gap-3">
+                <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="hideCase"></Share>
+                <div class="row mt-2">
+                    <textarea class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
+                    <p></p>
+                    <div class="col">
+                        <button ref="btnSubmit" @click.prevent="onSubmit" type="button"
+                            style="position: relative; float: right;" class="btn btn-primary" v-html="spinner"></button>
+                    </div>
+                </div>
+            </div>
 
-    <div class="row mt-2">
-        <textarea class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
-        <p></p>
-        <div class="col">
-            <button ref="btnSubmit" @click.prevent="onSubmit" type="button" style="position: relative; float: right;" class="btn btn-primary" v-html="spinner"></button>
-        </div>
-    </div>
-</div>
-</form>
+            <div class="row text-secondary mt-4">
+                <div v-if="stream_in.length > 0">
+                    <div style="white-space: pre-wrap; color: black;"><label>A:&nbsp;</label>{{ stream_in }}</div>
+                    <p></p>
+                    <hr />
+                </div>
+                <div style="margin-left: 1px;" v-for="(ci, index) in caseStoreRefs.chatHistory.value" :key="index">
+                    <div class="Q">{{ "Q: " + ci.Q }}
+                        <input type="checkbox" :value="ci" v-model="checkedItems">
+                    </div>
+                    <div class="A"><label>A:&nbsp;</label>{{ ci.A }}</div>
+                    <p></p>
+                    <hr />
+                </div>
+            </div>
+        </form>
 
-<div class="row text-secondary mt-4">
-    <div v-if="stream_in.length>0">
-        <div style="white-space: pre-wrap; color: black;"><label>A:&nbsp;</label>{{ stream_in }}</div>
-        <p></p>
-        <hr/>
     </div>
-    <div style="margin-left: 1px;" v-for="(ci, index) in caseStoreRefs.chatHistory.value" :key="index">
-        <div class="Q"><label>Q:&nbsp;</label>{{ ci.Q }}</div>
-        <div class="A"><label>A:&nbsp;</label>{{ ci.A }}</div>
-        <p></p>
-        <hr/>
-    </div>
-</div>
-</div>
 </template>
 <style>
 div.Q {
@@ -156,7 +170,8 @@ div.Q {
     border-radius: 10px;
     padding: 5px;
     margin-bottom: 10px;
-
+    display: flex;
+    justify-content: space-between;
 }
 div.A {
     white-space: pre-wrap;
