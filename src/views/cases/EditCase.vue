@@ -155,7 +155,7 @@ async function hideCase() {
                     <div class="Q">{{ "Q: " + ci.Q }}
                         <input type="checkbox" :value="ci" v-model="checkedItems">
                     </div>
-                    <div class="A"><label>A:&nbsp;</label>{{ ci.A }}</div>
+                    <div class="A">{{"A: " + ci.A }}</div>
                     <p></p>
                     <hr />
                 </div>
@@ -169,7 +169,7 @@ div.Q {
     background-color:rgb(238, 238, 213);
     /* border: 1px solid blue; */
     border-radius: 10px;
-    padding: 5px;
+    padding: 5px 5px 5px 0;
     margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
