@@ -64,7 +64,7 @@ function closeNav() {
         <a href="javascript:void(0)" class="closebtn" @click="closeNav()">&times;</a>
         <div class="btn-group-vertical btn-group-sm d-grid gap-1" role="group" aria-label="Small button group">
             <button @click="addNewCase" type="button" class="btn btn-light text-nowrap btn-outline-primary">
-                <span style="display: block; width: 120px;">新建</span>
+                <span style="display: block; width: 120px;">新建对话</span>
             </button>
             <button @click="selectCase(c)" v-for="(c, i) in cases" :key="i" type="button"
                 :class="btnClass(c)">{{ c.brief }}</button>
