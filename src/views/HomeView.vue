@@ -42,8 +42,8 @@ async function onSubmit() {
             <div class="col-4">
               <label for="llm">选择模型：</label>
               <select v-model="settings.model" id="llm" class="form-select mt-2 mb-3">
-                <option value="gpt-4" selected>GPT-4</option>
-                <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                <option value="gpt-4-turbo" selected>GPT-4 Turbo</option>
+                <option value="gpt-4">GPT-4</option>
               </select>
             </div>
           </div>
