@@ -70,6 +70,7 @@ onMounted(async ()=>{
     await caseStore.initCase(route.params.id as string)
     console.log("Case Mounted")
     // openSocket()
+    document
 })
 function openSocket() {
     console.log("Open socket")
@@ -136,7 +137,7 @@ async function hideCase() {
             <div class="container d-grid row-gap-3">
                 <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="hideCase"></Share>
                 <div class="row mt-2">
-                    <textarea class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
+                    <textarea @keydown.enter.exact.prevent="onSubmit" class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
                     <p></p>
                     <div class="col">
                         <button ref="btnSubmit" @click.prevent="onSubmit" type="button"
