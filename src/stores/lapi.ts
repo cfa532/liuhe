@@ -52,37 +52,17 @@ export const useLeitherStore = defineStore({
         }
     },
     actions: {
-        login(user=import.meta.env.VITE_LEITHER_USERNAME, pswd=import.meta.env.VITE_LEITHER_PASSWD) {
-            return new Promise<any>((resolve, reject)=>{
-                this.client.Login(user, pswd, "byname").then(
-                    (result:any)=>{ 
-                        this._sid = result.sid      // set State sid
-                        sessionStorage.setItem("sid", JSON.stringify({sid: result.sid, uid: result.uid, timestamp:Date.now()}) )
-                        this.client.SignPPT(this._sid, {
-                            CertFor: "Self",
-                            Userid: result.uid,
-                            RequestService: "mimei"
-                        }, 1).then(
-                            (ppt:any)=>{
-                            console.log("ppt=", JSON.parse(ppt))
-                            this.client.RequestService(ppt).then(
-                                (map:any)=>{
-                                    console.log("Request service: ", map)
-                                    resolve(this)
-                                }, (err:Error)=>{
-                                    console.error("Request service error=", err)
-                                    reject("Request service error")
-                                })
-                        }, (err:Error)=>{
-                            console.error("Sign PPT error=", err)
-                            reject("Sign PPT error")
-                        })
-                    }, (e:Error) => {
-                        console.error("Leither login error=", e)
-                        reject("Leither login error")
-                    }
-                )
-            })
+        async login(user = import.meta.env.VITE_LEITHER_USERNAME, pswd = import.meta.env.VITE_LEITHER_PASSWD) {
+            const result = await this.client.Login(user, pswd, "byname") as any
+            this._sid = result.sid      // set State sid
+            sessionStorage.setItem("sid", JSON.stringify({ sid: result.sid, uid: result.uid, timestamp: Date.now() }))
+            const ppt = await this.client.SignPPT(this._sid, {
+                CertFor: "Self",
+                Userid: result.uid,
+                RequestService: "mimei"
+            }, 1)
+            const map = await this.client.RequestService(ppt)
+            console.log("Request service: ", JSON.parse(ppt), map)
         },
         logout() {
             sessionStorage.removeItem("sid");

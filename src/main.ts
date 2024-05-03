@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { router } from '@/router'
-import { useLeitherStore } from "@/stores"
+import { useLeitherStore, useAlertStore } from "@/stores"
 import App from './App.vue'
 
 // setup Leither backend as database
@@ -14,10 +14,9 @@ app.use(router)
 app.config.errorHandler = async (err, instance, info) => {
     // Handle the error globally
     console.error("Global error:", err);
-    window.alert(err)
     console.log("Vue instance:", instance);
     console.log("Error info:", info);
-
+    useAlertStore().error(err + "Try reload.")
     sessionStorage.removeItem("sid")
     await lapi.login()
 }
