@@ -18,24 +18,25 @@ app.config.errorHandler = async (err, instance, info) => {
     console.log("Error info:", info);
     useAlertStore().error(err + "Try reload.")
     sessionStorage.removeItem("sid")
-    await lapi.login()
+    // await lapi.login()
 }
 console.warn("main.ts built....on " + __BUILD_TIME__, "ver:"+import.meta.env.VITE_APP_VERSION)
-const lapi = useLeitherStore()
+// const lapi = useLeitherStore()
+app.mount('#app')
 
-try {
-    if (lapi.sid) {
-        console.log(lapi.$state, "sid="+lapi.sid)
-        app.mount('#app')
-    } else {
-        lapi.login().then(()=>{
-            console.log(lapi.$state)
-            app.mount('#app')
-        })
-    }
-} catch(err) {
-    lapi.logout()
-    console.error(err)
-    window.alert(err)
-    router.push("/account")
-}
+// try {
+//     if (await lapi.sid) {
+//         console.log(lapi.$state, "sid=" + await lapi.sid)
+//         app.mount('#app')
+//     } else {
+//         lapi.login().then(()=>{
+//             console.log(lapi.$state)
+//             app.mount('#app')
+//         })
+//     }
+// } catch(err) {
+//     lapi.logout()
+//     console.error(err)
+//     window.alert(err)
+//     router.push("/account")
+// }
