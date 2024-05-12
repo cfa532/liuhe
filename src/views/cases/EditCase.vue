@@ -153,10 +153,10 @@ async function hideCase() {
                     <hr />
                 </div>
                 <div style="margin-left: 1px;" v-for="(ci, index) in caseStoreRefs.chatHistory.value" :key="index">
-                    <div class="Q">{{ "Q: " + ci.Q }}
-                        <input type="checkbox" :value="ci" v-model="checkedItems" style="margin-left: 5px;">
+                    <div style="padding-left: 25px; text-indent: -20px;" class="Q">{{ "Q: " + ci.Q }}
+                        <input type="checkbox" :value="ci" v-model="checkedItems" style="margin: 6px 5px 0 5px;">
                     </div>
-                    <div class="A">{{"A: " + ci.A }}</div>
+                    <div style="padding-left: 25px; text-indent: -20px;" class="A">{{"A: " + ci.A }}</div>
                     <p></p>
                     <hr />
                 </div>
@@ -174,6 +174,7 @@ div.Q {
     margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
 }
 div.A {
     white-space: pre-wrap;
