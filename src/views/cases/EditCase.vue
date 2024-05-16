@@ -16,6 +16,7 @@ const stream_in = ref("")
 const spinner = ref("提交")
 const btnSubmit = ref()
 const checkedItems = ref([])
+const checkboxNoHistory = ref()
 
 // const chatHistory = ref<ChatItem[]>([])
 let socket: WebSocket
@@ -39,12 +40,15 @@ async function onSubmit() {
     ci.Q = query.value
     ci.A = ""
     const qwh: any = {query: ci.Q, history: [] as Array<ChatItem>}   // query with history
-    if (checkedItems.value.length > 0) {
+
+    if (checkedItems.value.length > 0 && !checkboxNoHistory.value) {
+        // if any previous conversations are checked, use them as chat history
         for (let i=0; i<Math.min(6, checkedItems.value.length); i++) {
             const item: ChatItem = checkedItems.value[i]
             qwh.history.push({Q: item.Q.replace(/"/g, "'"), A:item.A.replace(/"/g, "'").replace(/\s+/g, " ")})
         }
-    } else {
+    } else if (!checkboxNoHistory.value) {
+        // otherwise use the most recent 6 chats as history
         for (let i=0; i<Math.min(6, caseStoreRefs.chatHistory.value.length); i++) {
             const item: ChatItem = caseStoreRefs.chatHistory.value[i]
             qwh.history.push({Q: item.Q.replace(/"/g, "'"), A:item.A.replace(/"/g, "'").replace(/\s+/g, " ")})
@@ -99,6 +103,7 @@ function openSocket() {
                 spinner.value = "提交"
                 btnSubmit.value.disabled = false
                 checkedItems.value = []
+                checkboxNoHistory.value = false
                 break
             default:
                 console.warn("Ws default:", data)
@@ -136,8 +141,9 @@ async function hideCase() {
         <form>
             <div class="container d-grid row-gap-3">
                 <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="hideCase"></Share>
-                <div class="row mt-2">
+                <div class="row mt-2" style="position: relative;">
                     <textarea @keydown.enter.exact.prevent="onSubmit" class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
+                    <input title="No history if checked" style="position: absolute; top: 15px; right: 15px; transform: translate(50%, -50%);" type="checkbox" v-model="checkboxNoHistory">
                     <p></p>
                     <div class="col">
                         <button ref="btnSubmit" @click.prevent="onSubmit" type="button"
@@ -154,7 +160,7 @@ async function hideCase() {
                 </div>
                 <div style="margin-left: 1px;" v-for="(ci, index) in caseStoreRefs.chatHistory.value" :key="index">
                     <div style="padding-left: 25px; text-indent: -20px;" class="Q">{{ "Q: " + ci.Q }}
-                        <input type="checkbox" :value="ci" v-model="checkedItems" style="margin: 6px 5px 0 5px;">
+                        <input title="Check to add into history" type="checkbox" :value="ci" v-model="checkedItems" style="margin: 6px 5px 0 5px;">
                     </div>
                     <div style="padding-left: 25px; text-indent: -20px;" class="A">{{"A: " + ci.A }}</div>
                     <p></p>
