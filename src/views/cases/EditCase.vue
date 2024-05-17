@@ -143,7 +143,7 @@ async function hideCase() {
                 <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="hideCase"></Share>
                 <div class="row mt-2" style="position: relative;">
                     <textarea @keydown.enter.exact.prevent="onSubmit" class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
-                    <input title="No history if checked" style="position: absolute; top: 15px; right: 15px; transform: translate(50%, -50%);" type="checkbox" v-model="checkboxNoHistory">
+                    <input title="No history if checked" style="position: absolute; bottom: 55px; right: 15px; transform: translate(50%, -50%);" type="checkbox" v-model="checkboxNoHistory">
                     <p></p>
                     <div class="col">
                         <button ref="btnSubmit" @click.prevent="onSubmit" type="button"
