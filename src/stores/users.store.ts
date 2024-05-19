@@ -26,7 +26,13 @@ export const useUsersStore = defineStore({
         },
         async getAll() {
             try {
-                this.users = await fetchWrapper.get(baseUrl);
+                this.users = await fetchWrapper.get(`${baseUrl}/all`);
+                this.users.forEach((user: any) => {
+                    user.familyName = user.family_name
+                    user.givenName  = user.given_name
+                    delete user.family_name
+                    delete user.given_name
+                });
             } catch (error) {
                 this.users = { error };
             }

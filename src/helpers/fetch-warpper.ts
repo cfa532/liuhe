@@ -27,13 +27,13 @@ function request(method: string) {
 // helper functions
 function authHeader(url:string) {
     // return auth header with jwt if user is logged in and request is to the api url
-    const { user } = useAuthStore();
-    const isLoggedIn = !!user?.token;
+    const { user, token } = useAuthStore();
+    const isLoggedIn = !!token;
     const isAPIUrl = url.startsWith(import.meta.env.VITE_API_URL);
     // const isApiUrl = true
     console.log("API_URL", url, user, isLoggedIn)
     if (isLoggedIn && isAPIUrl) {
-        return { Authorization: `${user.token.token_type} ${user.token.access_token}` };
+        return { Authorization: `${token.token_type} ${token.access_token}` };
     } else {
         return {};
     }
