@@ -21,15 +21,16 @@ export const useAuthStore = defineStore({
                 const formData = new FormData();
                 formData.append("username", username);
                 formData.append("password", password);
-                const resp = await window.fetch(`${baseUrl}/token`, {method: "POST", body: formData}) as any
+                const resp = await window.fetch(`${baseUrl}/token`, {method: "POST", body: formData})
                 // const resp = await fetchWrapper.post(`${baseUrl}/token`, { username, password });
-                console.log(resp)
+                const result = await resp.json()
                 // update pinia state
-                this.user = resp.user;
+                this.user = result.user;
+                this.token = result.token
 
                 // store user details and jwt in local storage to keep user logged in between page refreshes
-                localStorage.setItem('user', JSON.stringify(resp.user));
-                localStorage.setItem("token", JSON.stringify(resp.token))
+                localStorage.setItem('user', JSON.stringify(result.user));
+                localStorage.setItem("token", JSON.stringify(result.token))
 
                 // redirect to previous url or default to home page
                 router.push(this.returnUrl || '/');
