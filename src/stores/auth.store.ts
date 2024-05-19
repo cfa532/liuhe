@@ -1,11 +1,8 @@
 import { defineStore } from 'pinia';
-
 import { fetchWrapper } from '@/helpers';
 import { router } from '@/router';
 import { useAlertStore, useCaseStore, useCaseListStore } from '@/stores';
-
-// const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
-const baseUrl = '/users'
+const baseUrl = `${import.meta.env.VITE_API_URL}`;
 
 export const useAuthStore = defineStore({
     id: 'auth',
@@ -13,6 +10,7 @@ export const useAuthStore = defineStore({
         // initialize state from local storage to enable user to stay logged in
         user: JSON.parse(localStorage.getItem('user')!),
         returnUrl: '/',
+        token: JSON.parse(localStorage.getItem('token')!)
     }),
     getters: {
         mid: state => state.user.mid,
@@ -20,13 +18,18 @@ export const useAuthStore = defineStore({
     actions: {
         async login(username:string, password:string) {
             try {
-                const user = await fetchWrapper.post(`${baseUrl}/authenticate`, { username, password });
-                console.log(user)
+                const formData = new FormData();
+                formData.append("username", username);
+                formData.append("password", password);
+                const resp = await window.fetch(`${baseUrl}/token`, {method: "POST", body: formData}) as any
+                // const resp = await fetchWrapper.post(`${baseUrl}/token`, { username, password });
+                console.log(resp)
                 // update pinia state
-                this.user = user;
+                this.user = resp.user;
 
                 // store user details and jwt in local storage to keep user logged in between page refreshes
-                localStorage.setItem('user', JSON.stringify(user));
+                localStorage.setItem('user', JSON.stringify(resp.user));
+                localStorage.setItem("token", JSON.stringify(resp.token))
 
                 // redirect to previous url or default to home page
                 router.push(this.returnUrl || '/');
@@ -41,6 +44,7 @@ export const useAuthStore = defineStore({
             useCaseListStore().$reset()
             localStorage.removeItem('user');
             localStorage.removeItem('activeId');
+            localStorage.removeItem("token")
             sessionStorage.removeItem("sid")
             router.push('/account/login');
             this.user = null as any;

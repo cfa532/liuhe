@@ -12,28 +12,28 @@ function request(method: string) {
         const requestOptions:any = {
             method,
             headers: authHeader(url)
-        };
+        }
         if (body) {
             requestOptions.headers['Content-Type'] = 'application/json';
             requestOptions.body = JSON.stringify(body);
         }
         console.log(url, requestOptions)
+
+        // fetch is monkey patched in fake-backend in the beginning of main.ts
         return fetch(url, requestOptions).then(handleResponse);
-        // fetch is monkey patched in fake-backend
     }
 }
 
 // helper functions
-
 function authHeader(url:string) {
     // return auth header with jwt if user is logged in and request is to the api url
     const { user } = useAuthStore();
     const isLoggedIn = !!user?.token;
-    // const isApiUrl = url.startsWith(import.meta.env.VITE_API_URL);
-    const isApiUrl = true
+    const isAPIUrl = url.startsWith(import.meta.env.VITE_API_URL);
+    // const isApiUrl = true
     console.log("API_URL", url, user, isLoggedIn)
-    if (isLoggedIn && isApiUrl) {
-        return { Authorization: `Bearer ${user.token}` };
+    if (isLoggedIn && isAPIUrl) {
+        return { Authorization: `${user.token.token_type} ${user.token.access_token}` };
     } else {
         return {};
     }

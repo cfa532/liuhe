@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia';
 import { fetchWrapper } from '@/helpers';
 import { useAuthStore } from '@/stores';
+import llmTemplate from '../assets/template.json'
 
-// const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
-const baseUrl = '/users'
+const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
+
 export const useUsersStore = defineStore({
     id: 'users',
     state: () => ({
@@ -12,6 +13,15 @@ export const useUsersStore = defineStore({
     }),
     actions: {
         async register(user: any) {
+            user.role = "user"
+            if (user.username == "admin") user.role = "admin"
+            user.subscription = false
+            user.family_name = user.familyName
+            user.given_name = user.givenName
+            user.template = llmTemplate
+            delete user.familyName
+            delete user.givenName
+            console.log(user)
             await fetchWrapper.post(`${baseUrl}/register`, user);
         },
         async getAll() {

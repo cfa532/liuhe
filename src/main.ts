@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { router } from '@/router'
-import { useLeitherStore, useAlertStore } from "@/stores"
+import { useAlertStore } from "@/stores"
 import App from './App.vue'
 
 // setup Leither backend as database
@@ -9,7 +9,9 @@ import { leitherBackend } from './helpers';
 
 const app = createApp(App)
 app.use(createPinia())
-leitherBackend();   // init backend after Pinia
+
+// leitherBackend();   // init customize backend fetch with Leither function
+
 app.use(router)
 app.config.errorHandler = async (err, instance, info) => {
     // Handle the error globally

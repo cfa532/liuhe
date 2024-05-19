@@ -7,14 +7,29 @@ interface Window {
 }
 
 // User accounts are saved in Main DB in a seperate Mimei. Each user has an individual Mimei for its data.
-interface UserAccount {
-    username: string,
-    familyName: string,
-    givenName: string,
-    password: string,
-    mid: string,            // Mimei id for this user's db, everything of the user is stored in the Mimei
-    role?: string,           // 用户身份：分析师，交易员，财务？
-    template?: any,         // dictionary that hold user settings of LLM
+// interface UserAccount {
+//     username: string,
+//     familyName: string,
+//     givenName: string,
+//     password: string,
+//     mid: string,            // Mimei id for this user's db, everything of the user is stored in the Mimei
+//     role: string,           // 用户身份：分析师，交易员，财务？
+//     template: any,         // dictionary that hold user settings of LLM
+//     subscription: boolean,  // whether the user is subscribed to the Mimei
+//     token_count?: any,
+//     token_usage?: any
+// }
+class UserAccount {
+    username: string;
+    familyName: string;
+    givenName: string
+    password: string
+    mid: string                     // Mimei id for this user's db, everything of the user is stored in the Mimei
+    role: string = "user"           // 用户身份：分析师，交易员，财务？
+    template: any                   // dictionary that hold user settings of LLM
+    subscription: boolean = false   // whether the user is subscribed to the Mimei
+    token_count?: any
+    token_usage?: any
 }
 
 interface Book {
