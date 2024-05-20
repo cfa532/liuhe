@@ -33,11 +33,11 @@ export const useLeitherStore = defineStore({
         _timestamp: Date.now(),
         ips: ips,
         // hostUrl: "ws://" + ips +"/ws/",         // IP:port, where leither service runs
-        client: window.hprose.Client.create("ws://" + ips +"/ws/", ayApi),       // Hprose client
+        // client: window.hprose.Client.create("ws://" + ips +"/ws/", ayApi),       // Hprose client
     }),
     getters: {
-        sid: async () => {
-            return useAuthStore().session.sid
+        client: () => { return window.hprose.Client.create("ws://" + useAuthStore().session.node_ip +"/ws/", ayApi)},       // Hprose client
+        sid: async () => { return useAuthStore().session.sid
             // if (!sessionStorage["sid"] || Date.now()-JSON.parse(sessionStorage["sid"]).timestamp>28800) {
             //     console.warn("Update sid")
             //     // const client = window.hprose.Client.create(state.hostUrl, ayApi)
@@ -55,24 +55,6 @@ export const useLeitherStore = defineStore({
             // return state._sid
         }
     },
-    actions: {
-        // async login(user = import.meta.env.VITE_LEITHER_USERNAME, pswd = import.meta.env.VITE_LEITHER_PASSWD) {
-        //     const result = await this.client.Login(user, pswd, "byname") as any
-        //     this._sid = result.sid      // set State sid
-        //     sessionStorage.setItem("sid", JSON.stringify({ sid: result.sid, uid: result.uid, timestamp: Date.now() }))
-        //     const ppt = await this.client.SignPPT(this._sid, {
-        //         CertFor: "Self",
-        //         Userid: result.uid,
-        //         RequestService: "mimei"
-        //     }, 1)
-        //     const map = await this.client.RequestService(ppt)
-        //     console.log("Request service: ", JSON.parse(ppt), map)
-        // },
-        // logout() {
-        //     sessionStorage["sid"] = "";
-        //     this._sid = "";
-        // }
-    }
 })
 
 export const useMainStore = defineStore({
