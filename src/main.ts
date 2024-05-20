@@ -18,7 +18,7 @@ app.config.errorHandler = async (err, instance, info) => {
     console.error("Global error:", err);
     console.log("Vue instance:", instance);
     console.log("Error info:", info);
-    useAlertStore().error(err + "Try reload.")
+    useAlertStore().error(err + ". Try reload.")
     sessionStorage.removeItem("sid")
     // await lapi.login()
 }
