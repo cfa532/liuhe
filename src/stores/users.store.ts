@@ -21,6 +21,8 @@ export const useUsersStore = defineStore({
             user.template = llmTemplate
             delete user.familyName
             delete user.givenName
+            user.token_count = {"gpt-3.5": 1000000, "gpt-4-turbo": 100000}
+            user.token_usage = {"gpt-3.5": 0, "gpt-4-turbo": 0}
             console.log(user)
             await fetchWrapper.post(`${baseUrl}/register`, user);
         },
@@ -40,26 +42,20 @@ export const useUsersStore = defineStore({
         async getById(id: string) {
             this.user = { loading: true };
             try {
-                this.user = await fetchWrapper.get(`${baseUrl}/${id}`);
+                this.user = await fetchWrapper.get(`${baseUrl}?id=${id}`);
             } catch (error) {
                 this.user = { error };
             }
         },
         async update(id: string, params: any) {
             console.log(id, params)
-            await fetchWrapper.put(`${baseUrl}/${id}`, params);
-
-            // update stored user if the logged in user updated their own record
-            // const authStore = useAuthStore();
-            // if (id === authStore.user!.username) {
-            //     // update local storage
-            //     const user = { ...authStore.user, ...params } as UserAccount;
-            //     console.log(params, authStore.user, user)
-            //     localStorage.setItem('user', JSON.stringify(user));
-
-            //     // update auth user in pinia state
-            //     authStore.user = user;
-            // }
+            const user = params
+            user.family_name = user.familyName
+            user.given_name = user.givenName
+            user.template = llmTemplate
+            delete user.familyName
+            delete user.givenName
+            await fetchWrapper.put(`${baseUrl}`, user);
         },
         async delete(id: string) {
             if (window.confirm("Are you sure?")) {

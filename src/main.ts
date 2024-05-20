@@ -5,7 +5,7 @@ import { useAlertStore } from "@/stores"
 import App from './App.vue'
 
 // setup Leither backend as database
-import { leitherBackend } from './helpers';
+// import { leitherBackend } from './helpers';
 
 const app = createApp(App)
 app.use(createPinia())

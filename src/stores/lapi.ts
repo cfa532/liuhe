@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 
 // Hprose API
-const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "Getnodeip", "SwarmLocal", "DhtGetAllKeys","MFOpenByPath",
+const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "SwarmLocal", "DhtGetAllKeys","MFOpenByPath",
     "DhtGet", "DhtGets", "SignPPT", "RequestService", "SwarmAddrs", "MFOpenTempFile", "MFTemp2MacFile", "MFSetData",
     "MFGetData", "MMCreate", "MMOpen", "Hset", "Hget", "Hmset", "Hmget", "Zadd", "Zrangebyscore", "Zrange", "MFOpenMacFile",
     "MFReaddir", "MFGetMimeType", "MFSetObject", "MFGetObject", "Zcount", "Zrevrange", "Hlen", "Hscan", "Hrevscan",
@@ -31,23 +31,23 @@ export const useLeitherStore = defineStore({
         _sid: "",       // if sid="", MM read only
         _timestamp: Date.now(),
         ips: ips,
-        hostUrl: "ws://" + ips +"/ws/",         // IP:port, where leither service runs
+        // hostUrl: "ws://" + ips +"/ws/",         // IP:port, where leither service runs
+        client: window.hprose.Client.create("ws://" + ips +"/ws/", ayApi),       // Hprose client
     }),
     getters: {
-        client: (state) => window.hprose.Client.create(state.hostUrl, ayApi),       // Hprose client
         sid: async (state) => {
             if (!sessionStorage["sid"] || Date.now()-JSON.parse(sessionStorage["sid"]).timestamp>28800) {
                 console.warn("Update sid")
-                const client = window.hprose.Client.create(state.hostUrl, ayApi)
-                const result = await client.Login(import.meta.env.VITE_LEITHER_USERNAME, import.meta.env.VITE_LEITHER_PASSWD, "byname") as any
+                // const client = window.hprose.Client.create(state.hostUrl, ayApi)
+                const result = await state.client.Login(import.meta.env.VITE_LEITHER_USERNAME, import.meta.env.VITE_LEITHER_PASSWD, "byname")
                 state._sid = result.sid      // set State sid
                 sessionStorage.setItem("sid", JSON.stringify({ sid: result.sid, uid: result.uid, timestamp: Date.now() }))
-                const ppt = await client.SignPPT(state._sid, {
+                const ppt = await state.client.SignPPT(state._sid, {
                     CertFor: "Self",
                     Userid: result.uid,
                     RequestService: "mimei"
                 }, 1)
-                await client.RequestService(ppt)
+                await state.client.RequestService(ppt)
                 return state._sid
             }
             return state._sid

@@ -5,14 +5,14 @@ import { CaseList } from '@/components';
 import { onMounted, ref } from 'vue';
 
 // const api = useLeither();
-const mmInfo = useMimei();
+// const mmInfo = useMimei();
 const { user } = storeToRefs(useAuthStore());
 const sideNav = ref<HTMLDivElement>()
 const settings = ref(user.value.template ? user.value.template : {llm:"openai",temperature: "0.0",model:"gpt-4"})
 const submitted = ref(true)
 
 onMounted(async ()=>{
-  console.log("main page mounted", mmInfo.$state, user.value)
+  // console.log("main page mounted", mmInfo.$state, user.value)
 })
 async function onSubmit() {
   submitted.value = true
