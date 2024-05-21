@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { useAuthStore, useMainStore as useMimei, useUsersStore } from '@/stores';
+import { useAuthStore, useUsersStore } from '@/stores';
 import { CaseList } from '@/components';
 import { onMounted, ref } from 'vue';
 
