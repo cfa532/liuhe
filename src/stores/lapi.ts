@@ -24,7 +24,7 @@ function getcurips() {
     }
     return import.meta.env.VITE_LEITHER_IP ? import.meta.env.VITE_LEITHER_IP : ips
 };
-const ips = getcurips();
+const ips = getcurips();    // web server's IP. Leither might be on different node, assigned by authentication server.
 
 export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler', 
