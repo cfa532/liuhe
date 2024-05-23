@@ -23,10 +23,14 @@ export const useAuthStore = defineStore({
                 formData.append("username", username);
                 formData.append("password", password);
                 formData.append("client_id", "1234567890");
-                const resp = await window.fetch(`${baseUrl}/token`, {method: "POST", body: formData})   
+                const resp = await window.fetch(`${baseUrl}/token`, {method: "POST", body: formData})
                 
                 // problem when using fetchWrapper, incorrect Content-Type
                 // const resp = await fetchWrapper.post(`${baseUrl}/token`, { username, password });
+                console.log("status code", resp.status)
+                if (resp.status >= 400) {
+                    throw new Error("Login failed. Invalid username or password.")
+                }
                 const result = await resp.json()
 
                 // update pinia state
@@ -55,7 +59,6 @@ export const useAuthStore = defineStore({
             localStorage.removeItem("token")
             localStorage.removeItem("session")
             localStorage.removeItem('activeId');
-            sessionStorage.removeItem("sid")
             this.user = null
             this.token = null
             this.session = null

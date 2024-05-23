@@ -19,7 +19,6 @@ app.config.errorHandler = async (err, instance, info) => {
     console.log("Vue instance:", instance);
     console.log("Error info:", info);
     useAlertStore().error(err + ". Try reload.")
-    sessionStorage.removeItem("sid")
     // await lapi.login()
 }
 console.warn("main.ts built....on " + __BUILD_TIME__, "ver:"+import.meta.env.VITE_APP_VERSION)
