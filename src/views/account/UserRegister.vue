@@ -25,7 +25,7 @@ async function onSubmit(values: any) {
         await router.push('/account/login');
         alertStore.success('Registration successful');
     } catch (error) { 
-        alertStore.error(error);
+        alertStore.error(`Registration faile. Error code ${error}`);
     }
 }
 </script>
