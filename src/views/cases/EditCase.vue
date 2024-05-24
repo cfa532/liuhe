@@ -57,7 +57,8 @@ async function onSubmit() {
     console.log(qwh, checkedItems.value)
     stream_in.value = ""
 
-    const msg = JSON.stringify({input: qwh, parameters: user.template, user: user.username})
+    // const msg = JSON.stringify({input: qwh, parameters: user.template, user: user.username})   // username for find user object for bookkeeping
+    const msg = JSON.stringify({input: qwh, parameters: user.template, user: "987533bewrfwetgewg57"})
     if (socket && socket.readyState == WebSocket.OPEN) {
         startTime = Date.now()
         socket.send(msg)
