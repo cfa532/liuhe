@@ -81,7 +81,6 @@ onMounted(async () => {
         if (event.ctrlKey && event.key === 'Enter') {
             nohistory = true
             await onSubmit()
-            console.log('Ctrl+Enter was pressed', query.value);
         }
     })
 })
