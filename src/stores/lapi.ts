@@ -29,15 +29,12 @@ export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler', 
     state: ()=>({
         _sid: "",       // if sid="", MM read only
-        _timestamp: Date.now(),
-        ips: ips,
         hostUrl: "ws://" + ips +"/ws/",         // IP:port, where leither service runs
     }),
     getters: {
         client: (state) => window.hprose.Client.create(state.hostUrl, ayApi),       // Hprose client
         sid: async (state) => {
-            if (!sessionStorage["sid"] || Date.now()-JSON.parse(sessionStorage["sid"]).timestamp>28800) {
-                console.warn("Update sid")
+            if (!state._sid) {
                 const client = window.hprose.Client.create(state.hostUrl, ayApi)
                 const result = await client.Login(import.meta.env.VITE_LEITHER_USERNAME, import.meta.env.VITE_LEITHER_PASSWD, "byname") as any
                 state._sid = result.sid      // set State sid
@@ -49,8 +46,23 @@ export const useLeitherStore = defineStore({
                 }, 1)
                 await client.RequestService(ppt)
                 return state._sid
+            } else {
+                // check sid expired?
+                const sid = JSON.parse(sessionStorage.getItem("sid") as string)
+                if (Date.now() - sid.timestamp > 3600000) {
+                    const client = window.hprose.Client.create(state.hostUrl, ayApi)
+                    const result = await client.Login(import.meta.env.VITE_LEITHER_USERNAME, import.meta.env.VITE_LEITHER_PASSWD, "byname") as any
+                    state._sid = result.sid      // set State sid
+                    sessionStorage.setItem("sid", JSON.stringify({ sid: result.sid, uid: result.uid, timestamp: Date.now() }))
+                    const ppt = await client.SignPPT(state._sid, {
+                        CertFor: "Self",
+                        Userid: result.uid,
+                        RequestService: "mimei"
+                    }, 1)
+                    await client.RequestService(ppt)
+                }
+                return state._sid
             }
-            return state._sid
         }
     },
     actions: {
