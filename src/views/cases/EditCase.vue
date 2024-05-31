@@ -68,7 +68,7 @@ async function onSubmit() {
         window.setTimeout(()=>{
             startTime = Date.now()
             socket.send(JSON.stringify({input: qwh, parameters: user.template}))
-        }, 3000)
+        }, 2000)
     }
 }
 onMounted(async () => {
