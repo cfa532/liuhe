@@ -22,6 +22,7 @@ const checkboxNoHistory = ref()
 let socket: WebSocket
 let timer: any
 let startTime = 0       // time between sending message and receives first reply.
+var nohistory = true    // send a query without chat history
 
 async function onSubmit() {
     spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
@@ -41,6 +42,7 @@ async function onSubmit() {
     ci.A = ""
     const qwh: any = {query: ci.Q, history: [] as Array<ChatItem>}   // query with history
 
+    if (nohistory) checkboxNoHistory.value = true
     if (checkedItems.value.length > 0 && !checkboxNoHistory.value) {
         // if any previous conversations are checked, use them as chat history
         for (let i=0; i<Math.min(6, checkedItems.value.length); i++) {
@@ -69,13 +71,20 @@ async function onSubmit() {
         }, 3000)
     }
 }
-onMounted(async ()=>{
+onMounted(async () => {
     // load chat history of a particular case
     await caseStore.initCase(route.params.id as string)
     console.log("Case Mounted")
     // openSocket()
-    document
+    document.addEventListener('keydown', async function (event) {
+        if (event.ctrlKey && event.key === 'Enter') {
+            nohistory = true
+            await onSubmit()
+            console.log('Ctrl+Enter was pressed', query.value);
+        }
+    })
 })
+
 function openSocket() {
     console.log("Open socket")
     socket = new WebSocket(import.meta.env.VITE_LLM_URL)
@@ -104,6 +113,7 @@ function openSocket() {
                 btnSubmit.value.disabled = false
                 checkedItems.value = []
                 checkboxNoHistory.value = false
+                nohistory = false
                 break
             default:
                 console.warn("Ws default:", data)
