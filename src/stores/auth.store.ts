@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 // import { fetchWrapper } from '@/helpers';
 import { router } from '@/router';
-import { useAlertStore, useCaseStore, useCaseListStore } from '@/stores';
+import { useAlertStore, useCaseStore, useCaseListStore, useLeitherStore } from '@/stores';
 const baseUrl = `${import.meta.env.VITE_API_URL}`;
 
 export const useAuthStore = defineStore({
@@ -9,10 +9,10 @@ export const useAuthStore = defineStore({
     state: () => ({
         // initialize state from local storage to enable user to stay logged in
         returnUrl: '/',
-        user: JSON.parse(localStorage.getItem('user')!),   // user is used as indicator of login status.
+        mid: localStorage.getItem('mid')!,
         token: localStorage.getItem('token') ? JSON.parse(localStorage.getItem('token')!) : {},
-        session: localStorage.getItem('session') ? JSON.parse(localStorage.getItem('session')!) : {},
-        mid: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!).mid : "",
+        ppt: localStorage.getItem('session') ? JSON.parse(localStorage.getItem('session')!) : {},
+        user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : "",    // user is used as indicator of login status.
     }),
     getters: {
     },
@@ -32,13 +32,17 @@ export const useAuthStore = defineStore({
                 // update pinia state
                 this.user = result.user;
                 this.token = result.token
-                this.session = result.session
-                this.mid = result.user.mid
+                this.ppt = result.session
 
                 // store user details and jwt in local storage to keep user logged in between page refreshes
                 localStorage.setItem('user', JSON.stringify(result.user));
                 localStorage.setItem("token", JSON.stringify(result.token))
                 localStorage.setItem("session", JSON.stringify(result.session))
+
+                const lapi = useLeitherStore()
+                this.mid = await lapi.client.MMCreate(await lapi.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+this.user.username, 2, 0x07276704);
+                localStorage.setItem("mid", this.mid)
+                console.log("user mid", this.mid)
 
                 // redirect to previous url or default to home page
                 router.push(this.returnUrl || '/');
@@ -55,10 +59,10 @@ export const useAuthStore = defineStore({
             localStorage.removeItem("token")
             localStorage.removeItem("session")
             localStorage.removeItem('activeId');
-            sessionStorage.removeItem("sid")
+            localStorage.removeItem('mid');
             this.user = null
             this.token = null
-            this.session = null
+            this.ppt = null
             this.mid = ""
             router.push('/account/login');
         }

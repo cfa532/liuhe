@@ -27,32 +27,31 @@ function getcurips() {
 const ips = getcurips();    // web server's IP. Leither might be on different node, assigned by authentication server.
 
 export const useLeitherStore = defineStore({
-    id: 'LeitherApiHandler', 
-    state: ()=>({
+    id: 'LeitherApiHandler',
+    state: () => ({
         _sid: "",       // if sid="", MM read only
-        _timestamp: Date.now(),
         ips: ips,
-        // hostUrl: "ws://" + ips +"/ws/",         // IP:port, where leither service runs
-        // client: window.hprose.Client.create("ws://" + ips +"/ws/", ayApi),       // Hprose client
+        client: window.hprose.Client.create("ws://" + ips + "/ws/", ayApi),       // Hprose client
     }),
     getters: {
-        client: () => { return window.hprose.Client.create("ws://" + useAuthStore().session.node_ip +"/ws/", ayApi)},       // Hprose client
-        sid: async () => { return useAuthStore().session.sid
-            // if (!sessionStorage["sid"] || Date.now()-JSON.parse(sessionStorage["sid"]).timestamp>28800) {
-            //     console.warn("Update sid")
-            //     // const client = window.hprose.Client.create(state.hostUrl, ayApi)
-            //     const result = await state.client.Login(import.meta.env.VITE_LEITHER_USERNAME, import.meta.env.VITE_LEITHER_PASSWD, "byname")
-            //     state._sid = result.sid      // set State sid
-            //     sessionStorage.setItem("sid", JSON.stringify({ sid: result.sid, uid: result.uid, timestamp: Date.now() }))
-            //     const ppt = await state.client.SignPPT(state._sid, {
-            //         CertFor: "Self",
-            //         Userid: result.uid,
-            //         RequestService: "mimei"
-            //     }, 1)
-            //     await state.client.RequestService(ppt)
-            //     return state._sid
-            // }
-            // return state._sid
+        sid: async (state) => {
+            if (!state._sid) {
+                try {
+                    const user = useAuthStore()
+                    const result = await state.client.Login(user.ppt)
+                    if (!result) {
+                        console.warn("PPT expired")
+                        user.logout()
+                        return ""
+                    }
+                    console.log("Login ok", result, user.ppt)
+                    state._sid = result.sid      // set State sid
+                } catch (e) {
+                    console.error(e)
+                }
+                return state._sid
+            }
+            return state._sid
         }
     },
 })

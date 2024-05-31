@@ -75,8 +75,16 @@ onMounted(async ()=>{
     await caseStore.initCase(route.params.id as string)
     console.log("Case Mounted")
     // openSocket()
-    document
+    document.addEventListener('keydown', async function(event) {
+    if (event.ctrlKey && event.key === 'Enter') {
+        console.log('Ctrl+Enter was pressed', query.value);
+        if (query.value.trim()) {
+            await onSubmit()
+        }
+    }
+});
 })
+
 function openSocket() {
     console.log("Open socket")
     socket = new WebSocket(import.meta.env.VITE_LLM_URL)

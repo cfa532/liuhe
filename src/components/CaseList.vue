@@ -29,8 +29,8 @@ watch(() => props.caseId, async (nv, ov) => {
 onMounted(async () => {
     // get list of cases of the user
     console.log("case list mounted", caseListStore.activeId.value, await caseListStore.allCases.value)
-    mySidenav.value!.style.backgroundColor = document.body.style.background + " solid"
     cases.value = await caseListStore.allCases.value
+    mySidenav.value!.style.backgroundColor = document.body.style.background + " solid"
 })
 function selectCase(c: ChatCase) {
     // highlight current case and
