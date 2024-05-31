@@ -25,35 +25,47 @@ function getcurips() {
     return import.meta.env.VITE_LEITHER_IP ? import.meta.env.VITE_LEITHER_IP : ips
 };
 const ips = getcurips();    // web server's IP. Leither might be on different node, assigned by authentication server.
+const client = window.hprose.Client.create("ws://" + ips + "/ws/", ayApi)       // Hprose client
+
+async function pptLogin() {
+    const user = useAuthStore()
+    const result = await client.Login(user.ppt)
+    if (!result) {
+        console.warn("PPT expired")
+        user.logout()
+    }
+    console.log("Login ok", result)
+    return result
+}
 
 export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler',
     state: () => ({
         _sid: "",       // if sid="", MM read only
         ips: ips,
-        client: window.hprose.Client.create("ws://" + ips + "/ws/", ayApi),       // Hprose client
+        sid_timestamp: Date.now(),
+        client: client,       // Hprose client
     }),
     getters: {
         sid: async (state) => {
             if (!state._sid) {
                 try {
-                    const user = useAuthStore()
-                    const result = await state.client.Login(user.ppt)
-                    if (!result) {
-                        console.warn("PPT expired")
-                        user.logout()
-                        return ""
-                    }
-                    console.log("Login ok", result)
-                    state._sid = result.sid      // set State sid
+                    state._sid = (await pptLogin()).sid      // set State sid
                 } catch (e) {
                     console.error(e)
                 }
-                return state._sid
+            } else {
+                if (Date.now() - state.sid_timestamp > 1000 * 60 * 60 * 24) {
+                    console.warn("sid expired. Renew it.")
+                    state._sid = (await pptLogin()).sid 
+                }
             }
             return state._sid
-        }
+        },
     },
+    actions: {
+        
+    }
 })
 
 export const useMainStore = defineStore({
