@@ -32,14 +32,14 @@ export const useAuthStore = defineStore({
                 // update pinia state
                 this.user = result.user;
                 this.token = result.token
-                this.ppt = result.session
+                this.ppt = result.session       // PPT signed by server Leither
 
                 // store user details and jwt in local storage to keep user logged in between page refreshes
                 localStorage.setItem('user', JSON.stringify(result.user));
                 localStorage.setItem("token", JSON.stringify(result.token))
                 localStorage.setItem("session", JSON.stringify(result.session))
 
-                const lapi = useLeitherStore()
+                const lapi = useLeitherStore()  // Must run after user get its ppt from server.
                 this.mid = await lapi.client.MMCreate(await lapi.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+this.user.username, 2, 0x07276704);
                 localStorage.setItem("mid", this.mid)
                 console.log("user mid", this.mid)

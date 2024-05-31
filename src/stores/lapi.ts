@@ -44,7 +44,7 @@ export const useLeitherStore = defineStore({
                         user.logout()
                         return ""
                     }
-                    console.log("Login ok", result, user.ppt)
+                    console.log("Login ok", result)
                     state._sid = result.sid      // set State sid
                 } catch (e) {
                     console.error(e)

@@ -13,14 +13,14 @@ app.use(createPinia())
 // leitherBackend();   // init customize backend fetch with Leither function
 
 app.use(router)
-// app.config.errorHandler = async (err, instance, info) => {
-//     // Handle the error globally
-//     console.error("Global error:", err);
-//     console.log("Vue instance:", instance);
-//     console.log("Error info:", info);
-//     useAlertStore().error(err + ". Try reload.")
-//     // await lapi.login()
-// }
+app.config.errorHandler = async (err, instance, info) => {
+    // Handle the error globally. It will hinder the display of some error message.
+    // but it is useful to show alert on front end.
+    console.error("Global error:", err);
+    console.log("Vue instance:", instance);
+    console.log("Error info:", info);
+    useAlertStore().error(err + ". Try reload.")
+}
 console.warn("main.ts built....on " + __BUILD_TIME__, "ver:"+import.meta.env.VITE_APP_VERSION)
 // const lapi = useLeitherStore()
 app.mount('#app')
