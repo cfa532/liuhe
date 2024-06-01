@@ -24,7 +24,9 @@ export const useAuthStore = defineStore({
                 formData.append("password", password);
                 formData.append("client_id", "1234567890");
                 const resp = await window.fetch(`${baseUrl}/token`, {method: "POST", body: formData})   
-                
+
+                if (!resp.ok) throw new Error((await resp.json())["detail"]);
+
                 // problem when using fetchWrapper, incorrect Content-Type
                 // const resp = await fetchWrapper.post(`${baseUrl}/token`, { username, password });
                 const result = await resp.json()
