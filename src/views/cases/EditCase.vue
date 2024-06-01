@@ -78,8 +78,7 @@ onMounted(async () => {
     document.addEventListener('keydown', async function (event) {
         if (event.ctrlKey && event.key === 'Enter') {
             checkboxNoHistory.value = true
-            await onSubmit()
-            console.log('Ctrl+Enter was pressed', query.value);
+            await onSubmit(event)
         }
     })
 })
