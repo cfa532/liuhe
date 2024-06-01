@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { useAuthStore, useUsersStore } from '@/stores';
+import { useAuthStore, useUsersStore, useAlertStore } from '@/stores';
 import { CaseList } from '@/components';
 import { ref } from 'vue';
 
@@ -14,7 +14,12 @@ const submitted = ref(true)
 async function onSubmit() {
   submitted.value = true
   user.value.template = settings.value
-  await useUsersStore().update(user.value.username, user.value)
+  try {
+    await useUsersStore().update(user.value.username, user.value)
+    useAlertStore().success("Account updated.")
+  } catch {
+    useAlertStore().error("Update user account failed.")
+  }
 }
 </script>
 
