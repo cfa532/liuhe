@@ -25,7 +25,7 @@ async function onSubmit() {
         <CaseList></CaseList>
       </div>
       <div class="col">
-        <h3 v-if="user">Hi, {{ user.givenName }}</h3>
+        <h3 v-if="user">Hi, {{ user.given_name }}</h3>
         <br>
         <form @change.prevent="submitted=false" @submit.prevent="onSubmit">
           <div class="row">
@@ -41,6 +41,7 @@ async function onSubmit() {
               <select v-model="settings.model" id="llm" class="form-select mt-2 mb-3">
                 <option value="gpt-4-turbo" selected>GPT-4 Turbo</option>
                 <option value="gpt-4">GPT-4</option>
+                <option value="gpt-3.5-turbo">GPT-3.5</option>
               </select>
             </div>
           </div>

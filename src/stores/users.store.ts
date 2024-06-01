@@ -14,27 +14,20 @@ export const useUsersStore = defineStore({
     actions: {
         async register(user: any) {
             user.role = "user"
-            if (user.username == "admin") user.role = "admin"
+            if (user.username == "admin")
+                user.role = "admin"
             user.subscription = false
-            user.family_name = user.familyName
-            user.given_name = user.givenName
             user.template = llmTemplate
-            delete user.familyName
-            delete user.givenName
-            user.token_count = {"gpt-3.5": 1000000, "gpt-4-turbo": 100000}
-            user.token_usage = {"gpt-3.5": 0, "gpt-4-turbo": 0}
-            console.log(user)
+            user.token_count = {"gpt-3.5-turbo": 1000000, "gpt-4-turbo": 100000, "gpt-4": 100000}
+            user.token_usage = {"gpt-3.5-turbo": 0, "gpt-4-turbo": 0, "gpt-4": 0}
             await fetchWrapper.post(`${baseUrl}/register`, user);
+            // if (!resp.ok) {
+            //     throw new Error((await resp.json())["detail"]);
+            // }
         },
         async getAll() {
             try {
                 this.users = await fetchWrapper.get(`${baseUrl}/all`);
-                this.users.forEach((user: any) => {
-                    user.familyName = user.family_name
-                    user.givenName  = user.given_name
-                    delete user.family_name
-                    delete user.given_name
-                });
             } catch (error) {
                 this.users = { error };
             }
@@ -49,13 +42,8 @@ export const useUsersStore = defineStore({
         },
         async update(id: string, params: any) {
             console.log(id, params)
-            const user = params
-            user.family_name = user.familyName
-            user.given_name = user.givenName
-            user.template = llmTemplate
-            delete user.familyName
-            delete user.givenName
-            await fetchWrapper.put(`${baseUrl}`, user);
+            this.user = await fetchWrapper.put(`${baseUrl}`, params);
+            localStorage.setItem("user", JSON.stringify(this.user))
         },
         async delete(id: string) {
             if (window.confirm("Are you sure?")) {

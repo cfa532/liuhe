@@ -21,8 +21,8 @@ interface Window {
 // }
 class UserAccount {
     username: string;
-    familyName: string;
-    givenName: string
+    family_name: string;
+    given_name: string
     password: string
     mid: string                     // Mimei id for this user's db, everything of the user is stored in the Mimei
     role: string = "user"           // 用户身份：分析师，交易员，财务？

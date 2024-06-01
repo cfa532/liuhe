@@ -105,7 +105,7 @@ function leitherBackend() {
                     Object.assign(user, params);
                     // make a DEEP copy of user, because userMimei makes change to ua
                     // user.role = user.username=="admin" ? "admin" : "user"
-                    ua = {username: user.username, familyName: user.familyName, givenName: user.givenName, role: user.role,
+                    ua = {username: user.username, family_name: user.family_name, given_name: user.given_name, role: user.role,
                         password: user.password, mid: user.mid, template: llmTemplate, subscription: false}    // a tempt solution to change user template
                 }
                 userMimei.editUser(ua).then(()=>{

@@ -17,8 +17,6 @@ function request(method: string) {
             requestOptions.headers['Content-Type'] = 'application/json';
             requestOptions.body = JSON.stringify(body);
         }
-        console.log(url, requestOptions)
-
         // fetch is monkey patched in fake-backend in the beginning of main.ts
         return fetch(url, requestOptions).then(handleResponse);
     }
@@ -42,7 +40,7 @@ function authHeader(url:string) {
 async function handleResponse(response: any) {
     const isJson = response.headers?.get('content-type')?.includes('application/json');
     const data = isJson ? await response.json() : null;
-    console.log(data)
+
     // check for error response
     if (!response.ok) {
         const { user, logout } = useAuthStore();
@@ -50,7 +48,6 @@ async function handleResponse(response: any) {
             // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
             logout();
         }
-
         // get error message from body or default to response status
         const error = (data && data.message) || response.status;
         return Promise.reject(error);
