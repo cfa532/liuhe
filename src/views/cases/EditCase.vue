@@ -23,9 +23,10 @@ let socket: WebSocket
 let timer: any
 let startTime = 0       // time between sending message and receives first reply.
 
-async function onSubmit() {
+async function onSubmit(event: any) {
     spinner.value = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>'
     btnSubmit.value.disabled = true
+    event.preventDefault()      // prevernt from continuous submitting.
 
     timer = window.setTimeout(()=>{
         // alert user to reload
