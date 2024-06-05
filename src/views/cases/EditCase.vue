@@ -32,7 +32,7 @@ async function onSubmit(event: any) {
         // alert user to reload
         window.alert("如果等待超时，尝试刷新页面后重新提交。")
         spinner.value = "提交"
-        btnSubmit.value.disabled = false
+        if (btnSubmit.value) btnSubmit.value.disabled = false
     }, 120000)
 
     // send message to websoceket and wait for response
@@ -68,7 +68,7 @@ async function onSubmit(event: any) {
         window.setTimeout(()=>{
             startTime = Date.now()
             socket.send(msg)
-        }, 2000)
+        }, 3000)
     }
 }
 onMounted(async () => {
@@ -109,7 +109,7 @@ function openSocket() {
                 query.value = ""
                 stream_in.value = ""
                 spinner.value = "提交"
-                btnSubmit.value.disabled = false
+                if (btnSubmit.value) btnSubmit.value.disabled = false
                 checkedItems.value = []
                 checkboxNoHistory.value = false
                 break
@@ -122,7 +122,7 @@ function openSocket() {
     socket.onerror = err => {
         console.error(err)
         spinner.value = "提交"
-        btnSubmit.value.disabled = false
+        if (btnSubmit.value) btnSubmit.value.disabled = false
         socket.close(1000, "Job done")
     }
 }

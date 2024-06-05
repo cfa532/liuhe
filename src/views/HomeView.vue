@@ -8,7 +8,7 @@ import { ref } from 'vue';
 // const mmInfo = useMimei();
 const { user } = storeToRefs(useAuthStore());
 const sideNav = ref<HTMLDivElement>()
-const settings = ref(user.value.template ? user.value.template : {llm:"openai",temperature: "0.0",model:"gpt-4"})
+const settings = ref(user.value.template ? user.value.template : {llm:"openai",temperature: "0.0",model:"gpt-4o"})
 const submitted = ref(true)
 
 async function onSubmit() {
@@ -44,6 +44,7 @@ async function onSubmit() {
             <div class="col-4">
               <label for="llm">选择模型：</label>
               <select v-model="settings.model" id="llm" class="form-select mt-2 mb-3">
+                <option value="gpt-4o" selected>GPT-4o</option>
                 <option value="gpt-4-turbo" selected>GPT-4 Turbo</option>
                 <option value="gpt-4">GPT-4</option>
                 <option value="gpt-3.5-turbo">GPT-3.5</option>
