@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onErrorCaptured, onMounted, ref, watch } from 'vue';
-import { useAuthStore, useCaseStore, useCaseListStore } from '@/stores';
+import { useAuthStore, useCaseStore, useCaseListStore, useAlertStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { Share } from '@/components'
@@ -35,12 +35,12 @@ async function onSubmit(event: any) {
 
     timer = window.setTimeout(() => {
         // alert user to reload
+        btnSubmit.value.disabled = false
         window.alert("如果等待超时，尝试刷新页面后重新提交。")
         spinner.value = "提交"
-        if (btnSubmit.value) btnSubmit.value.disabled = false
     }, 120000)
 
-    // send message to websoceket and wait for response
+    // send message to websocket and wait for response
     const ci = {} as ChatItem
     query.value = typeof query.value == "undefined" ? "Hello" : query.value;        // query submitted to AI
     ci.Q = query.value
@@ -80,18 +80,10 @@ onMounted(async () => {
     // load chat history of a particular case
     await caseStore.initCase(route.params.id as string)
     console.log("Case Mounted")
-    // openSocket()
-    // document.addEventListener('keydown', async function (event) {
-    //     if (event.ctrlKey && event.key === 'Enter') {
-    //         checkboxNoHistory.value = true
-    //         await onSubmit(event)
-    //     }
-    // })
 })
 
 function openSocket() {
-    console.log("Open socket")
-    socket = new WebSocket(import.meta.env.VITE_LLM_URL)
+    socket = new WebSocket(import.meta.env.VITE_LLM_URL + "?token=" + useAuthStore().token.access_token)
     socket.onmessage = ({ data }) => {
         const event = JSON.parse(data)
         const ci = {} as ChatItem
@@ -115,8 +107,7 @@ function openSocket() {
                 stream_in.value = ""
                 spinner.value = "提交"
                 isSubmitting.value = false
-
-                if (btnSubmit.value) btnSubmit.value.disabled = false
+                btnSubmit.value.disabled = false
                 checkedItems.value = []
                 checkboxNoHistory.value = false
                 break
@@ -129,7 +120,7 @@ function openSocket() {
     socket.onerror = err => {
         console.error(err)
         spinner.value = "提交"
-        if (btnSubmit.value) btnSubmit.value.disabled = false
+        btnSubmit.value.disabled = false
         socket.close(1000, "Job done")
     }
 }
@@ -139,13 +130,9 @@ watch(() => route.params.id, async (nv, ov) => {
         await caseStore.initCase(nv as string)
         console.log(caseStoreRefs.case.value, nv, ov)
     }
-},
-)
-onErrorCaptured((err) => {
-    console.error(err)
-    return false
 })
 async function hideCase() {
+    // set the current case as hidden in database, do not delete it.
     console.log("hide case", route.params.id)
     await caseList.hideCase(route.params.id as string)
     emits("newCaseId", "-" + route.params.id)
