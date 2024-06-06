@@ -50,13 +50,12 @@ export const useAuthStore = defineStore({
                 router.push(this.returnUrl || '/');
             } catch (error) {
                 const alertStore = useAlertStore();
-                alertStore.error(error);                
+                alertStore.error(error);
+                this.logout()            
             }
         },
 
         logout() {
-            useCaseStore().$reset()
-            useCaseListStore().$reset()
             localStorage.removeItem('user');
             localStorage.removeItem("token")
             localStorage.removeItem("session")
@@ -66,6 +65,8 @@ export const useAuthStore = defineStore({
             this.token = null
             this.ppt = null
             this.mid = ""
+            useCaseStore().$reset()
+            useCaseListStore().$reset()
             router.push('/account/login');
         }
     }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onErrorCaptured, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useAuthStore, useCaseStore, useCaseListStore, useAlertStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
