@@ -157,7 +157,7 @@ function handleKeyDown(event: any) {
     }
 };
 function checkPPT(event: any) {
-    console.log("focus", event)
+    // check PPT, if expired, logout.
     if (hasPPTExpired) {
         console.log("PPT expired", hasPPTExpired)
         useAuthStore().logout()
