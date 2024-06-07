@@ -11,10 +11,15 @@ export const useAuthStore = defineStore({
         returnUrl: '/',
         mid: localStorage.getItem('mid')!,
         token: localStorage.getItem('token') ? JSON.parse(localStorage.getItem('token')!) : {},
-        ppt: localStorage.getItem('session') ? JSON.parse(localStorage.getItem('session')!) : {},
+        ppt: localStorage.getItem('session') ,
         user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : "",    // user is used as indicator of login status.
     }),
     getters: {
+        hasPPTExpired: (state) => {
+               //'CertFor=Self;EndTime=20240608150543UTC;NodeId=5nE6CTAgEhR696x-ZpmRzFUZbkk;SignTime=20240607150543UTC;'
+               const endTime = stringToDictionary(JSON.parse(state.ppt!).Data).EndTime
+               return isExpired(endTime)
+        }
     },
     actions: {
         async login(username:string, password:string) {
@@ -35,11 +40,12 @@ export const useAuthStore = defineStore({
                 this.user = result.user;
                 this.token = result.token
                 this.ppt = result.session       // PPT signed by server Leither
+                console.log(this.ppt)
 
                 // store user details and jwt in local storage to keep user logged in between page refreshes
                 localStorage.setItem('user', JSON.stringify(result.user));
                 localStorage.setItem("token", JSON.stringify(result.token))
-                localStorage.setItem("session", JSON.stringify(result.session))
+                localStorage.setItem("session", (result.session))
 
                 const lapi = useLeitherStore()  // Must run after user get its ppt from server.
                 this.mid = await lapi.client.MMCreate(await lapi.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+this.user.username, 2, 0x07276704);
@@ -54,7 +60,6 @@ export const useAuthStore = defineStore({
                 this.logout()            
             }
         },
-
         logout() {
             localStorage.removeItem('user');
             localStorage.removeItem("token")
@@ -68,6 +73,38 @@ export const useAuthStore = defineStore({
             useCaseStore().$reset()
             useCaseListStore().$reset()
             router.push('/account/login');
-        }
+        },
     }
 });
+
+interface Dictionary {
+    [key: string]: string;
+}
+
+function stringToDictionary(str: string): Dictionary {
+    const dictionary: Dictionary = {};
+    const pairs: string[] = str.split(';');
+    
+    pairs.forEach(pair => {
+      if (pair) {
+        const [key, value] = pair.split('=');
+        dictionary[key] = value;
+      }
+    });
+    return dictionary;
+  }
+
+function isExpired(timeString: string) {
+    // Parse the time string into a Date object
+    const parsedTime = new Date(timeString);
+  
+    // Get the current time in UTC
+    const currentTime = new Date().toLocaleString("en-US", { timeZone: "UTC" });
+  
+    // Convert both times to timestamps (milliseconds since epoch)
+    const parsedTimeTimestamp = parsedTime.getTime();
+    const currentTimeTimestamp = new Date(currentTime).getTime();
+  
+    // Compare the timestamps and return a boolean
+    return parsedTimeTimestamp < currentTimeTimestamp;
+  }
