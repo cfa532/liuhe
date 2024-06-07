@@ -156,6 +156,13 @@ function handleKeyDown(event: any) {
         }
     }
 };
+function checkPPT(event: any) {
+    console.log("focus", event)
+    if (hasPPTExpired) {
+        console.log("PPT expired", hasPPTExpired)
+        useAuthStore().logout()
+    }
+}
 </script>
 
 <template>
@@ -164,7 +171,7 @@ function handleKeyDown(event: any) {
             <div class="container d-grid row-gap-3">
                 <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="hideCase"></Share>
                 <div class="row mt-2" style="position: relative;">
-                    <textarea class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
+                    <textarea @focus.prevent="checkPPT" class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
                     <input title="No history if checked" style="position: absolute; bottom: 55px; right: 15px; transform: translate(50%, -50%);" type="checkbox" v-model="checkboxNoHistory">
                     <p></p>
                     <div class="col">
