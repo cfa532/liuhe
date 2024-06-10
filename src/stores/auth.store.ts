@@ -11,14 +11,24 @@ export const useAuthStore = defineStore({
         returnUrl: '/',
         mid: localStorage.getItem('mid')!,
         token: localStorage.getItem('token') ? JSON.parse(localStorage.getItem('token')!) : {},
-        ppt: localStorage.getItem('session') ,
+        ppt: localStorage.getItem('session'),
         user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : "",    // user is used as indicator of login status.
     }),
     getters: {
         hasPPTExpired: (state) => {
                //'CertFor=Self;EndTime=20240608150543UTC;NodeId=5nE6CTAgEhR696x-ZpmRzFUZbkk;SignTime=20240607150543UTC;'
                const endTime = stringToDictionary(JSON.parse(state.ppt!).Data).EndTime
+               console.warn("PPT expire date:", endTime)
                return isExpired(endTime)
+        },
+        hasTokenExpired: (state) => {
+            const arrayToken = state.token.access_token.split('.')
+            const tokenPayload = JSON.parse(atob(arrayToken[1]));
+            if (Math.floor(new Date().getTime() / 1000) >= tokenPayload?.sub) {
+                console.warn("Token expired", tokenPayload?.sub)
+                return true
+            }
+            return false
         }
     },
     actions: {
@@ -35,19 +45,20 @@ export const useAuthStore = defineStore({
                 // problem when using fetchWrapper, incorrect Content-Type
                 // const resp = await fetchWrapper.post(`${baseUrl}/token`, { username, password });
                 const result = await resp.json()
+                console.log(result)
 
                 // update pinia state
                 this.user = result.user;
                 this.token = result.token
                 this.ppt = result.session       // PPT signed by server Leither
-                console.log(this.ppt)
 
                 // store user details and jwt in local storage to keep user logged in between page refreshes
                 localStorage.setItem('user', JSON.stringify(result.user));
                 localStorage.setItem("token", JSON.stringify(result.token))
-                localStorage.setItem("session", (result.session))
+                localStorage.setItem("session", result.session)     // PPT string
 
                 const lapi = useLeitherStore()  // Must run after user get its ppt from server.
+                console.log(lapi.$state)
                 this.mid = await lapi.client.MMCreate(await lapi.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+this.user.username, 2, 0x07276704);
                 localStorage.setItem("mid", this.mid)
                 console.log("user mid", this.mid)

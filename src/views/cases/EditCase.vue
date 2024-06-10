@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import { useAuthStore, useCaseStore, useCaseListStore, useAlertStore } from '@/stores';
+import { useAuthStore, useCaseStore, useCaseListStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { Share } from '@/components'
@@ -9,7 +9,7 @@ const emits = defineEmits(["newCaseId"])     // add new case to list
 const caseList = useCaseListStore()
 const caseStore = useCaseStore()
 const caseStoreRefs = storeToRefs(caseStore)
-const { user, hasPPTExpired } = useAuthStore()
+const { user, hasPPTExpired, hasTokenExpired } = useAuthStore()
 const route = useRoute();
 const query = ref()
 const stream_in = ref("")
@@ -80,6 +80,7 @@ onMounted(async () => {
     // load chat history of a particular case
     await caseStore.initCase(route.params.id as string)
     console.log("Case Mounted")
+    openSocket()
 })
 
 function openSocket() {
@@ -110,6 +111,11 @@ function openSocket() {
                 btnSubmit.value.disabled = false
                 checkedItems.value = []
                 checkboxNoHistory.value = false
+                break
+            case "error":
+                console.warn(event.error)
+                window.alert("Token expired. Re-login")
+                useAuthStore().logout()
                 break
             default:
                 console.warn("Ws default:", data)
@@ -158,8 +164,8 @@ function handleKeyDown(event: any) {
 };
 function checkPPT(event: any) {
     // check PPT, if expired, logout.
-    if (hasPPTExpired) {
-        console.log("PPT expired", hasPPTExpired)
+    if (hasPPTExpired || hasTokenExpired) {
+        window.alert("PPT or taken expired")
         useAuthStore().logout()
     }
 }

@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { router } from '@/router'
-import { useAlertStore } from "@/stores"
 import App from './App.vue'
 
 // setup Leither backend as database
@@ -13,14 +12,14 @@ app.use(createPinia())
 // leitherBackend();   // init customize backend fetch with Leither function
 
 app.use(router)
-app.config.errorHandler = async (err, instance, info) => {
-    // Handle the error globally. It will hinder the display of some error message.
-    // but it is useful to show alert on front end.
-    console.error("Global error:", err);
-    console.log("Vue instance:", instance);
-    console.log("Error info:", info);
-    useAlertStore().error(err + ". Try reload.")
-}
+// app.config.errorHandler = async (err, instance, info) => {
+//     // Handle the error globally. It will hinder the display of some error message.
+//     // but it is useful to show alert on front end.
+//     console.error("Global error:", err);
+//     console.log("Vue instance:", instance);
+//     console.log("Error info:", info);
+//     useAlertStore().error(err + ". Try reload.")
+// }
 console.warn("main.ts built....on " + __BUILD_TIME__, "ver:"+import.meta.env.VITE_APP_VERSION)
 // const lapi = useLeitherStore()
 app.mount('#app')

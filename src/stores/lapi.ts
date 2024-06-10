@@ -30,11 +30,11 @@ const client = window.hprose.Client.create("ws://" + ips + "/ws/", ayApi)       
 async function pptLogin() {
     const user = useAuthStore()
     const result = await client.Login(user.ppt)
+    console.log("Login", result)
     if (!result) {
         console.warn("PPT expired")
         user.logout()
     }
-    console.log("Login ok", result)
     return result
 }
 
@@ -48,19 +48,12 @@ export const useLeitherStore = defineStore({
     }),
     getters: {
         sid: async (state) => {
-            if (!state._sid) {
-                try {
-                    state._sid = (await pptLogin()).sid      // set State sid
-                } catch (e) {
-                    console.error(e)
-                }
+            if (Date.now() - state.sid_timestamp > 1000 * 60 * 60 * 24 || !state._sid) {
+                state._sid = (await pptLogin()).sid
+                return state._sid
             } else {
-                if (Date.now() - state.sid_timestamp > 1000 * 60 * 60 * 24) {
-                    console.warn("sid expired. Renew it.")
-                    state._sid = (await pptLogin()).sid 
-                }
+                return state._sid
             }
-            return state._sid
         },
     },
     actions: {

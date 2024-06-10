@@ -12,6 +12,7 @@ export const useCaseStore = defineStore({
         api: useLeitherStore(),    // Leither api handle
         _mid: "",            // Mimei database to hold all the cases of the user
         _mmsid: "",          // session id for the current user Mimei
+        _mmsidCur: "",
         _value: {} as ChatCase,
         chatHistory: [] as ChatItem[]
     }),
@@ -176,7 +177,6 @@ export const useCaseListStore = defineStore({
             const kase = await this.api.client.Hget(await this.mmsid, CHAT_CASE_KEY, id)
             kase.show = false
             await this.api.client.Hset(await this.mmsidCur, CHAT_CASE_KEY, id, kase)    // do NOT delete a case, just hide it.
-            // await this.api.client.Del(await this.mmsidCur, CHAT_HISTORY_KEY+id)
             await this.backup()
             // remove the id from case list
             this._allcases = this._allcases.filter((e:any)=>e.id!=id)
