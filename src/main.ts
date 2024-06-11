@@ -9,7 +9,7 @@ import App from './App.vue'
 const app = createApp(App)
 app.use(createPinia())
 
-// leitherBackend();   // init customize backend fetch with Leither function
+// leitherBackend();   // Monkey patch here. init customize backend fetch with Leither function
 
 app.use(router)
 // app.config.errorHandler = async (err, instance, info) => {

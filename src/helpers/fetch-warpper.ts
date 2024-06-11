@@ -18,18 +18,18 @@ function request(method: string) {
             requestOptions.body = JSON.stringify(body);
         }
         // fetch is monkey patched in fake-backend in the beginning of main.ts
-        return fetch(url, requestOptions).then(handleResponse);
+        return fetch(url, requestOptions).then(handleResponse)
     }
 }
 
 // helper functions
 function authHeader(url:string) {
     // return auth header with jwt if user is logged in and request is to the api url
-    const { user, token } = useAuthStore();
-    const isLoggedIn = !!token;
+    const { token } = useAuthStore();
+    const isLoggedIn = Object.keys(token).length > 0;
     const isAPIUrl = url.startsWith(import.meta.env.VITE_API_URL);
     // const isApiUrl = true
-    console.log("API_URL", url, user, isLoggedIn)
+    console.log("API_URL", url, isLoggedIn, token)
     if (isLoggedIn && isAPIUrl) {
         return { Authorization: `${token.token_type} ${token.access_token}` };
     } else {
@@ -49,7 +49,8 @@ async function handleResponse(response: any) {
             logout();
         }
         // get error message from body or default to response status
-        const error = (data && data.message) || response.status;
+        // data in Response from FastAPI is {"detail":"Username exists"}
+        const error = (data && data.detail) || response.status;
         return Promise.reject(error);
     }
     return data;
