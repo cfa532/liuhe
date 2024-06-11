@@ -47,9 +47,9 @@ export const useCaseStore = defineStore({
             try {
                 const newVer = await this.api.client.MMBackup(await this.api.sid, this.mid, '', "delref=true")
                 // now publish a new version of database Mimei
-                // const ret:DhtReply = await this.api.client.MiMeiPublish(await this.api.sid, "", this.mid)
+                const ret:DhtReply = await this.api.client.MiMeiPublish(await this.api.sid, "", this.mid)
                 this._mmsid = await this.api.client.MMOpen(await this.api.sid, this.mid, "last");
-                console.log("Case Mimei newVer="+newVer)
+                console.log("Case Mimei newVer="+newVer, ret)
             } catch(err:any) {
                 throw new Error(err)
             }
@@ -145,8 +145,8 @@ export const useCaseListStore = defineStore({
         async backup() {
             const newVer = await this.api.client.MMBackup(await this.api.sid, this.mid, '', "delref=true")
             // now publish a new version of database Mimei
-            // const ret:DhtReply = this.api.client.MiMeiPublish(await this.api.sid, "", this.mid)
-            console.log("Case list new version="+newVer)
+            const ret:DhtReply = this.api.client.MiMeiPublish(await this.api.sid, "", this.mid)
+            console.warn("Case list new version="+newVer, ret)
             this._mmsid = await this.api.client.MMOpen(await this.api.sid, this.mid, "last");
         },
         setActiveId(id:string) {

@@ -18,14 +18,25 @@ export const useAuthStore = defineStore({
         hasPPTExpired: (state) => {
                //'CertFor=Self;EndTime=20240608150543UTC;NodeId=5nE6CTAgEhR696x-ZpmRzFUZbkk;SignTime=20240607150543UTC;'
                const endTime = stringToDictionary(JSON.parse(state.ppt!).Data).EndTime
-               console.warn("PPT expire date:", endTime)
-               return isExpired(endTime)
+               const now = new Date();
+               const year = now.getFullYear().toString().padStart(4, "0");
+               const month = (now.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed
+               const day = now.getDate().toString().padStart(2, "0");
+               const hours = now.getHours().toString().padStart(2, "0");
+               const minutes = now.getMinutes().toString().padStart(2, "0");
+               const seconds = now.getSeconds().toString().padStart(2, "0");
+               const nowTime = `${year}${month}${day}${hours}${minutes}${seconds}UTC`;
+               if (endTime < nowTime) {
+                    console.warn("PPT expired", nowTime, endTime)
+                    return true
+               }
+               return false
         },
         hasTokenExpired: (state) => {
             const arrayToken = state.token.access_token.split('.')
             const tokenPayload = JSON.parse(atob(arrayToken[1]));
-            if (Math.floor(new Date().getTime() / 1000) >= tokenPayload?.sub) {
-                console.warn("Token expired", tokenPayload?.sub)
+            if (new Date().getTime()/1000 >= tokenPayload?.exp) {
+                console.warn("Token expired", tokenPayload?.exp)
                 return true
             }
             return false
@@ -58,11 +69,17 @@ export const useAuthStore = defineStore({
                 localStorage.setItem("session", result.session)     // PPT string
 
                 const lapi = useLeitherStore()  // Must run after user get its ppt from server.
-                console.log(lapi.$state)
-                this.mid = await lapi.client.MMCreate(await lapi.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+this.user.username, 2, 0x07276704);
+                this.mid = await lapi.client.MMCreate(await lapi.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT',
+                    'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+this.user.username, 2, 0x07276704);
                 localStorage.setItem("mid", this.mid)
                 console.log("user mid", this.mid)
 
+                lapi.client.MiMeiSync(await lapi.sid, "", this.mid, async (err:any)=>{
+                    console.error(err)
+                    lapi.client.MiMeiPublish(await lapi.sid, "", this.mid)
+                })
+                // const ret:DhtReply = lapi.client.MiMeiSync(await lapi.sid, "", this.mid)
+                // console.warn("sync result", ret)
                 // redirect to previous url or default to home page
                 router.push(this.returnUrl || '/');
             } catch (error) {
@@ -103,19 +120,4 @@ function stringToDictionary(str: string): Dictionary {
       }
     });
     return dictionary;
-  }
-
-function isExpired(timeString: string) {
-    // Parse the time string into a Date object
-    const parsedTime = new Date(timeString);
-  
-    // Get the current time in UTC
-    const currentTime = new Date().toLocaleString("en-US", { timeZone: "UTC" });
-  
-    // Convert both times to timestamps (milliseconds since epoch)
-    const parsedTimeTimestamp = parsedTime.getTime();
-    const currentTimeTimestamp = new Date(currentTime).getTime();
-  
-    // Compare the timestamps and return a boolean
-    return parsedTimeTimestamp < currentTimeTimestamp;
-  }
+}

@@ -8,7 +8,7 @@ const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "SwarmLocal", "DhtGe
     "MFReaddir", "MFGetMimeType", "MFSetObject", "MFGetObject", "Zcount", "Zrevrange", "Hlen", "Hscan", "Hrevscan",
     "MMRelease", "MMBackup", "MFStat", "Zrem", "Zremrangebyscore", "MiMeiPublish", "PullMsg", "MFTemp2Ipfs", "MFSetCid",
     "MMSum", "MiMeiSync", "IpfsAdd", "MMAddRef", "MMDelRef", "MMDelVers", "MMRelease", "MMGetRef", "MMGetRefs", "Hdel",
-    "Hgetall", "Hkeys", "Del"
+    "Hgetall", "Hkeys", "Del", "MiMeiSync"
 ];
 
 function getcurips() {
