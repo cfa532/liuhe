@@ -15,32 +15,6 @@ export const useAuthStore = defineStore({
         user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : "",    // user is used as indicator of login status.
     }),
     getters: {
-        hasPPTExpired: (state) => {
-               //'CertFor=Self;EndTime=20240608150543UTC;NodeId=5nE6CTAgEhR696x-ZpmRzFUZbkk;SignTime=20240607150543UTC;'
-               const endTime = stringToDictionary(JSON.parse(state.ppt!).Data).EndTime
-               const now = new Date();
-               const year = now.getFullYear().toString().padStart(4, "0");
-               const month = (now.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed
-               const day = now.getDate().toString().padStart(2, "0");
-               const hours = now.getHours().toString().padStart(2, "0");
-               const minutes = now.getMinutes().toString().padStart(2, "0");
-               const seconds = now.getSeconds().toString().padStart(2, "0");
-               const nowTime = `${year}${month}${day}${hours}${minutes}${seconds}UTC`;
-               if (endTime < nowTime) {
-                    console.warn("PPT expired", nowTime, endTime)
-                    return true
-               }
-               return false
-        },
-        hasTokenExpired: (state) => {
-            const arrayToken = state.token.access_token.split('.')
-            const tokenPayload = JSON.parse(atob(arrayToken[1]));
-            if (new Date().getTime()/1000 >= tokenPayload?.exp) {
-                console.warn("Token expired", tokenPayload?.exp)
-                return true
-            }
-            return false
-        }
     },
     actions: {
         async login(username:string, password:string) {
@@ -102,6 +76,33 @@ export const useAuthStore = defineStore({
             useCaseListStore().$reset()
             router.push('/account/login');
         },
+        hasPPTExpired() {
+            //'CertFor=Self;EndTime=20240608150543UTC;NodeId=5nE6CTAgEhR696x-ZpmRzFUZbkk;SignTime=20240607150543UTC;'
+            const endTime = stringToDictionary(JSON.parse(this.ppt!).Data).EndTime
+            const now = new Date();
+            const year = now.getFullYear().toString().padStart(4, "0");
+            const month = (now.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-indexed
+            const day = now.getDate().toString().padStart(2, "0");
+            const hours = now.getHours().toString().padStart(2, "0");
+            const minutes = now.getMinutes().toString().padStart(2, "0");
+            const seconds = now.getSeconds().toString().padStart(2, "0");
+            const nowTime = `${year}${month}${day}${hours}${minutes}${seconds}UTC`;
+            if (endTime < nowTime) {
+                 console.warn("PPT expired", nowTime, endTime)
+                 return true
+            }
+            return false
+     },
+     hasTokenExpired() {
+         const arrayToken = this.token.access_token.split('.')
+         const tokenPayload = JSON.parse(atob(arrayToken[1]));
+         if (Date.now()/1000 >= tokenPayload?.exp) {
+             console.warn("Token expired", tokenPayload?.exp)
+             return true
+         }
+         return false
+     }
+
     }
 });
 

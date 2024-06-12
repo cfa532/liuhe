@@ -57,10 +57,10 @@ async function onSubmit(event: any) {
         // otherwise use the most recent 6 chats as history
         for (let i = 0; i < Math.min(6, caseStoreRefs.chatHistory.value.length); i++) {
             const item: ChatItem = caseStoreRefs.chatHistory.value[i]
+            // it seems double quote will conflict with LnagChain
             qwh.history.push({ Q: item.Q.replace(/"/g, "'"), A: item.A.replace(/"/g, "'").replace(/\s+/g, " ") })
         }
     }
-    console.log(qwh, checkedItems.value)
     stream_in.value = ""
 
     const msg = JSON.stringify({ input: qwh, parameters: user.template, user: user.username })
@@ -81,6 +81,11 @@ onMounted(async () => {
     await caseStore.initCase(route.params.id as string)
     console.log("Case Mounted")
     openSocket()
+    window.setInterval(()=>{
+        if (hasPPTExpired() || hasTokenExpired()) {
+            useAuthStore().logout()
+        }
+    }, 3600000)
 })
 
 function openSocket() {
@@ -114,8 +119,8 @@ function openSocket() {
                 break
             case "error":
                 console.warn(event.error)
-                window.alert("Token expired. Re-login")
-                useAuthStore().logout()
+                // window.alert("Token expired. Re-login")
+                // useAuthStore().logout()
                 break
             default:
                 console.warn("Ws default:", data)
@@ -163,8 +168,7 @@ function handleKeyDown(event: any) {
     }
 };
 function checkTimeout() {
-    if (hasPPTExpired || hasTokenExpired) {
-        window.alert("PPT or taken expired")
+    if (hasPPTExpired() || hasTokenExpired()) {
         useAuthStore().logout()
     }
 }
