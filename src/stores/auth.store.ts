@@ -43,14 +43,14 @@ export const useAuthStore = defineStore({
                 localStorage.setItem("session", result.session)     // PPT string
 
                 const lapi = useLeitherStore()  // Must run after user get its ppt from server.
-                this.mid = await lapi.client.MMCreate(await lapi.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT',
+                this.mid = await lapi.client.MMCreate(await lapi.sid(), '5KF-zeJy-KUQVFukKla8vKWuSoT',
                     'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+this.user.username, 2, 0x07276704);
                 localStorage.setItem("mid", this.mid)
                 console.log("user mid", this.mid)
 
-                lapi.client.MiMeiSync(await lapi.sid, "", this.mid, async (err:any)=>{
+                lapi.client.MiMeiSync(await lapi.sid(), "", this.mid, async (err:any)=>{
                     console.error(err)
-                    lapi.client.MiMeiPublish(await lapi.sid, "", this.mid)
+                    lapi.client.MiMeiPublish(await lapi.sid(), "", this.mid)
                 })
                 // const ret:DhtReply = lapi.client.MiMeiSync(await lapi.sid, "", this.mid)
                 // console.warn("sync result", ret)

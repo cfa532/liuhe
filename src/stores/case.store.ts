@@ -30,25 +30,25 @@ export const useCaseStore = defineStore({
         },
         // mimei sid for reading
         mmsid: async function(state) :Promise<string> {
-            state._mmsid = state._mmsid? state._mmsid : await this.api.client.MMOpen(await this.api.sid, this.mid, "last")
+            state._mmsid = state._mmsid? state._mmsid : await this.api.client.MMOpen(await this.api.sid(), this.mid, "last")
             return state._mmsid
         },
         // mimei sid for writing
         mmsidCur: async function() :Promise<string> {
-            // if (! await this.api.sid) {
+            // if (! await this.api.sid()) {
             //     // re-login
             //     await this.api.client.login()
             // }
-            return await this.api.client.MMOpen(await this.api.sid, this.mid, "cur");
+            return await this.api.client.MMOpen(await this.api.sid(), this.mid, "cur");
         },
     },
     actions: {
         async backup() {
             try {
-                const newVer = await this.api.client.MMBackup(await this.api.sid, this.mid, '', "delref=true")
+                const newVer = await this.api.client.MMBackup(await this.api.sid(), this.mid, '', "delref=true")
                 // now publish a new version of database Mimei
-                const ret:DhtReply = await this.api.client.MiMeiPublish(await this.api.sid, "", this.mid)
-                this._mmsid = await this.api.client.MMOpen(await this.api.sid, this.mid, "last");
+                const ret:DhtReply = await this.api.client.MiMeiPublish(await this.api.sid(), "", this.mid)
+                this._mmsid = await this.api.client.MMOpen(await this.api.sid(), this.mid, "last");
                 console.log("Case Mimei newVer="+newVer, ret)
             } catch(err:any) {
                 throw new Error(err)
@@ -122,12 +122,12 @@ export const useCaseListStore = defineStore({
         },
         // mimei sid for reading
         mmsid: async function(state) :Promise<string> {
-            state._mmsid = state._mmsid? state._mmsid : await this.api.client.MMOpen(await this.api.sid, this.mid, "last")
+            state._mmsid = state._mmsid? state._mmsid : await this.api.client.MMOpen(await this.api.sid(), this.mid, "last")
             return state._mmsid
         },
         // mimei sid for writing
         mmsidCur: async function() :Promise<string> {
-            return await this.api.client.MMOpen(await this.api.sid, this.mid, "cur");
+            return await this.api.client.MMOpen(await this.api.sid(), this.mid, "cur");
         },
         allCases: async function(state) {
             if (state._allcases.length == 0) {
@@ -143,11 +143,11 @@ export const useCaseListStore = defineStore({
     },
     actions: {
         async backup() {
-            const newVer = await this.api.client.MMBackup(await this.api.sid, this.mid, '', "delref=true")
+            const newVer = await this.api.client.MMBackup(await this.api.sid(), this.mid, '', "delref=true")
             // now publish a new version of database Mimei
-            const ret:DhtReply = this.api.client.MiMeiPublish(await this.api.sid, "", this.mid)
+            const ret:DhtReply = this.api.client.MiMeiPublish(await this.api.sid(), "", this.mid)
             console.warn("Case list new version="+newVer, ret)
-            this._mmsid = await this.api.client.MMOpen(await this.api.sid, this.mid, "last");
+            this._mmsid = await this.api.client.MMOpen(await this.api.sid(), this.mid, "last");
         },
         setActiveId(id:string) {
             localStorage["activeId"] = id

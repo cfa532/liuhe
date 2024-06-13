@@ -47,17 +47,16 @@ export const useLeitherStore = defineStore({
         client: client,       // Hprose client
     }),
     getters: {
-        sid: async (state) => {
-            if (Date.now() - state.sid_timestamp > 1000 * 60 * 60 * 24 || !state._sid) {
-                state._sid = (await pptLogin()).sid
-                return state._sid
-            } else {
-                return state._sid
-            }
-        },
     },
     actions: {
-        
+        async sid() {
+            if (Date.now() - this.sid_timestamp > 1000 * 60 * 60 * 24 || !this._sid) {
+                this._sid = (await pptLogin()).sid
+                return this._sid
+            } else {
+                return this._sid
+            }
+        },        
     }
 })
 
@@ -72,11 +71,11 @@ export const useMainStore = defineStore({
     }),
     getters: {
         mmsid: async function(state) :Promise<string> {
-            state._mmsid = state._mmsid? state._mmsid : await this.api.client.MMOpen(await this.api.sid, this.mid, "last");
+            state._mmsid = state._mmsid? state._mmsid : await this.api.client.MMOpen(await this.api.sid(), this.mid, "last");
             return state._mmsid;
         },
         mmsidCur: async function() :Promise<string> {
-            return await this.api.client.MMOpen(await this.api.sid, this.mid, "cur");
+            return await this.api.client.MMOpen(await this.api.sid(), this.mid, "cur");
         },
     },
     actions: {
@@ -87,10 +86,10 @@ export const useMainStore = defineStore({
         async backup(mid: string="") {
             if (!mid) mid = this.mid;
             try {
-                const newVer = await this.api.client.MMBackup(await this.api.sid, mid, '', "delref=true")
-                this.$state._mmsid = await this.api.client.MMOpen(await this.api.sid, mid, "last");
+                const newVer = await this.api.client.MMBackup(await this.api.sid(), mid, '', "delref=true")
+                this.$state._mmsid = await this.api.client.MMOpen(await this.api.sid(), mid, "last");
                 // now publish a new version of database Mimei
-                const ret:DhtReply = this.api.client.MiMeiPublish(await this.api.sid, "", mid)
+                const ret:DhtReply = this.api.client.MiMeiPublish(await this.api.sid(), "", mid)
                 console.log("Main Mimei publish []DhtReply=", ret, this._mmsid, "newVer="+newVer)
             } catch(err:any) {
                 throw new Error(err)
@@ -113,9 +112,9 @@ export const useMainStore = defineStore({
                 throw new Error("The username is taken.")
             }
             // create a new Mimei to store user cases information
-            user.mid = await this.api.client.MMCreate(await this.api.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+user.username, 2, 0x07276704);
+            user.mid = await this.api.client.MMCreate(await this.api.sid(), '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+user.username, 2, 0x07276704);
             await this.api.client.Hset(await this.mmsidCur, this.user_key, user.username, JSON.stringify(user))
-            await this.api.client.MMAddRef(await this.api.sid, this.mid, user.mid)        // associate the new MM with Main MMM
+            await this.api.client.MMAddRef(await this.api.sid(), this.mid, user.mid)        // associate the new MM with Main MMM
             await this.backup()
             return user
         },
