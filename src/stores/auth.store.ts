@@ -42,19 +42,20 @@ export const useAuthStore = defineStore({
                 localStorage.setItem("token", JSON.stringify(result.token))
                 localStorage.setItem("session", result.session)     // PPT string
 
-                const lapi = useLeitherStore()  // Must run after user get its ppt from server.
+                // Must run after user get its ppt from server. It gets PPT from localStorage
+                const lapi = useLeitherStore()
+
                 this.mid = await lapi.client.MMCreate(await lapi.sid(), '5KF-zeJy-KUQVFukKla8vKWuSoT',
                     'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+this.user.username, 2, 0x07276704);
                 localStorage.setItem("mid", this.mid)
-                console.log("user mid", this.mid)
 
-                lapi.client.MiMeiSync(await lapi.sid(), "", this.mid, async (err:any)=>{
-                    console.error(err)
-                    lapi.client.MiMeiPublish(await lapi.sid(), "", this.mid)
-                })
-                // const ret:DhtReply = lapi.client.MiMeiSync(await lapi.sid, "", this.mid)
-                // console.warn("sync result", ret)
-                // redirect to previous url or default to home page
+                // authorize local host to write the mid created by remote authorization host identity
+                lapi.client.MMSetRight(await lapi.sid(), this.mid, await lapi.hostId, 0xf)
+                console.log("user mid", this.mid, await lapi.hostId)
+
+                lapi.client.MiMeiSync(await lapi.sid(), "", this.mid)
+                lapi.client.MiMeiPublish("", "", this.mid)
+
                 router.push(this.returnUrl || '/');
             } catch (error) {
                 const alertStore = useAlertStore();

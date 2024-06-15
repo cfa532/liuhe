@@ -21,9 +21,6 @@ export const useUsersStore = defineStore({
             user.token_count = {"gpt-3.5-turbo": 1000000, "gpt-4-turbo": 100000, "gpt-4": 100000}
             user.token_usage = {"gpt-3.5-turbo": 0, "gpt-4-turbo": 0, "gpt-4": 0}
             await fetchWrapper.post(`${baseUrl}/register`, user)
-            // if (!resp.ok) {
-            //     throw new Error((await resp.json())["detail"]);
-            // }
         },
         async getAll() {
             try {

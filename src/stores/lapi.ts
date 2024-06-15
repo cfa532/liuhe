@@ -8,7 +8,7 @@ const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "SwarmLocal", "DhtGe
     "MFReaddir", "MFGetMimeType", "MFSetObject", "MFGetObject", "Zcount", "Zrevrange", "Hlen", "Hscan", "Hrevscan",
     "MMRelease", "MMBackup", "MFStat", "Zrem", "Zremrangebyscore", "MiMeiPublish", "PullMsg", "MFTemp2Ipfs", "MFSetCid",
     "MMSum", "MiMeiSync", "IpfsAdd", "MMAddRef", "MMDelRef", "MMDelVers", "MMRelease", "MMGetRef", "MMGetRefs", "Hdel",
-    "Hgetall", "Hkeys", "Del", "MiMeiSync"
+    "Hgetall", "Hkeys", "Del", "MiMeiSync", "MMSetRight"
 ];
 
 function getcurips() {
@@ -47,6 +47,9 @@ export const useLeitherStore = defineStore({
         client: client,       // Hprose client
     }),
     getters: {
+        hostId: (state)=>{
+            return state.client.Getvar("", "hostid")
+        }
     },
     actions: {
         async sid() {
