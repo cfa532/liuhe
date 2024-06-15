@@ -27,17 +27,6 @@ function getcurips() {
 const ips = getcurips();    // web server's IP. Leither might be on different node, assigned by authentication server.
 const client = window.hprose.Client.create("ws://" + ips + "/ws/", ayApi)       // Hprose client
 
-async function pptLogin() {
-    const user = useAuthStore()
-    const result = await client.Login(user.ppt)
-    console.log("Login", result)
-    if (!result) {
-        console.warn("PPT expired")
-        user.logout()
-    }
-    return result
-}
-
 export const useLeitherStore = defineStore({
     id: 'LeitherApiHandler',
     state: () => ({
@@ -47,14 +36,15 @@ export const useLeitherStore = defineStore({
         client: client,       // Hprose client
     }),
     getters: {
-        hostId: (state)=>{
-            return state.client.Getvar("", "hostid")
+        hostId: async (state)=>{
+            return await state.client.Getvar("", "hostid")
         }
     },
     actions: {
         async sid() {
             if (Date.now() - this.sid_timestamp > 1000 * 60 * 60 * 24 || !this._sid) {
-                this._sid = (await pptLogin()).sid
+                const result = await client.Login(useAuthStore().ppt)
+                this._sid = result ? result.sid : ""
                 return this._sid
             } else {
                 return this._sid

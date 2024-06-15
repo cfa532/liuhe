@@ -44,15 +44,11 @@ export const useCaseStore = defineStore({
     },
     actions: {
         async backup() {
-            try {
-                const newVer = await this.api.client.MMBackup(await this.api.sid(), this.mid, '', "delref=true")
-                // now publish a new version of database Mimei
-                const ret:DhtReply = await this.api.client.MiMeiPublish(await this.api.sid(), "", this.mid)
-                this._mmsid = await this.api.client.MMOpen(await this.api.sid(), this.mid, "last");
-                console.log("Case Mimei newVer="+newVer, ret)
-            } catch(err:any) {
-                throw new Error(err)
-            }
+            const newVer = await this.api.client.MMBackup(await this.api.sid(), this.mid, '', "delref=true")
+            // now publish a new version of database Mimei
+            const ret:DhtReply = await this.api.client.MiMeiPublish(await this.api.sid(), "", this.mid)
+            this._mmsid = await this.api.client.MMOpen(await this.api.sid(), this.mid, "last");
+            console.log("Case Mimei newVer="+newVer, ret)
         },
         async addChatItem(ci:ChatItem) {
             // add a chat item to chat history of the current case

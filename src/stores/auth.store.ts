@@ -11,7 +11,7 @@ export const useAuthStore = defineStore({
         returnUrl: '/',
         mid: localStorage.getItem('mid')!,
         token: localStorage.getItem('token') ? JSON.parse(localStorage.getItem('token')!) : {},
-        ppt: localStorage.getItem('session'),
+        ppt: localStorage.getItem('ppt'),
         user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : "",    // user is used as indicator of login status.
     }),
     getters: {
@@ -19,12 +19,12 @@ export const useAuthStore = defineStore({
     actions: {
         async login(username:string, password:string) {
             try {
+                const lapi = useLeitherStore()
                 const formData = new FormData();
                 formData.append("username", username);
                 formData.append("password", password);
-                formData.append("client_id", "1234567890");
+                formData.append("client_id", await lapi.hostId);
                 const resp = await window.fetch(`${baseUrl}/token`, {method: "POST", body: formData})   
-
                 if (!resp.ok) throw new Error((await resp.json())["detail"]);
 
                 // problem when using fetchWrapper, incorrect Content-Type
@@ -35,27 +35,17 @@ export const useAuthStore = defineStore({
                 // update pinia state
                 this.user = result.user;
                 this.token = result.token
-                this.ppt = result.session       // PPT signed by server Leither
+                this.ppt = result.ppt       // PPT signed by server Leither
+                this.mid = result.user.mid
 
                 // store user details and jwt in local storage to keep user logged in between page refreshes
                 localStorage.setItem('user', JSON.stringify(result.user));
                 localStorage.setItem("token", JSON.stringify(result.token))
-                localStorage.setItem("session", result.session)     // PPT string
+                localStorage.setItem("ppt", result.ppt)     // PPT string
+                localStorage.setItem("mid", result.user.mid)
 
-                // Must run after user get its ppt from server. It gets PPT from localStorage
-                const lapi = useLeitherStore()
-
-                this.mid = await lapi.client.MMCreate(await lapi.sid(), '5KF-zeJy-KUQVFukKla8vKWuSoT',
-                    'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY+'_'+this.user.username, 2, 0x07276704);
-                localStorage.setItem("mid", this.mid)
-
-                // authorize local host to write the mid created by remote authorization host identity
-                lapi.client.MMSetRight(await lapi.sid(), this.mid, await lapi.hostId, 0xf)
-                console.log("user mid", this.mid, await lapi.hostId)
-
-                lapi.client.MiMeiSync(await lapi.sid(), "", this.mid)
-                lapi.client.MiMeiPublish("", "", this.mid)
-
+                // lapi.sid() must be run after user get its ppt from server. It gets PPT from localStorage
+                await lapi.client.MiMeiSync(await lapi.sid(), "", this.mid)
                 router.push(this.returnUrl || '/');
             } catch (error) {
                 const alertStore = useAlertStore();
@@ -66,7 +56,7 @@ export const useAuthStore = defineStore({
         logout() {
             localStorage.removeItem('user');
             localStorage.removeItem("token")
-            localStorage.removeItem("session")
+            localStorage.removeItem("ppt")
             localStorage.removeItem('activeId');
             localStorage.removeItem('mid');
             this.user = null
