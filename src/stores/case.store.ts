@@ -17,8 +17,8 @@ export const useCaseStore = defineStore({
         chatHistory: [] as ChatItem[]
     }),
     getters: {
-        id: function(): string {
-            return this._value.id
+        id: function(state): string {
+            return state._value.id
         },
         mid: function(state) {
             if (!state._mid)
