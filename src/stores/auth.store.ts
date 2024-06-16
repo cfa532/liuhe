@@ -45,7 +45,7 @@ export const useAuthStore = defineStore({
                 localStorage.setItem("mid", result.user.mid)
 
                 // lapi.sid() must be run after user get its ppt from server. It gets PPT from localStorage
-                await lapi.client.MiMeiSync(await lapi.sid(), "", this.mid)
+                lapi.client.MiMeiSync(await lapi.sid(), "", this.mid)
                 router.push(this.returnUrl || '/');
             } catch (error) {
                 const alertStore = useAlertStore();
