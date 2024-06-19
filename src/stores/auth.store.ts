@@ -68,6 +68,7 @@ export const useAuthStore = defineStore({
             router.push('/account/login');
         },
         hasPPTExpired() {
+            // PPT receieved from Authentication server upon login.
             //'CertFor=Self;EndTime=20240608150543UTC;NodeId=5nE6CTAgEhR696x-ZpmRzFUZbkk;SignTime=20240607150543UTC;'
             const endTime = stringToDictionary(JSON.parse(this.ppt!).Data).EndTime
             const now = new Date();
@@ -85,6 +86,7 @@ export const useAuthStore = defineStore({
             return false
      },
      hasTokenExpired() {
+        // Token received from Authentication server upon login.
          const arrayToken = this.token.access_token.split('.')
          const tokenPayload = JSON.parse(atob(arrayToken[1]));
          if (Date.now()/1000 >= tokenPayload?.exp) {
