@@ -63,16 +63,17 @@ async function onSubmit(event: any) {
     }
     stream_in.value = ""
 
-    const msg = JSON.stringify({ input: qwh, parameters: user.template, user: user.username })
+    const msg = { input: qwh, parameters: user.template, user: user.username }
+    console.log(msg)
     if (socket && socket.readyState == WebSocket.OPEN) {
         startTime = Date.now()
-        socket.send(msg)
+        socket.send(JSON.stringify(msg))
     }
     else {
         openSocket()
         window.setTimeout(() => {
             startTime = Date.now()
-            socket.send(msg)
+            socket.send(JSON.stringify(msg))
         }, 3000)
     }
 }
