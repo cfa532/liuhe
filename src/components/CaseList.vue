@@ -15,10 +15,10 @@ const cases = ref<ChatCase[]>([])
 watch(() => props.caseId, async (nv, ov) => {
     console.log("caseId:", nv, ov)
     if (nv) {
-        if (nv.substring(0,1) !== '-') {
+            // caseId prefixed with '-' means current case is removed.
+            if (nv.substring(0,1) !== '-') {
             useCaseListStore().setActiveId(nv)
         } else {
-            // caseId=0 means current case is removed and there is no activeId
             useCaseListStore().unsetActiveId()
             cases.value = await caseListStore.allCases.value
             console.log(cases.value)

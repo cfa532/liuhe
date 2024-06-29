@@ -1,0 +1,19 @@
+{{$m := string2map "key1=value1;key2=value2;key3=value3" ";"}}
+{{range $k, $v := $m}}
+    {{$k}}: {{$v}}
+    <br>
+{{end}}
+
+{{$str := map2string $m "&"}}
+str = {{$str}}
+
+<br>
+
+
+=======================
+
+{{$aid := mapget . "aid"}}
+{{$ver := mapget . "ver"}}
+aid={{$aid}}&ver={{$ver}}
+
+{{printf "aid=%s&ver=%s" $aid $ver}}
