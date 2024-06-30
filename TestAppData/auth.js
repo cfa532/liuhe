@@ -2,7 +2,6 @@
 //request是一个全局变量，由Leither在执行角本前生成，并记入到全局变量
 console.log("request=", request)
 
-
 //sid是一个session id，代表者角本执行的身份
 let sid = request["sid"]
 console.log("sid=", sid)
@@ -54,9 +53,11 @@ console.log("appsid", value)
 
 
 var authSid = lapi.BELoginAsAuthor()
-lapi.SessionSet(besid, "authSid", authSid)
+var ppt = lapi.SignPPT(authSid, {"CertFor":"Self", "NodeId":""}, 1440)
+return ppt
+// lapi.SessionSet(besid, "authSid", authSid)
 
 //返回的应该是besid
 
-return besid
+// return besid
 })()
