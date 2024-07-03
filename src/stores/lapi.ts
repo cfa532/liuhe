@@ -43,24 +43,36 @@ export const useLeitherStore = defineStore({
     },
     actions: {
         async sid() {
-            if (Date.now() - this.sid_timestamp > 1000 * 60 * 60 * 24 || !this._sid) {
-                const result = await client.Login(useAuthStore().ppt)
-                this._sid = result ? result.sid : ""
-                this.sid_timestamp = Date.now()
-                return this._sid
+            if (!this._sid || Date.now() - this.sid_timestamp > 1000 * 60 * 60 * 24) {
+                const auth = useAuthStore()
+                if (auth.hasPPTExpired()) {
+                    auth.logout()
+                    return null
+                } else {
+                    const result = await client.Login(auth.ppt)
+                    this._sid = result.sid
+                    this.sid_timestamp = Date.now()
+                    return this._sid
+                }
             } else {
                 return this._sid
             }
         },
         async getMid(ppt: string) {
-            const result = await client.Login(ppt)
-            const mid = await client.MMCreate(result.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY, 2, 0x7276705)
-            this._sid = result.sid
-            this.uid = result.uid
-            this.sid_timestamp = Date.now()
-            console.log("getMid", mid, this._sid, this.uid)
-            // await client.MiMeiSync(this._sid, '', mid)
-            return mid
+            const auth = useAuthStore()
+            if (auth.hasPPTExpired()) {
+                auth.logout()
+                return null
+            } else {
+                const result = await client.Login(ppt)
+                const mid = await client.MMCreate(result.sid, '5KF-zeJy-KUQVFukKla8vKWuSoT', 'USER_MM', import.meta.env.VITE_USER_ACCOUNTS_KEY, 2, 0x7276705)
+                this._sid = result.sid
+                this.uid = result.uid
+                this.sid_timestamp = Date.now()
+                console.log("getMid", mid, this._sid, this.uid)
+                // await client.MiMeiSync(this._sid, '', mid)
+                return mid
+            }
         }   
     }
 })
