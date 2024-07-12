@@ -87,6 +87,7 @@ export const useAuthStore = defineStore({
             return false
         },
         hasTokenExpired() {
+            return false    // not used
             // Token received from Authentication server upon login.
             const arrayToken = this.token.access_token.split('.')
             const tokenPayload = JSON.parse(atob(arrayToken[1]))

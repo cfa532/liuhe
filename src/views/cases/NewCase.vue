@@ -26,6 +26,13 @@ async function onSubmit() {
 onMounted(()=>{
     console.log("New Case Mounted")
 })
+function handleKeyDown(event: any) {
+    if (event.key === 'Enter') {
+        // Submit form on Enter key press
+        event.preventDefault();
+        onSubmit();
+    }
+};
 </script>
 
 <template>
@@ -42,7 +49,7 @@ onMounted(()=>{
     <div class="row mt-2">
         <div class="col">
             <button ref="btnSubmit" @click.prevent="onSubmit" type="button" style="position: relative; float: right;"
-             class="btn btn-primary" v-html="spinner"></button>
+             class="btn btn-primary" v-html="spinner" @keydown="handleKeyDown"></button>
         </div>
     </div>
 </div>
