@@ -3,8 +3,11 @@ import { onMounted, ref, watch } from 'vue';
 import { useAuthStore, useCaseStore, useCaseListStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import { Share } from '@/components'
+import { Share, Preview } from '@/components'
 
+interface HTMLInputEvent extends Event {
+  target: HTMLInputElement & EventTarget
+}
 const emits = defineEmits(["newCaseId"])     // add new case to list
 const caseList = useCaseListStore()
 const caseStore = useCaseStore()
@@ -18,6 +21,9 @@ const btnSubmit = ref()
 const checkedItems = ref([])
 const checkboxNoHistory = ref()
 const isSubmitting = ref(false)
+const selectFiles = ref()
+const filesUpload = ref<File[]>([])
+const divAttach = ref()
 
 // const chatHistory = ref<ChatItem[]>([])
 let socket: WebSocket
@@ -43,8 +49,13 @@ async function onSubmit(event: any) {
     // send message to websocket and wait for response
     const ci = {} as ChatItem
     query.value = typeof query.value == "undefined" ? "Hello" : query.value;        // query submitted to AI
-    ci.Q = query.value
+    ci.Q = query.value+"\n\n"
     ci.A = ""
+    // add uploaded files to user question.
+    for(const f of filesUpload.value) {
+        ci.Q = ci.Q + await f.text() + "\n"
+    }
+
     const qwh: any = { query: ci.Q, history: [] as Array<ChatItem> }   // query with history
 
     if (checkedItems.value.length > 0 && !checkboxNoHistory.value) {
@@ -65,6 +76,7 @@ async function onSubmit(event: any) {
 
     const msg = { input: qwh, parameters: user.template, user: user.username }
     console.log(msg)
+
     if (socket && socket.readyState == WebSocket.OPEN) {
         startTime = Date.now()
         socket.send(JSON.stringify(msg))
@@ -173,6 +185,29 @@ function checkTimeout() {
         useAuthStore().logout()
     }
 }
+async function onSelect(e: Event) {
+  const files =
+    (e as HTMLInputEvent).target.files ||
+    (e as DragEvent).dataTransfer?.files ||
+    (e as ClipboardEvent).clipboardData?.files
+  if (files?.length! > 0) {
+    Array.from(files!).forEach((f) => {
+        // remove duplication
+        if (filesUpload.value.findIndex((e: File) => {e.name === f.name}) === -1) {
+            filesUpload.value.push(f)
+      }
+    })
+    divAttach.value!.hidden = false
+  }
+}
+function removeFile(f: File) {
+  // removed file from preview list
+  var i = filesUpload.value.findIndex((e: File) => e == f)
+  filesUpload.value.splice(i, 1)
+  if (filesUpload.value.length == 0) {
+    divAttach.value.hidden = true
+  }
+}
 </script>
 
 <template>
@@ -182,12 +217,24 @@ function checkTimeout() {
                 <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="hideCase"></Share>
                 <div class="row mt-2" style="position: relative;">
                     <textarea @focus.prevent="checkTimeout" class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
-                    <input title="No history if checked" style="position: absolute; bottom: 55px; right: 15px; transform: translate(50%, -50%);" type="checkbox" v-model="checkboxNoHistory">
+                    <input title="No history if checked" style="position: absolute; bottom: 55px; right: 15px; transform: translate(50%, -50%);"
+                     type="checkbox" v-model="checkboxNoHistory">
                     <p></p>
                     <div class="col">
+                        <input ref="selectFiles" @change="onSelect" type="file" hidden multiple />
+                        <button ref="btnSubmit" @click.prevent="selectFiles.click()"
+                            style="position: relative; float: left;" class="btn btn-light btn-sm">Upload</button>
                         <button ref="btnSubmit" :disabled="isSubmitting" type="submit"
                             style="position: relative; float: right;" class="btn btn-primary" v-html="spinner"></button>
                     </div>
+                    <div ref="divAttach" hidden class="col preview-container">
+                        <Preview
+                          @file-canceled="removeFile(file)"
+                          v-for="(file, index) in filesUpload"
+                          :key="index"
+                          v-bind:src="file"
+                        ></Preview>
+                      </div>
                 </div>
             </div>
 
@@ -235,4 +282,11 @@ div.A {
     /* --bs-text-opacity: 1; */
     color: rgb(53 57 62) !important;
 }
+.preview-container {
+    position: absolute;
+    left: 0;
+    bottom: 50px;
+    margin-bottom: 6px;
+    z-index: 0;
+  }
 </style>

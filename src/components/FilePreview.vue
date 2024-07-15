@@ -3,13 +3,11 @@ import { onMounted, ref, watch } from 'vue';
 const emit = defineEmits(["fileCanceled"])
 const props = defineProps({
     src: {type: File, required: true},
-    progress: {type: Number, required: false, default:100},     // uploading progress bar
 })
 const imageUrl = ref("")
 const caption = ref("")
 onMounted(()=>{
     // src file may not be image
-    console.log("progress=", props.progress)
     thumbnail()
 })
 watch(()=>props.src, (newVal, oldVal)=>{
@@ -17,9 +15,7 @@ watch(()=>props.src, (newVal, oldVal)=>{
         thumbnail()
     }
 })
-function cancel() {
-    emit("fileCanceled")
-}
+
 function thumbnail() {
     if (props.src.type.includes("image")) {
         imageUrl.value = URL.createObjectURL(props.src)
@@ -63,32 +59,22 @@ const generateVideoThumbnail = (file: File) => {
 </script>
 
 <template>
-    <div class="postbox_media_photo_wrapper" :style="{position: 'relative', opacity: props.progress === 100 ? 1 : 0.7}">
-        <div style="position: absolute; display: flex; top: -5px; right: -5px; z-index: 20;">
-            <button @click="cancel" title="Close" class="btn-reset" type="button">
+    <div class="postbox_media_photo_wrapper" :style="{position: 'relative'}">
+        <div style="position: absolute; display: flex; top: -5px; right: -20px;">
+            <button @click='emit("fileCanceled")' title="Close" class="btn-reset" type="button">
             <svg style="width:20px; height:20px;">
-                <circle cx="10" cy="10" r="10" stroke="black" stroke-width="0" fill="#d14e4e" />
+                <circle cx="10" cy="10" r="10" stroke="black" stroke-width="0" fill="#ee8855" />
                 <line x1="5" y1="5" x2="15" y2="15" style="stroke:#fff;stroke-width:2"></line>
                 <line x1="15" y1="5" x2="5" y2="15" style="stroke:#fff;stroke-width:2"></line>
             </svg>
             </button>
         </div>
-        <div class="postbox_media_photo_img_wrapper" draggable="true">
-            <img :src="imageUrl" class="postbox_media_photo_img" draggable="false">
-        </div>
-        <div style="overflow:hidden; height:40px; position:absolute; bottom: 0px; left: 0px; padding: 5px 2px 0px 3px;">
-            <div style="font-size:small; inline-size: 119px; overflow-wrap: break-word;">{{caption}}</div>
-        </div>
-        <div v-if="props.progress < 100" class="progress-bar-overlay">
-            <div class="progress-bar" :style="{width: props.progress + '%', height: '10px', backgroundColor: 'green', borderRadius: '5px'}"></div>
-        </div>
+            <div style="font-size:smaller; overflow-wrap: break-word;">{{caption}}</div>
     </div>
 </template>
 
 <style>
 .postbox_media_photo_wrapper {
-  height: 170px;
-  width: 120px;
   position: relative;
   display: inline-block;
   background-color: #fff;
@@ -97,47 +83,10 @@ const generateVideoThumbnail = (file: File) => {
   transition: All .15s ease-out;
   /* max-width: calc(25% - 32px); */
   flex-grow: 1;
-  margin-right: 15px;
-  margin-top: 5px;
+  margin-right: 20px;
+  margin-left: 10px;
 }
-.postbox_media_photo_img_wrapper {
-  top: 10px;
-  position: absolute;
-  display: flex;
-  width: 100%;
-  height: 120px;
-  cursor: move;
-  user-select: none;
-  overflow: hidden;
-  /* height: calc(100% - 32px); */
-}
-.postbox_media_photo_img {
-  /* display: block; */
-  margin-left: auto;
-  margin-right: auto;
-  margin-top:auto;
-  margin-bottom: auto;
-  width: 100%;
-}
-.progress-bar-overlay {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    width: 100%;
-    height: 10px;
-    transform: translateY(-50%);
-    z-index: 100;
-    background: rgba(255, 255, 255, 0.5);
-  }
-  .progress-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background-color: green;
-    border-radius: 5px;
-  }
-  .btn-reset {
+.btn-reset {
     background: none;
     border: none;
     filter: none;
