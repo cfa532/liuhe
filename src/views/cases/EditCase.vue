@@ -53,9 +53,9 @@ async function onSubmit(event: any) {
     ci.A = ""
     // add uploaded files to user question.
     for(const f of filesUpload.value) {
-        ci.Q = ci.Q + await f.text() + "\n"
+        if (f.size + ci.Q.length < 8192)
+            ci.Q = ci.Q + await f.text() + "\n"
     }
-
     const qwh: any = { query: ci.Q, history: [] as Array<ChatItem> }   // query with history
 
     if (checkedItems.value.length > 0 && !checkboxNoHistory.value) {
@@ -213,7 +213,7 @@ function removeFile(f: File) {
 <template>
     <div class="col-md-10 col-sm-12">
         <form @submit.prevent="onSubmit" @keydown="handleKeyDown">
-            <div class="container d-grid row-gap-3">
+            <div class="container d-grid row-gap-3" @drop.prevent="onSelect">
                 <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="hideCase"></Share>
                 <div class="row mt-2" style="position: relative;">
                     <textarea @focus.prevent="checkTimeout" class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
