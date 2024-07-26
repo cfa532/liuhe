@@ -51,8 +51,8 @@ async function onSubmit(event: any) {
 
     // send message to websocket and wait for response
     const ci = {} as ChatItem
-    query.value = typeof query.value == "undefined" ? "Hello" : query.value;        // query submitted to AI
-    ci.Q = query.value + "\n" + keywords.value ? 'keywords of my query: '+query.value : "" + "\n"
+    query.value =  (query.value ? query.value : "Hello");        // query submitted to AI
+    ci.Q = query.value + "\n" + (keywords.value ? 'keywords of my query: '+keywords.value : "") + "\n"
     ci.A = ""
     // add uploaded files to user question.
     for(const f of filesUpload.value) {
