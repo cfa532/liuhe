@@ -22,6 +22,7 @@ function getcurips() {
         ips = window.location.host
         console.log("window.location", ips, window.location)
     }
+    // If there is testing IP set in .env, use it. Otherwise use IP returned by server.
     return import.meta.env.VITE_LEITHER_IP ? import.meta.env.VITE_LEITHER_IP : ips
 };
 const ips = getcurips();    // web server's IP. Leither might be on different node, assigned by authentication server.

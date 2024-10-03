@@ -23,6 +23,8 @@ export const useAuthStore = defineStore({
                 formData.append('username', username)
                 formData.append('password', password)
                 formData.append('client_id', await lapi.hostId)
+
+                // login to the FastAPI server and get a security token.
                 const resp = await window.fetch(`${baseUrl}/token`, { method: 'POST', body: formData })
                 if (!resp.ok) throw new Error((await resp.json())['detail'])
 
