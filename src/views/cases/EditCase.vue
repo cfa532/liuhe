@@ -4,7 +4,7 @@ import { useAuthStore, useCaseStore, useCaseListStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { Share, Preview } from '@/components'
-
+const route = useRoute()
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget
 }
@@ -12,8 +12,7 @@ const emits = defineEmits(["newCaseId"])     // add new case to list
 const caseList = useCaseListStore()
 const caseStore = useCaseStore()
 const caseStoreRefs = storeToRefs(caseStore)
-const { user, hasPPTExpired, hasTokenExpired } = useAuthStore()
-const route = useRoute();
+const { user } = useAuthStore()
 const query = ref()
 const keywords = ref()
 const stream_in = ref("")
@@ -47,18 +46,19 @@ async function onSubmit(event: any) {
         btnSubmit.value.disabled = false
         window.alert("如果等待超时，尝试刷新页面后重新提交。")
         spinner.value = "提交"
-    }, 120000)
+    }, 30000)
 
     // send message to websocket and wait for response
     const ci = {} as ChatItem
     query.value =  (query.value ? query.value : "Hello");        // query submitted to AI
     ci.Q = query.value + "\n" + (keywords.value ? 'keywords of my query: '+keywords.value : "") + "\n"
     ci.A = ""
+
     // add uploaded files to user question.
-    for(const f of filesUpload.value) {
-        if (f.size + ci.Q.length < 8192)
-            ci.Q = ci.Q + await f.text() + "\n"
-    }
+    // for(const f of filesUpload.value) {
+    //     if (f.size + ci.Q.length < 8192)
+    //         ci.Q = ci.Q + await f.text() + "\n"
+    // }
     const qwh: any = { query: ci.Q, history: [] as Array<ChatItem> }   // query with history
 
     if (checkedItems.value.length > 0 && !checkboxNoHistory.value) {
@@ -76,20 +76,29 @@ async function onSubmit(event: any) {
         }
     }
     stream_in.value = ""
-
     const msg = { input: qwh, parameters: user.template, user: user.username }
-    console.log(msg)
+    console.log(msg, filesUpload.value)
 
-    if (socket && socket.readyState == WebSocket.OPEN) {
-        startTime = Date.now()
-        socket.send(JSON.stringify(msg))
-    }
-    else {
-        openSocket()
-        window.setTimeout(() => {
-            startTime = Date.now()
-            socket.send(JSON.stringify(msg))
-        }, 3000)
+    if (filesUpload.value.length > 0) {
+        const baseUrl = `${import.meta.env.VITE_API_URL}`
+        const formData = new FormData()
+        formData.append('file', filesUpload.value[0]);
+        formData.append('message', JSON.stringify(msg));  // argument name must match that in FastAPI endpoints.
+        const resp = await window.fetch(`${baseUrl}/uploadfile/`, { method: 'POST', body: formData })
+        console.log((await resp.json())['detail'])
+
+        // const ci = {} as ChatItem
+        // ci.Q = query.value
+        // ci.A = await resp.text()
+        // caseStore.addChatItem(ci)
+        query.value = ""
+        stream_in.value = ""
+        spinner.value = "提交"
+        isSubmitting.value = false
+        btnSubmit.value.disabled = false
+        checkedItems.value = []
+        checkboxNoHistory.value = false
+        window.clearTimeout(timer)
     }
 }
 onMounted(async () => {
@@ -98,11 +107,6 @@ onMounted(async () => {
     console.log("Case Mounted")
     adjustWidth()
     openSocket()
-    window.setInterval(()=>{
-        if (hasPPTExpired() || hasTokenExpired()) {
-            useAuthStore().logout()
-        }
-    }, 3600000)
 })
 
 function openSocket() {
@@ -156,13 +160,11 @@ watch(() => route.params.id, async (nv, ov) => {
     // force changing of user case
     if (nv && nv != ov) {
         await caseStore.initCase(nv as string)
-        console.log(caseStoreRefs.case.value, nv, ov)
     }
 })
-async function hideCase() {
+async function delCase() {
     // set the current case as hidden in database, do not delete it.
-    console.log("hide case", route.params.id)
-    await caseList.hideCase(route.params.id as string)
+    await caseList.deleteCase(route.params.id as string)
     emits("newCaseId", "-" + route.params.id)
 }
 function handleKeyDown(event: any) {
@@ -184,11 +186,6 @@ function handleKeyDown(event: any) {
         }
     }
 };
-function checkTimeout() {
-    if (hasPPTExpired() || hasTokenExpired()) {
-        useAuthStore().logout()
-    }
-}
 async function onSelect(e: Event) {
   const files =
     (e as HTMLInputEvent).target.files ||
@@ -224,9 +221,9 @@ function adjustWidth() {
     <div class="col-md-10 col-sm-12">
         <form @submit.prevent="onSubmit" @keydown="handleKeyDown">
             <div class="container d-grid row-gap-3" @drop.prevent="onSelect">
-                <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="hideCase"></Share>
+                <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="delCase"></Share>
                 <div class="row mt-2" style="position: relative;">
-                    <textarea @focus.prevent="checkTimeout" class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
+                    <textarea class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
                     <input title="No history if checked" style="position: absolute; bottom: 55px; right: 15px; transform: translate(50%, -50%);"
                      type="checkbox" v-model="checkboxNoHistory">
                     <p></p>
