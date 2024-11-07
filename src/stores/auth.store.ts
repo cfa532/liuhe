@@ -58,8 +58,8 @@ export const useAuthStore = defineStore({
             localStorage.clear()
             this.user = null
             this.token = null
-            useCaseStore().$reset()
-            useCaseListStore().$reset()
+            // useCaseStore().$reset()
+            // useCaseListStore().$reset()
             router.push('/account/login')
         },
     }

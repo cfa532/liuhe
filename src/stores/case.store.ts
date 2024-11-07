@@ -16,15 +16,13 @@ export const useCaseStore = defineStore({
         userMid: localStorage.getItem("userMid"),
     }),
     getters: {
-        id: function(state): string {
-            return state.chatCase.id
-        },
+        id: (state)=> state.chatCase.id,
     },
     actions: {
         async addChatItem(ci: ChatItem) {
             // add a chat item to chat history of the current case
             await this.api.client.RunMApp("add_chat_item", {aid: this.appId, ver:"last",
-                userid: this.userId, caseid: this.id, chatitem: JSON.stringify(ci)
+                mid: this.userMid, caseid: this.id, chatitem: JSON.stringify(ci)
             })
         },
         async getChatHistory() {
