@@ -112,6 +112,8 @@ onMounted(async () => {
     checkFuture.value = localStorage.getItem("future")
     if (checkFuture.value == "true")
         query.value = defaultPrompt
+    else
+        query.value = ""
 })
 
 function openSocket() {
@@ -135,7 +137,11 @@ function openSocket() {
                 ci.cost = event.cost
                 caseStoreRefs.chatHistory.value!.unshift(ci)
                 caseStore.addChatItem(ci)
-                query.value = defaultPrompt
+
+                if (checkFuture.value == "true")
+                    query.value = defaultPrompt
+                else
+                    query.value = ""
                 stream_in.value = ""
                 spinner.value = "提交"
                 isSubmitting.value = false
