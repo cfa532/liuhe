@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { useAuthStore } from '@/stores';
 
 // Hprose API
 const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "SwarmLocal", "DhtGetAllKeys","MFOpenByPath",

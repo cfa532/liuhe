@@ -8,10 +8,6 @@ const route = useRoute()
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget
 }
-
-const defaultPrompt = "The following is a nonferrous metal future contract recognized by OCR. "+
-                      "Try to make sense out of it by adding space in the right place, "+
-                      "and extract key information about contract number, brand, quatity and commodity.\n"
 const emits = defineEmits(["newCaseId"])     // add new case to list
 const caseList = useCaseListStore()
 const caseStore = useCaseStore()
@@ -24,7 +20,6 @@ const spinner = ref("提交")
 const btnSubmit = ref()
 const checkedItems = ref([])
 const checkboxNoHistory = ref(false)
-const checkFuture = ref()
 const isSubmitting = ref(false)
 const selectFiles = ref()
 const filesUpload = ref<File[]>([])
@@ -109,11 +104,6 @@ onMounted(async () => {
     console.log("Case Mounted")
     adjustWidth()
     openSocket()
-    checkFuture.value = localStorage.getItem("future")
-    if (checkFuture.value == "true")
-        query.value = defaultPrompt
-    else
-        query.value = ""
 })
 
 function openSocket() {
@@ -138,10 +128,7 @@ function openSocket() {
                 caseStoreRefs.chatHistory.value!.unshift(ci)
                 caseStore.addChatItem(ci)
 
-                if (checkFuture.value == "true")
-                    query.value = defaultPrompt
-                else
-                    query.value = ""
+                query.value = ""
                 stream_in.value = ""
                 spinner.value = "提交"
                 isSubmitting.value = false
@@ -221,14 +208,7 @@ function removeFile(f: File) {
     divAttach.value.hidden = true
   }
 }
-function futureChecked() {
-    if (checkFuture.value) {
-        query.value = defaultPrompt
-        localStorage.setItem("future", "true")
-    } else {
-        localStorage.removeItem("future")
-    }
-}
+
 function adjustWidth() {
     // Set the hidden element's text to the input's value
     hiddenMeasure.value!.textContent = (keywords.value || dynamicInput.value!.placeholder) as string;
@@ -259,8 +239,6 @@ function adjustWidth() {
                             <input type="text" v-model="keywords" class="input-field" placeholder="keywords...." ref="dynamicInput" @input.prevent="adjustWidth()">
                             <span type="text" class="hidden-measure" ref="hiddenMeasure" />
                         </div>
-                        <label style="margin-left: 20px; margin-right:5px">Futures</label>
-                        <input ref="selectFuture" v-model="checkFuture" @change="futureChecked" type="checkbox"/>
                     </div>
                     <div class="col-2">
                         <button ref="btnSubmit" :disabled="isSubmitting" type="submit"
