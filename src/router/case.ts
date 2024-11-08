@@ -6,7 +6,11 @@ export default {
     children: [
         { path: '', component: Intro},
         { path: 'add', component: NewCase },
-        { path: 'edit/:id', component: EditCase }
+        { 
+            path: 'edit/:id',
+            component: EditCase,
+            props: true
+        }
     ]
 
 }

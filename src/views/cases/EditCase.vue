@@ -4,23 +4,27 @@ import { useAuthStore, useCaseStore, useCaseListStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import { Share, Preview } from '@/components'
-
+const route = useRoute()
 interface HTMLInputEvent extends Event {
   target: HTMLInputElement & EventTarget
 }
+
+const defaultPrompt = "The following is a nonferrous metal future contract recognized by OCR. "+
+                      "Try to make sense out of it by adding space in the right place, "+
+                      "and extract key information about contract number, brand, quatity and commodity.\n"
 const emits = defineEmits(["newCaseId"])     // add new case to list
 const caseList = useCaseListStore()
 const caseStore = useCaseStore()
 const caseStoreRefs = storeToRefs(caseStore)
-const { user, hasPPTExpired, hasTokenExpired } = useAuthStore()
-const route = useRoute();
+const { user } = useAuthStore()
 const query = ref()
 const keywords = ref()
 const stream_in = ref("")
 const spinner = ref("提交")
 const btnSubmit = ref()
 const checkedItems = ref([])
-const checkboxNoHistory = ref()
+const checkboxNoHistory = ref(false)
+const checkFuture = ref()
 const isSubmitting = ref(false)
 const selectFiles = ref()
 const filesUpload = ref<File[]>([])
@@ -47,19 +51,21 @@ async function onSubmit(event: any) {
         btnSubmit.value.disabled = false
         window.alert("如果等待超时，尝试刷新页面后重新提交。")
         spinner.value = "提交"
-    }, 120000)
+    }, 30000)
 
     // send message to websocket and wait for response
     const ci = {} as ChatItem
     query.value =  (query.value ? query.value : "Hello");        // query submitted to AI
     ci.Q = query.value + "\n" + (keywords.value ? 'keywords of my query: '+keywords.value : "") + "\n"
     ci.A = ""
+
     // add uploaded files to user question.
-    for(const f of filesUpload.value) {
-        if (f.size + ci.Q.length < 8192)
-            ci.Q = ci.Q + await f.text() + "\n"
-    }
-    const qwh: any = { query: ci.Q, history: [] as Array<ChatItem> }   // query with history
+    // for(const f of filesUpload.value) {
+    //     if (f.size + ci.Q.length < 8192)
+    //         ci.Q = ci.Q + await f.text() + "\n"
+    // }
+    const qwh: any = { query: ci.Q, history: [] as Array<ChatItem>,
+        numOfAttachments: filesUpload.value.length}   // query with history
 
     if (checkedItems.value.length > 0 && !checkboxNoHistory.value) {
         // if any previous conversations are checked, use them as chat history
@@ -75,14 +81,19 @@ async function onSubmit(event: any) {
             qwh.history.push({ Q: item.Q.replace(/"/g, "'"), A: item.A.replace(/"/g, "'").replace(/\s+/g, " ") })
         }
     }
-    stream_in.value = ""
+    // otherwise no chat history.
 
+    stream_in.value = ""
     const msg = { input: qwh, parameters: user.template, user: user.username }
-    console.log(msg)
+    console.log(msg, filesUpload.value)
 
     if (socket && socket.readyState == WebSocket.OPEN) {
         startTime = Date.now()
         socket.send(JSON.stringify(msg))
+        filesUpload.value.forEach(async e => {
+            const buf = await e.arrayBuffer()
+            socket.send(buf)
+        })
     }
     else {
         openSocket()
@@ -98,11 +109,11 @@ onMounted(async () => {
     console.log("Case Mounted")
     adjustWidth()
     openSocket()
-    window.setInterval(()=>{
-        if (hasPPTExpired() || hasTokenExpired()) {
-            useAuthStore().logout()
-        }
-    }, 3600000)
+    checkFuture.value = localStorage.getItem("future")
+    if (checkFuture.value == "true")
+        query.value = defaultPrompt
+    else
+        query.value = ""
 })
 
 function openSocket() {
@@ -126,13 +137,18 @@ function openSocket() {
                 ci.cost = event.cost
                 caseStoreRefs.chatHistory.value!.unshift(ci)
                 caseStore.addChatItem(ci)
-                query.value = ""
+
+                if (checkFuture.value == "true")
+                    query.value = defaultPrompt
+                else
+                    query.value = ""
                 stream_in.value = ""
                 spinner.value = "提交"
                 isSubmitting.value = false
                 btnSubmit.value.disabled = false
                 checkedItems.value = []
                 checkboxNoHistory.value = false
+                filesUpload.value = []
                 break
             case "error":
                 console.warn(event.error)
@@ -156,13 +172,11 @@ watch(() => route.params.id, async (nv, ov) => {
     // force changing of user case
     if (nv && nv != ov) {
         await caseStore.initCase(nv as string)
-        console.log(caseStoreRefs.case.value, nv, ov)
     }
 })
-async function hideCase() {
+async function delCase() {
     // set the current case as hidden in database, do not delete it.
-    console.log("hide case", route.params.id)
-    await caseList.hideCase(route.params.id as string)
+    await caseList.deleteCase(route.params.id as string)
     emits("newCaseId", "-" + route.params.id)
 }
 function handleKeyDown(event: any) {
@@ -184,11 +198,6 @@ function handleKeyDown(event: any) {
         }
     }
 };
-function checkTimeout() {
-    if (hasPPTExpired() || hasTokenExpired()) {
-        useAuthStore().logout()
-    }
-}
 async function onSelect(e: Event) {
   const files =
     (e as HTMLInputEvent).target.files ||
@@ -212,6 +221,14 @@ function removeFile(f: File) {
     divAttach.value.hidden = true
   }
 }
+function futureChecked() {
+    if (checkFuture.value) {
+        query.value = defaultPrompt
+        localStorage.setItem("future", "true")
+    } else {
+        localStorage.removeItem("future")
+    }
+}
 function adjustWidth() {
     // Set the hidden element's text to the input's value
     hiddenMeasure.value!.textContent = (keywords.value || dynamicInput.value!.placeholder) as string;
@@ -224,9 +241,9 @@ function adjustWidth() {
     <div class="col-md-10 col-sm-12">
         <form @submit.prevent="onSubmit" @keydown="handleKeyDown">
             <div class="container d-grid row-gap-3" @drop.prevent="onSelect">
-                <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="hideCase"></Share>
+                <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="delCase"></Share>
                 <div class="row mt-2" style="position: relative;">
-                    <textarea @focus.prevent="checkTimeout" class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
+                    <textarea class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
                     <input title="No history if checked" style="position: absolute; bottom: 55px; right: 15px; transform: translate(50%, -50%);"
                      type="checkbox" v-model="checkboxNoHistory">
                     <p></p>
@@ -242,6 +259,8 @@ function adjustWidth() {
                             <input type="text" v-model="keywords" class="input-field" placeholder="keywords...." ref="dynamicInput" @input.prevent="adjustWidth()">
                             <span type="text" class="hidden-measure" ref="hiddenMeasure" />
                         </div>
+                        <label style="margin-left: 20px; margin-right:5px">Futures</label>
+                        <input ref="selectFuture" v-model="checkFuture" @change="futureChecked" type="checkbox"/>
                     </div>
                     <div class="col-2">
                         <button ref="btnSubmit" :disabled="isSubmitting" type="submit"

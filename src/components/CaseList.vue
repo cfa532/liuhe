@@ -12,10 +12,11 @@ const btnOpen = ref<HTMLSpanElement>()
 const caseListStore = storeToRefs(useCaseListStore())
 const mySidenav = ref<HTMLDivElement>()
 const cases = ref<ChatCase[]>([])
+
 watch(() => props.caseId, async (nv, ov) => {
     console.log("caseId:", nv, ov)
     if (nv) {
-            // caseId prefixed with '-' means current case is removed.
+            // caseId prefixed with '-' means current case has been removed.
             if (nv.substring(0,1) !== '-') {
             useCaseListStore().setActiveId(nv)
         } else {
