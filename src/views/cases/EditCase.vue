@@ -6,12 +6,12 @@ import { useRoute } from 'vue-router';
 import { Share, Preview } from '@/components'
 const route = useRoute()
 interface HTMLInputEvent extends Event {
-  target: HTMLInputElement & EventTarget
+    target: HTMLInputElement & EventTarget
 }
 
-const defaultPrompt = "The following is a nonferrous metal future contract recognized by OCR. "+
-                      "Try to make sense out of it by adding space in the right place, "+
-                      "and extract key information about contract number, brand, quatity and commodity.\n"
+const defaultPrompt = "The following is a nonferrous metal future contract recognized by OCR. " +
+    "Try to make sense out of it by adding space in the right place, " +
+    "and extract key information about contract number, brand, quatity and commodity.\n"
 const emits = defineEmits(["newCaseId"])     // add new case to list
 const caseList = useCaseListStore()
 const caseStore = useCaseStore()
@@ -55,8 +55,8 @@ async function onSubmit(event: any) {
 
     // send message to websocket and wait for response
     const ci = {} as ChatItem
-    query.value =  (query.value ? query.value : "Hello");        // query submitted to AI
-    ci.Q = query.value + "\n" + (keywords.value ? 'keywords of my query: '+keywords.value : "") + "\n"
+    query.value = (query.value ? query.value : "Hello");        // query submitted to AI
+    ci.Q = query.value + "\n" + (keywords.value ? 'keywords of my query: ' + keywords.value : "") + "\n"
     ci.A = ""
 
     // add uploaded files to user question.
@@ -64,8 +64,10 @@ async function onSubmit(event: any) {
     //     if (f.size + ci.Q.length < 8192)
     //         ci.Q = ci.Q + await f.text() + "\n"
     // }
-    const qwh: any = { query: ci.Q, history: [] as Array<ChatItem>,
-        numOfAttachments: filesUpload.value.length}   // query with history
+    const qwh: any = {
+        query: ci.Q, history: [] as Array<ChatItem>,
+        numOfAttachments: filesUpload.value.length
+    }   // query with history
 
     if (checkedItems.value.length > 0 && !checkboxNoHistory.value) {
         // if any previous conversations are checked, use them as chat history
@@ -199,27 +201,29 @@ function handleKeyDown(event: any) {
     }
 };
 async function onSelect(e: Event) {
-  const files =
-    (e as HTMLInputEvent).target.files ||
-    (e as DragEvent).dataTransfer?.files ||
-    (e as ClipboardEvent).clipboardData?.files
-  if (files?.length! > 0) {
-    Array.from(files!).forEach((f) => {
-        // remove duplication
-        if (filesUpload.value.findIndex((e: File) => {e.name === f.name}) === -1) {
-            filesUpload.value.push(f)
-      }
-    })
-    divAttach.value!.hidden = false
-  }
+    const files =
+        (e as HTMLInputEvent).target.files ||
+        (e as DragEvent).dataTransfer?.files ||
+        (e as ClipboardEvent).clipboardData?.files
+    if (files?.length! > 0) {
+        Array.from(files!).forEach((f) => {
+            // remove duplication
+            if (filesUpload.value.findIndex((e: File) => { e.name === f.name }) === -1) {
+                filesUpload.value.push(f)
+            }
+        })
+        divAttach.value!.hidden = false
+    }
+    // Reset the file input value to allow re-selection of the same file
+    (e.target as HTMLInputElement).value = '';
 }
 function removeFile(f: File) {
-  // removed file from preview list
-  var i = filesUpload.value.findIndex((e: File) => e == f)
-  filesUpload.value.splice(i, 1)
-  if (filesUpload.value.length == 0) {
-    divAttach.value.hidden = true
-  }
+    // removed file from preview list
+    var i = filesUpload.value.findIndex((e: File) => e == f)
+    filesUpload.value.splice(i, 1)
+    if (filesUpload.value.length == 0) {
+        divAttach.value.hidden = true
+    }
 }
 function futureChecked() {
     if (checkFuture.value) {
@@ -244,35 +248,44 @@ function adjustWidth() {
                 <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="delCase"></Share>
                 <div class="row mt-2" style="position: relative;">
                     <textarea class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
-                    <input title="No history if checked" style="position: absolute; bottom: 55px; right: 15px; transform: translate(50%, -50%);"
-                     type="checkbox" v-model="checkboxNoHistory">
+                    <input title="No history if checked"
+                        style="position: absolute; bottom: 55px; right: 15px; transform: translate(50%, -50%);"
+                        type="checkbox" v-model="checkboxNoHistory">
                     <p></p>
                     <div class="col-10">
                         <input ref="selectFiles" @change="onSelect" type="file" hidden multiple />
                         <label for="fileUpload" class="upload-button" @click.prevent="selectFiles.click()">
-                            <svg fill="none" height="14" viewBox="0 0 14 14" width="14" xmlns="http://www.w3.org/2000/svg"><g stroke="#000001" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 5h1c.1326 0 .2598.05268.3536.14645.0937.09376.1464.22094.1464.35355v7.5c0 .1326-.0527.2598-.1464.3536-.0938.0937-.221.1464-.3536.1464h-9c-.13261 0-.25979-.0527-.35355-.1464-.09377-.0938-.14645-.221-.14645-.3536v-7.5c0-.13261.05268-.25979.14645-.35355.09376-.09377.22094-.14645.35355-.14645h1"/><path d="m7 7.5v-7"/><path d="m5 2.5 2-2 2 2"/></g></svg>
+                            <svg fill="none" height="14" viewBox="0 0 14 14" width="14"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <g stroke="#000001" stroke-linecap="round" stroke-linejoin="round">
+                                    <path
+                                        d="m10.5 5h1c.1326 0 .2598.05268.3536.14645.0937.09376.1464.22094.1464.35355v7.5c0 .1326-.0527.2598-.1464.3536-.0938.0937-.221.1464-.3536.1464h-9c-.13261 0-.25979-.0527-.35355-.1464-.09377-.0938-.14645-.221-.14645-.3536v-7.5c0-.13261.05268-.25979.14645-.35355.09376-.09377.22094-.14645.35355-.14645h1" />
+                                    <path d="m7 7.5v-7" />
+                                    <path d="m5 2.5 2-2 2 2" />
+                                </g>
+                            </svg>
                         </label>
-                        <label class="upload-button" @click.prevent="keywords=''; filesUpload=[]">
-                            <svg height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m13.9907.00000013c.8909 0 1.337 1.07713987.7071 1.70710987l-.8422.84211c.5654.60732 1.0348 1.30106 1.3892 2.05773.558 1.19141.8135 2.50205.744 3.81582s-.462 2.59013-1.1426 3.71603c-.6806 1.1258-1.6284 2.0665-2.7594 2.7385-1.131.6721-2.41025 1.0549-3.7245 1.1145-1.31426.0596-2.62293-.2059-3.81009-.7729-1.18716-.5669-2.21617-1.418-2.99587-2.4776-.779705-1.0597-1.286041-2.2953-1.4741578-3.59738-.07896991-.54661.3001268-1.05374.8467358-1.13271.546612-.07897 1.053742.30012 1.132712.84673.14109.97657.52084 1.90326 1.10562 2.69806.58478.7947 1.35653 1.433 2.2469 1.8582s1.87187.6243 2.85757.5797c.98569-.0447 1.94518-.3318 2.79338-.8359s1.5591-1.2095 2.0695-2.0539c.5105-.8444.8049-1.80169.857-2.78702s-.1395-1.96831-.558-2.86187c-.2556-.54572-.591-1.0478-.9934-1.49057l-.7331.73315c-.63.62997-1.70714.1838-1.70714-.7071v-3.99068987zm-12.490721 3.99999987c.552281 0 1 .44772 1 1 0 .55229-.447719 1-1 1-.552285 0-1-.44772-1-1s.447715-1 1-1zm2.250001-2.75c.55228 0 1 .44772 1 1 0 .55229-.44772 1-1 1-.55229 0-1-.44772-1-1s.44771-1 1-1zm3.25-1.25c.55228 0 1 .447716 1 1 0 .55229-.44772 1-1 1-.55229 0-1-.44771-1-1 0-.552284.44771-1 1-1z"/></svg>
+                        <label class="upload-button" @click.prevent="keywords = ''; filesUpload = []">
+                            <svg height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="m13.9907.00000013c.8909 0 1.337 1.07713987.7071 1.70710987l-.8422.84211c.5654.60732 1.0348 1.30106 1.3892 2.05773.558 1.19141.8135 2.50205.744 3.81582s-.462 2.59013-1.1426 3.71603c-.6806 1.1258-1.6284 2.0665-2.7594 2.7385-1.131.6721-2.41025 1.0549-3.7245 1.1145-1.31426.0596-2.62293-.2059-3.81009-.7729-1.18716-.5669-2.21617-1.418-2.99587-2.4776-.779705-1.0597-1.286041-2.2953-1.4741578-3.59738-.07896991-.54661.3001268-1.05374.8467358-1.13271.546612-.07897 1.053742.30012 1.132712.84673.14109.97657.52084 1.90326 1.10562 2.69806.58478.7947 1.35653 1.433 2.2469 1.8582s1.87187.6243 2.85757.5797c.98569-.0447 1.94518-.3318 2.79338-.8359s1.5591-1.2095 2.0695-2.0539c.5105-.8444.8049-1.80169.857-2.78702s-.1395-1.96831-.558-2.86187c-.2556-.54572-.591-1.0478-.9934-1.49057l-.7331.73315c-.63.62997-1.70714.1838-1.70714-.7071v-3.99068987zm-12.490721 3.99999987c.552281 0 1 .44772 1 1 0 .55229-.447719 1-1 1-.552285 0-1-.44772-1-1s.447715-1 1-1zm2.250001-2.75c.55228 0 1 .44772 1 1 0 .55229-.44772 1-1 1-.55229 0-1-.44772-1-1s.44771-1 1-1zm3.25-1.25c.55228 0 1 .447716 1 1 0 .55229-.44772 1-1 1-.55229 0-1-.44771-1-1 0-.552284.44771-1 1-1z" />
+                            </svg>
                         </label>
                         <div class="input-container">
-                            <input type="text" v-model="keywords" class="input-field" placeholder="keywords...." ref="dynamicInput" @input.prevent="adjustWidth()">
+                            <input type="text" v-model="keywords" class="input-field" placeholder="keywords...."
+                                ref="dynamicInput" @input.prevent="adjustWidth()">
                             <span type="text" class="hidden-measure" ref="hiddenMeasure" />
                         </div>
                         <label style="margin-left: 20px; margin-right:5px">Futures</label>
-                        <input ref="selectFuture" v-model="checkFuture" @change="futureChecked" type="checkbox"/>
+                        <input ref="selectFuture" v-model="checkFuture" @change="futureChecked" type="checkbox" />
                     </div>
                     <div class="col-2">
                         <button ref="btnSubmit" :disabled="isSubmitting" type="submit"
                             style="position: relative; float: right;" class="btn btn-primary" v-html="spinner"></button>
                     </div>
                     <div ref="divAttach" hidden class="col preview-container">
-                        <Preview
-                          @file-canceled="removeFile(file)"
-                          v-for="(file, index) in filesUpload"
-                          :key="index"
-                          v-bind:src="file"
-                        ></Preview>
+                        <Preview @file-canceled="removeFile(file)" v-for="(file, index) in filesUpload" :key="index"
+                            v-bind:src="file"></Preview>
                     </div>
                 </div>
             </div>
@@ -285,9 +298,10 @@ function adjustWidth() {
                 </div>
                 <div style="margin-left: 1px;" v-for="(ci, index) in caseStoreRefs.chatHistory.value" :key="index">
                     <div style="padding-left: 25px; text-indent: -20px;" class="Q">{{ "Q: " + ci.Q }}
-                        <input title="Check to add into history" type="checkbox" :value="ci" v-model="checkedItems" style="margin: 6px 5px 0 5px;">
+                        <input title="Check to add into history" type="checkbox" :value="ci" v-model="checkedItems"
+                            style="margin: 6px 5px 0 5px;">
                     </div>
-                    <div style="padding-left: 25px; text-indent: -20px;" class="A">{{"A: " + ci.A }}</div>
+                    <div style="padding-left: 25px; text-indent: -20px;" class="A">{{ "A: " + ci.A }}</div>
                     <p></p>
                     <hr />
                 </div>
@@ -298,7 +312,7 @@ function adjustWidth() {
 </template>
 <style>
 div.Q {
-    background-color:rgb(238, 238, 213);
+    background-color: rgb(238, 238, 213);
     /* border: 1px solid blue; */
     border-radius: 10px;
     padding: 5px 5px 5px 0;
@@ -307,20 +321,24 @@ div.Q {
     justify-content: space-between;
     align-items: flex-start;
 }
+
 div.A {
     white-space: pre-wrap;
     color: rgb(33, 31, 31);
 }
+
 .col-12 {
     background-color: rgb(199, 187, 163);
     padding: 5px;
     border-radius: 5px;
     /* border: 1px solid #73AD21; */
 }
+
 .text-secondary {
     /* --bs-text-opacity: 1; */
     color: rgb(53 57 62) !important;
 }
+
 .preview-container {
     position: absolute;
     left: 0;
@@ -328,6 +346,7 @@ div.A {
     margin-bottom: 6px;
     z-index: 0;
 }
+
 .upload-button {
     display: inline-flex;
     align-items: center;
@@ -338,6 +357,7 @@ div.A {
     fill: rgb(48, 46, 46);
     transition: background-color 0.3s;
 }
+
 .upload-button svg {
     padding-top: 6px;
     margin-right: 10px;
@@ -349,11 +369,13 @@ div.A {
     position: relative;
     display: inline-block;
 }
+
 .input-field {
     width: 1px;
     min-width: 200px;
     font-size: 14px;
 }
+
 .hidden-measure {
     position: absolute;
     visibility: hidden;
