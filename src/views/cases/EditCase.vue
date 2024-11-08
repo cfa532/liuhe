@@ -10,7 +10,7 @@ interface HTMLInputEvent extends Event {
 }
 
 const defaultPrompt = "The following is a nonferrous metal future contract recognized by OCR. " +
-    "Try to make sense out of it by adding space in the right place, " +
+    "Try to make sense of it by adding space in the right place, " +
     "and extract key information about contract number, brand, quatity and commodity.\n"
 const emits = defineEmits(["newCaseId"])     // add new case to list
 const caseList = useCaseListStore()
@@ -51,7 +51,7 @@ async function onSubmit(event: any) {
         btnSubmit.value.disabled = false
         window.alert("如果等待超时，尝试刷新页面后重新提交。")
         spinner.value = "提交"
-    }, 30000)
+    }, 300000)
 
     // send message to websocket and wait for response
     const ci = {} as ChatItem
