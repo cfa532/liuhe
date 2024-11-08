@@ -78,6 +78,7 @@ export const useCaseListStore = defineStore({
             state._allcases = await state.api.client.RunMApp("get_cases", {aid: state.appId, ver: "last",
                 mid: state.userMid
             })
+            state._allcases = state._allcases ? state._allcases : []
             state._allcases.sort((a, b) => b.timestamp - a.timestamp)
             return state._allcases
         }
