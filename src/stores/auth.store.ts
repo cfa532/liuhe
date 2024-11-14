@@ -40,6 +40,10 @@ export const useAuthStore = defineStore({
                 const userMid = await lapi.client.RunMApp("update_user", {aid: lapi.appId, ver: "last",
                     user: JSON.stringify(this.user)
                 })
+                // userMid is different from user's mid returned by authentication server.
+                // Data node uses its own userMid to store chat data. Authentication server uses its
+                // version of user mid to store user credentials. 
+                result.user.mid = userMid
 
                 // store user details and jwt in local storage to keep user logged in between page refreshes
                 localStorage.setItem('user', JSON.stringify(result.user))
@@ -51,16 +55,27 @@ export const useAuthStore = defineStore({
                 const alertStore = useAlertStore()
                 console.error(error)
                 alertStore.error(error)
-                this.logout()
+                await this.logout()
             }
         },
-        logout() {
-            localStorage.clear()
-            this.user = null
-            this.token = null
-            // useCaseStore().$reset()
-            // useCaseListStore().$reset()
-            router.push('/account/login')
+        async logout() {
+            try {
+                const lapi = useLeitherStore()
+
+                // do NOT wait for logout which will take a while.
+                lapi.client.RunMApp("logout", {aid: lapi.appId, ver: "last", userid: this.userMid})
+                localStorage.clear()
+                this.user = null
+                this.token = null
+                // useCaseStore().$reset()
+                // useCaseListStore().$reset()
+                router.push('/account/login')
+            } catch(e) {
+                console.error(e)
+                localStorage.clear()
+                this.user = null
+                this.token = null
+            }
         },
     }
 })
