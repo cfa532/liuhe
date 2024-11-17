@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 // import { fetchWrapper } from '@/helpers';
 import { router } from '@/router'
-import { useAlertStore, useLeitherStore } from '@/stores'
+import { useAlertStore, useLeitherStore, useCaseListStore } from '@/stores'
 const baseUrl = `${import.meta.env.VITE_API_URL}`
 
 export const useAuthStore = defineStore({
@@ -61,14 +61,11 @@ export const useAuthStore = defineStore({
         async logout() {
             try {
                 const lapi = useLeitherStore()
-
-                // do NOT wait for logout which will take a while.
-                lapi.client.RunMApp("logout", {aid: lapi.appId, ver: "last", userid: this.userMid})
+                lapi.client.RunMApp("logout", {aid: lapi.appId, ver: "last", userid: this.userMid})  // do NOT wait for logout which will take a while.
+                useCaseListStore().$reset()
                 localStorage.clear()
                 this.user = null
                 this.token = null
-                // useCaseStore().$reset()
-                // useCaseListStore().$reset()
                 router.push('/account/login')
             } catch(e) {
                 console.error(e)
