@@ -4,7 +4,7 @@ import { Form, Field } from 'vee-validate';
 import * as Yup from 'yup';
 import { useRoute } from 'vue-router';
 
-import { useUsersStore, useAlertStore, useAuthStore } from '@/stores';
+import { useUsersStore, useAlertStore } from '@/stores';
 import { router } from '@/router';
 
 const usersStore = useUsersStore();
