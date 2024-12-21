@@ -17,21 +17,19 @@ function request(method: string) {
             requestOptions.headers['Content-Type'] = 'application/json';
             requestOptions.body = JSON.stringify(body);
         }
-        console.log(url, requestOptions)
-
         // fetch is monkey patched in fake-backend in the beginning of main.ts
-        return fetch(url, requestOptions).then(handleResponse);
+        return fetch(url, requestOptions).then(handleResponse)
     }
 }
 
 // helper functions
 function authHeader(url:string) {
     // return auth header with jwt if user is logged in and request is to the api url
-    const { user, token } = useAuthStore();
-    const isLoggedIn = !!token;
+    const { token } = useAuthStore();
+    const isLoggedIn = Object.keys(token).length > 0;
     const isAPIUrl = url.startsWith(import.meta.env.VITE_API_URL);
     // const isApiUrl = true
-    console.log("API_URL", url, user, isLoggedIn)
+    console.log("API_URL", url, isLoggedIn, token)
     if (isLoggedIn && isAPIUrl) {
         return { Authorization: `${token.token_type} ${token.access_token}` };
     } else {
@@ -42,17 +40,17 @@ function authHeader(url:string) {
 async function handleResponse(response: any) {
     const isJson = response.headers?.get('content-type')?.includes('application/json');
     const data = isJson ? await response.json() : null;
-    console.log(data)
+
     // check for error response
     if (!response.ok) {
         const { user, logout } = useAuthStore();
         if ([401, 403].includes(response.status) && user) {
             // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
-            logout();
+            await logout();
         }
-
         // get error message from body or default to response status
-        const error = (data && data.message) || response.status;
+        // data in Response from FastAPI is {"detail":"Username exists"}
+        const error = (data && data.detail) || response.status;
         return Promise.reject(error);
     }
     return data;

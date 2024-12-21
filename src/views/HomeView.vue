@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { useAuthStore, useUsersStore } from '@/stores';
+import { useAuthStore, useUsersStore, useAlertStore } from '@/stores';
 import { CaseList } from '@/components';
 import { ref } from 'vue';
 
@@ -8,13 +8,18 @@ import { ref } from 'vue';
 // const mmInfo = useMimei();
 const { user } = storeToRefs(useAuthStore());
 const sideNav = ref<HTMLDivElement>()
-const settings = ref(user.value.template ? user.value.template : {llm:"openai",temperature: "0.0",model:"gpt-4"})
+const settings = ref(user.value.template ? user.value.template : {llm:"openai",temperature: "0.0",model:"gpt-4o"})
 const submitted = ref(true)
 
 async function onSubmit() {
   submitted.value = true
   user.value.template = settings.value
-  await useUsersStore().update(user.value.username, user.value)
+  try {
+    await useUsersStore().update(user.value.username, user.value)
+    useAlertStore().success("Account updated.")
+  } catch {
+    useAlertStore().error("Update user account failed.")
+  }
 }
 </script>
 
@@ -25,7 +30,7 @@ async function onSubmit() {
         <CaseList></CaseList>
       </div>
       <div class="col">
-        <h3 v-if="user">Hi, {{ user.givenName }}</h3>
+        <h3 v-if="user">Hi, {{ user.given_name }}</h3>
         <br>
         <form @change.prevent="submitted=false" @submit.prevent="onSubmit">
           <div class="row">
@@ -39,8 +44,10 @@ async function onSubmit() {
             <div class="col-4">
               <label for="llm">选择模型：</label>
               <select v-model="settings.model" id="llm" class="form-select mt-2 mb-3">
+                <option value="o1-mini" selected>o1-mini</option>
+                <option value="gpt-4o" selected>GPT-4o</option>
                 <option value="gpt-4-turbo" selected>GPT-4 Turbo</option>
-                <option value="gpt-4">GPT-4</option>
+                <option value="gpt-3.5-turbo">GPT-3.5</option>
               </select>
             </div>
           </div>

@@ -24,8 +24,8 @@ usersStore.getAll();
         <tbody>
             <template v-if="users.length">
                 <tr v-for="user in users" :key="user.username">
-                    <td>{{ user.familyName }}</td>
-                    <td>{{ user.givenName }}</td>
+                    <td>{{ user.family_name }}</td>
+                    <td>{{ user.given_name }}</td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.role }}</td>
                     <td style="white-space: nowrap">

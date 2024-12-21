@@ -21,15 +21,16 @@ interface Window {
 // }
 class UserAccount {
     username: string;
-    familyName: string;
-    givenName: string
+    family_name: string;
+    given_name: string
     password: string
     mid: string                     // Mimei id for this user's db, everything of the user is stored in the Mimei
     role: string = "user"           // 用户身份：分析师，交易员，财务？
     template: any                   // dictionary that hold user settings of LLM
     subscription: boolean = false   // whether the user is subscribed to the Mimei
-    token_count?: any
-    token_usage?: any
+    token_count?: number
+    token_usage?: number
+    host_id?: string
 }
 
 interface Book {
@@ -43,16 +44,19 @@ interface ChatItem {
     tokens?: number;   // token cost for this chat
     cost?: number;    // cost in $US
 }
-interface ChatCase {       // chat
-    // this.id is used as Key to the chat history Score_Pair
-    // human ask, and AI reply. Within Mimei DB, each chat item is stored as ScorePair.
-    // score: timestamp when the item is created, which means AI answered a question.
-    id: string,             // id of the chat case, use sequence of timestamp which will be unique.
-    timestamp: number,      // date and time this leagal case is created in the system. Updated every time change is made
-                            // used to sort the chat case list
-    brief: string,          // brief description of the case
-    show?: boolean          // show or hide this case
+
+// this.id is used as Key to the chat history Score_Pair
+// human ask, and AI reply. Within Mimei DB, each chat item is stored as ScorePair.
+// score: timestamp when the item is created, which means AI answered a question.
+interface ChatCase {
+    // id of the chat case, timestamp is used as value.
+    id: string,
+    // Updated every time the case is changed.
+    timestamp: number,
+    // brief description of the case. Used as case title     
+    brief: string,
 }
+
 // Mimei data structures
 interface ScorePair { 
     score: number

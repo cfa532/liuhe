@@ -1,0 +1,36 @@
+<html>
+<head></head>
+<body>
+
+<!-- besid是用于后端的session id -->
+
+{{$besid := runmapp "auth" .}} 
+besid={{$besid}}
+<br>
+
+<!-- besid加上全局变量 -->
+{{$request := mapset . "besid" $besid}}
+
+<!-- 执行写操作 -->
+runmapp write :
+<br>
+
+{{runmapp "write" $request}} 
+
+<br>
+runmapp read:
+<br>
+{{runmapp "read" $request}} 
+<br>
+
+{{$aid := mapget . "aid"}}
+{{$ver := mapget . "ver"}}
+
+<a href="/entry?aid={{$aid}}&ver={{$ver}}&besid={{$besid}}&entry=read">读数据</a>
+<br>
+
+<a href="/entry?aid={{$aid}}&ver={{$ver}}&besid={{$besid}}&entry=write">写数据</a>
+<br>
+
+</body>
+</html>

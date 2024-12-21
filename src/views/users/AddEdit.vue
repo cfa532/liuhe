@@ -4,7 +4,7 @@ import { Form, Field } from 'vee-validate';
 import * as Yup from 'yup';
 import { useRoute } from 'vue-router';
 
-import { useUsersStore, useAlertStore, useAuthStore } from '@/stores';
+import { useUsersStore, useAlertStore } from '@/stores';
 import { router } from '@/router';
 
 const usersStore = useUsersStore();
@@ -23,9 +23,9 @@ if (id) {
 }
 
 const schema = Yup.object().shape({
-    familyName: Yup.string()
+    family_name: Yup.string()
         .required('姓氏必填'),
-    givenName: Yup.string()
+    given_name: Yup.string()
         .required('名字必填'),
     username: Yup.string()
         .required('用户名必填'),
@@ -61,13 +61,13 @@ async function onSubmit(values:any) {
             <div class="form-row">
                 <div class="form-group col">
                     <label>姓</label>
-                    <Field name="familyName" type="text" class="form-control" :class="{ 'is-invalid': errors.firstName }" />
-                    <div class="invalid-feedback">{{ errors.firstName }}</div>
+                    <Field name="family_name" type="text" class="form-control" :class="{ 'is-invalid': errors.family_name }" />
+                    <div class="invalid-feedback">{{ errors.family_name }}</div>
                 </div>
                 <div class="form-group col">
                     <label>名</label>
-                    <Field name="givenName" type="text" class="form-control" :class="{ 'is-invalid': errors.lastName }" />
-                    <div class="invalid-feedback">{{ errors.lastName }}</div>
+                    <Field name="given_name" type="text" class="form-control" :class="{ 'is-invalid': errors.given_name }" />
+                    <div class="invalid-feedback">{{ errors.given_name }}</div>
                 </div>
             </div>
             <div class="form-row">

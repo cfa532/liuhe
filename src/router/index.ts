@@ -1,6 +1,6 @@
 // export { router } from './router'
 
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import { useAuthStore, useAlertStore } from '@/stores';
 import accountRoutes from '@/router/account';
 import usersRoutes from '@/router/users';
@@ -8,7 +8,7 @@ import caseRoutes from '@/router/case'
 import { Home, IPs } from '@/views';
 
 export const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHashHistory(import.meta.env.BASE_URL),
     linkActiveClass: 'active',
     routes: [
         { path: '/', component: Home },

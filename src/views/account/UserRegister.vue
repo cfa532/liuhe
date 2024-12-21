@@ -6,10 +6,10 @@ import { useUsersStore, useAlertStore } from '@/stores';
 import { router } from '@/router';
 
 const schema = Yup.object().shape({
-    familyName: Yup.string()
-        .required('First Name is required'),
-    givenName: Yup.string()
-        .required('Last Name is required'),
+    family_name: Yup.string()
+        .required('Family Name is required'),
+    given_name: Yup.string()
+        .required('Given Name is required'),
     username: Yup.string()
         .required('Username is required'),
     password: Yup.string()
@@ -24,8 +24,8 @@ async function onSubmit(values: any) {
         await usersStore.register(values);
         await router.push('/account/login');
         alertStore.success('Registration successful');
-    } catch (error) { 
-        alertStore.error(error);
+    } catch (error) {
+        alertStore.error("Registration error: "+ error);
     }
 }
 </script>
@@ -37,13 +37,13 @@ async function onSubmit(values: any) {
             <Form @submit="onSubmit" :validation-schema="schema" v-slot="{ errors, isSubmitting }">
                 <div class="form-group" style="margin-top: 0px;">
                     <label>姓氏</label>
-                    <Field name="familyName" type="text" class="form-control" :class="{ 'is-invalid': errors.firstName }" />
-                    <div class="invalid-feedback">{{ errors.firstName }}</div>
+                    <Field name="family_name" type="text" class="form-control" :class="{ 'is-invalid': errors.family_name }" />
+                    <div class="invalid-feedback">{{ errors.family_name }}</div>
                 </div>
                 <div class="form-group">
                     <label>名</label>
-                    <Field name="givenName" type="text" class="form-control" :class="{ 'is-invalid': errors.lastName }" />
-                    <div class="invalid-feedback">{{ errors.lastName }}</div>
+                    <Field name="given_name" type="text" class="form-control" :class="{ 'is-invalid': errors.given_name }" />
+                    <div class="invalid-feedback">{{ errors.given_name }}</div>
                 </div>
                 <div class="form-group">
                     <label>用户名</label>
