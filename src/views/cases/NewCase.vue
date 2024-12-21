@@ -29,7 +29,6 @@ onMounted(()=>{
 function handleKeyDown(event: any) {
     if (event.key === 'Enter') {
         // Submit form on Enter key press
-        event.preventDefault();
         onSubmit();
     }
 };
@@ -49,7 +48,7 @@ function handleKeyDown(event: any) {
     <div class="row mt-2">
         <div class="col">
             <button ref="btnSubmit" @click.prevent="onSubmit" type="button" style="position: relative; float: right;"
-             class="btn btn-primary" v-html="spinner" @keydown="handleKeyDown"></button>
+             class="btn btn-primary" v-html="spinner" @keydown.prevent="handleKeyDown"></button>
         </div>
     </div>
 </div>
