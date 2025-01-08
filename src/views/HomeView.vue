@@ -11,7 +11,6 @@ const sideNav = ref<HTMLDivElement>()
 const settings = ref(user.value.template ? user.value.template : {llm:"openai",temperature: "0.0",model:"gpt-4o"})
 const submitted = ref(true)
 const models = ref(["o1-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"])
-const selectedModel = ref(settings.value.model);
 
 async function onSubmit() {
   submitted.value = true
@@ -28,11 +27,6 @@ function selectLLM() {
     models.value = ["o1-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]
   } else if (settings.value.llm == "gemini") {
     models.value = ["gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"]
-  }
-  if (models.value.findIndex(e => e===settings.value.model) > -1) {
-    selectedModel.value = settings.value.model
-  } else {
-    selectedModel.value = models.value[0]
   }
 }
 onMounted(()=>{
@@ -52,15 +46,15 @@ onMounted(()=>{
         <form @change.prevent="submitted=false" @submit.prevent="onSubmit">
           <div class="row">
             <div class="col-4">
-              <label for="llm">选择大模型：</label>
+              <label for="llm">LLM:</label>
               <select v-model="settings.llm" @change.prevent="selectLLM" class="form-select mt-2 mb-3">
                 <option value="openai" selected>OpenAI</option>
                 <option value="gemini">Gemini</option>
               </select>
             </div>
             <div class="col-4">
-              <label for="llm">选择模型：</label>
-              <select v-model="selectedModel" class="form-select mt-2 mb-3">
+              <label for="llm">Model:</label>
+              <select v-model="settings.model" class="form-select mt-2 mb-3">
                 <option v-for="(model, index) in models" :value="model" :key="index">{{model}}</option>
               </select>
             </div>
