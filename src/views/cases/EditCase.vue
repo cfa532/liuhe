@@ -6,7 +6,6 @@ import { useRoute } from 'vue-router';
 import { Share, Preview, PreviewURL } from '@/components'
 import IconLink from '@/components/icons/IconLink.vue'
 import LinkModal from '@/components/LinkModal.vue';
-import { url } from 'inspector';
 
 const props = defineProps<{
     id: Number;
