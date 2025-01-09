@@ -3,7 +3,14 @@ import { onMounted, ref, watch } from 'vue';
 import { useAuthStore, useCaseStore, useCaseListStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import { Share, Preview } from '@/components'
+import { Share, Preview, PreviewURL } from '@/components'
+import IconLink from '@/components/icons/IconLink.vue'
+import LinkModal from '@/components/LinkModal.vue';
+import { url } from 'inspector';
+
+const props = defineProps<{
+    id: Number;
+}>();
 const route = useRoute()
 interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget
@@ -31,6 +38,23 @@ const hiddenMeasure = ref<HTMLSpanElement>()
 let socket: WebSocket
 let timer: any
 let startTime = 0       // time between sending message and receives first reply.
+
+const links = ref([''] as string[]);
+const showModal = ref(false);
+const handleSave = (urls: string[]) => {
+    links.value = urls;
+    showModal.value = false;
+    if (urls.length > 0)
+        divAttach.value.hidden = false
+    console.log('Saved URLs:', urls);    
+};
+const handleCancel = () => {
+    showModal.value = false;
+    console.log('Modal cancelled');
+};
+const openModal = () => {
+    showModal.value = true;
+}
 
 async function onSubmit(event: any) {
     if (isSubmitting.value) {
@@ -61,7 +85,8 @@ async function onSubmit(event: any) {
     // }
     const qwh: any = {
         query: ci.Q, history: [] as Array<ChatItem>,
-        numOfAttachments: filesUpload.value.length
+        numOfAttachments: filesUpload.value.length,
+        urls: links.value,   // links to media files
     }   // query with history
 
     if (checkedItems.value.length > 0 && !checkboxNoHistory.value) {
@@ -199,7 +224,7 @@ async function onSelect(e: Event) {
                 filesUpload.value.push(f)
             }
         })
-        divAttach.value!.hidden = false
+        divAttach.value.hidden = false
     }
     // Reset the file input value to allow re-selection of the same file
     (e.target as HTMLInputElement).value = '';
@@ -208,11 +233,17 @@ function removeFile(f: File) {
     // removed file from preview list
     var i = filesUpload.value.findIndex((e: File) => e == f)
     filesUpload.value.splice(i, 1)
-    if (filesUpload.value.length == 0) {
+    if (filesUpload.value.length == 0 && links.value.length == 0) {
         divAttach.value.hidden = true
     }
 }
-
+function removeUrl(url: string) {
+    const i = links.value.findIndex((e: string) => e == url)
+    links.value.splice(i, 1)
+    if (filesUpload.value.length == 0 && links.value.length == 0) {
+        divAttach.value.hidden = true
+    }
+}
 function adjustWidth() {
     // Set the hidden element's text to the input's value
     hiddenMeasure.value!.textContent = (keywords.value || dynamicInput.value!.placeholder) as string;
@@ -222,6 +253,7 @@ function adjustWidth() {
 </script>
 
 <template>
+    <LinkModal :isVisible="showModal" @save="handleSave" @cancel="handleCancel" />
     <div class="col-md-10 col-sm-12">
         <form @submit.prevent="onSubmit" @keydown="handleKeyDown">
             <div class="container d-grid row-gap-3" @drop.prevent="onSelect">
@@ -234,9 +266,8 @@ function adjustWidth() {
                     <p></p>
                     <div class="col-10">
                         <input ref="selectFiles" @change="onSelect" type="file" hidden multiple />
-                        <label for="fileUpload" class="upload-button" @click.prevent="selectFiles.click()">
-                            <svg fill="none" height="14" viewBox="0 0 14 14" width="14"
-                                xmlns="http://www.w3.org/2000/svg">
+                        <label for="fileUpload" class="bottom-btn" @click.prevent="selectFiles.click()">
+                            <svg fill="none" height="14" viewBox="0 0 14 14" width="14" xmlns="http://www.w3.org/2000/svg">
                                 <g stroke="#000001" stroke-linecap="round" stroke-linejoin="round">
                                     <path
                                         d="m10.5 5h1c.1326 0 .2598.05268.3536.14645.0937.09376.1464.22094.1464.35355v7.5c0 .1326-.0527.2598-.1464.3536-.0938.0937-.221.1464-.3536.1464h-9c-.13261 0-.25979-.0527-.35355-.1464-.09377-.0938-.14645-.221-.14645-.3536v-7.5c0-.13261.05268-.25979.14645-.35355.09376-.09377.22094-.14645.35355-.14645h1" />
@@ -245,7 +276,10 @@ function adjustWidth() {
                                 </g>
                             </svg>
                         </label>
-                        <label class="upload-button" @click.prevent="keywords = ''; filesUpload = []">
+                        <label class="bottom-btn" @click.prevent="openModal">
+                            <IconLink />
+                        </label>
+                        <label class="bottom-btn" @click.prevent="keywords = ''; filesUpload = []">
                             <svg height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="m13.9907.00000013c.8909 0 1.337 1.07713987.7071 1.70710987l-.8422.84211c.5654.60732 1.0348 1.30106 1.3892 2.05773.558 1.19141.8135 2.50205.744 3.81582s-.462 2.59013-1.1426 3.71603c-.6806 1.1258-1.6284 2.0665-2.7594 2.7385-1.131.6721-2.41025 1.0549-3.7245 1.1145-1.31426.0596-2.62293-.2059-3.81009-.7729-1.18716-.5669-2.21617-1.418-2.99587-2.4776-.779705-1.0597-1.286041-2.2953-1.4741578-3.59738-.07896991-.54661.3001268-1.05374.8467358-1.13271.546612-.07897 1.053742.30012 1.132712.84673.14109.97657.52084 1.90326 1.10562 2.69806.58478.7947 1.35653 1.433 2.2469 1.8582s1.87187.6243 2.85757.5797c.98569-.0447 1.94518-.3318 2.79338-.8359s1.5591-1.2095 2.0695-2.0539c.5105-.8444.8049-1.80169.857-2.78702s-.1395-1.96831-.558-2.86187c-.2556-.54572-.591-1.0478-.9934-1.49057l-.7331.73315c-.63.62997-1.70714.1838-1.70714-.7071v-3.99068987zm-12.490721 3.99999987c.552281 0 1 .44772 1 1 0 .55229-.447719 1-1 1-.552285 0-1-.44772-1-1s.447715-1 1-1zm2.250001-2.75c.55228 0 1 .44772 1 1 0 .55229-.44772 1-1 1-.55229 0-1-.44772-1-1s.44771-1 1-1zm3.25-1.25c.55228 0 1 .447716 1 1 0 .55229-.44772 1-1 1-.55229 0-1-.44771-1-1 0-.552284.44771-1 1-1z" />
@@ -263,7 +297,10 @@ function adjustWidth() {
                     </div>
                     <div ref="divAttach" hidden class="col preview-container">
                         <Preview @file-canceled="removeFile(file)" v-for="(file, index) in filesUpload" :key="index"
-                            v-bind:src="file"></Preview>
+                            :src="file"></Preview>
+
+                        <PreviewURL @link-removed="removeUrl(url)" v-for="(url, index) in links" :key="index"
+                            :src="url"></PreviewURL>
                     </div>
                 </div>
             </div>
@@ -285,10 +322,10 @@ function adjustWidth() {
                 </div>
             </div>
         </form>
-
     </div>
 </template>
-<style>
+
+<style scoped>
 div.Q {
     background-color: rgb(238, 238, 213);
     /* border: 1px solid blue; */
@@ -325,7 +362,7 @@ div.A {
     z-index: 0;
 }
 
-.upload-button {
+.bottom-btn {
     display: inline-flex;
     align-items: center;
     border: none;
@@ -336,7 +373,7 @@ div.A {
     transition: background-color 0.3s;
 }
 
-.upload-button svg {
+.bottom-btn svg {
     padding-top: 6px;
     margin-right: 10px;
     width: 24px;
