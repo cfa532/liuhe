@@ -38,7 +38,7 @@ let socket: WebSocket
 let timer: any
 let startTime = 0       // time between sending message and receives first reply.
 
-const links = ref([''] as string[]);
+const links = ref([] as string[]);
 const showModal = ref(false);
 const handleSave = (urls: string[]) => {
     links.value = urls;
@@ -69,7 +69,7 @@ async function onSubmit(event: any) {
         btnSubmit.value.disabled = false
         window.alert("如果等待超时，尝试刷新页面后重新提交。")
         spinner.value = "提交"
-    }, 30000)
+    }, 300000)
 
     // send message to websocket and wait for response
     const ci = {} as ChatItem
@@ -77,15 +77,11 @@ async function onSubmit(event: any) {
     ci.Q = query.value + "\n" + (keywords.value ? 'keywords of my query: ' + keywords.value : "") + "\n"
     ci.A = ""
 
-    // add uploaded files to user question.
-    // for(const f of filesUpload.value) {
-    //     if (f.size + ci.Q.length < 8192)
-    //         ci.Q = ci.Q + await f.text() + "\n"
-    // }
     const qwh: any = {
-        query: ci.Q, history: [] as Array<ChatItem>,
+        query: ci.Q,
+        history: [] as Array<ChatItem>,
         numOfAttachments: filesUpload.value.length,
-        urls: links.value,   // links to media files
+        urls: links.value,   // links to media files on Google Cloud Storage
     }   // query with history
 
     if (checkedItems.value.length > 0 && !checkboxNoHistory.value) {
@@ -112,6 +108,7 @@ async function onSubmit(event: any) {
         startTime = Date.now()
         socket.send(JSON.stringify(msg))
         filesUpload.value.forEach(async e => {
+            // send file to server one by one
             const buf = await e.arrayBuffer()
             socket.send(buf)
         })
@@ -162,6 +159,7 @@ function openSocket() {
                 checkedItems.value = []
                 checkboxNoHistory.value = false
                 filesUpload.value = []
+                links.value = []
                 break
             case "error":
                 console.warn(event.error)
@@ -258,7 +256,7 @@ function adjustWidth() {
             <div class="container d-grid row-gap-3" @drop.prevent="onSelect">
                 <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="delCase"></Share>
                 <div class="row mt-2" style="position: relative;">
-                    <textarea class="form-control" rows="5" v-model="query" placeholder="Ask me...."></textarea>
+                    <textarea class="form-control" rows="5" v-model="query" :placeholder="user.template.llm + '...'"></textarea>
                     <input title="No history if checked"
                         style="position: absolute; bottom: 55px; right: 15px; transform: translate(50%, -50%);"
                         type="checkbox" v-model="checkboxNoHistory">
