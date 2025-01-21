@@ -157,7 +157,7 @@ function openSocket() {
                 isSubmitting.value = false
                 btnSubmit.value.disabled = false
                 checkedItems.value = []
-                checkboxNoHistory.value = false
+                // checkboxNoHistory.value = false
                 filesUpload.value = []
                 links.value = []
                 break
@@ -198,7 +198,7 @@ function handleKeyDown(event: any) {
                 return;
             }
         } else if (event.ctrlKey) {
-            // Process data before submitting
+            // Submit form on Enter key pressed with Ctrl key
             event.preventDefault();
             checkboxNoHistory.value = true
             onSubmit(event);
@@ -276,7 +276,7 @@ function adjustWidth() {
                         <label class="bottom-btn" @click.prevent="openModal">
                             <IconLink />
                         </label>
-                        <label class="bottom-btn" @click.prevent="keywords = ''; filesUpload = []">
+                        <label class="bottom-btn" @click.prevent="keywords = ''; filesUpload = []; checkboxNoHistory = false">
                             <svg height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="m13.9907.00000013c.8909 0 1.337 1.07713987.7071 1.70710987l-.8422.84211c.5654.60732 1.0348 1.30106 1.3892 2.05773.558 1.19141.8135 2.50205.744 3.81582s-.462 2.59013-1.1426 3.71603c-.6806 1.1258-1.6284 2.0665-2.7594 2.7385-1.131.6721-2.41025 1.0549-3.7245 1.1145-1.31426.0596-2.62293-.2059-3.81009-.7729-1.18716-.5669-2.21617-1.418-2.99587-2.4776-.779705-1.0597-1.286041-2.2953-1.4741578-3.59738-.07896991-.54661.3001268-1.05374.8467358-1.13271.546612-.07897 1.053742.30012 1.132712.84673.14109.97657.52084 1.90326 1.10562 2.69806.58478.7947 1.35653 1.433 2.2469 1.8582s1.87187.6243 2.85757.5797c.98569-.0447 1.94518-.3318 2.79338-.8359s1.5591-1.2095 2.0695-2.0539c.5105-.8444.8049-1.80169.857-2.78702s-.1395-1.96831-.558-2.86187c-.2556-.54572-.591-1.0478-.9934-1.49057l-.7331.73315c-.63.62997-1.70714.1838-1.70714-.7071v-3.99068987zm-12.490721 3.99999987c.552281 0 1 .44772 1 1 0 .55229-.447719 1-1 1-.552285 0-1-.44772-1-1s.447715-1 1-1zm2.250001-2.75c.55228 0 1 .44772 1 1 0 .55229-.44772 1-1 1-.55229 0-1-.44772-1-1s.44771-1 1-1zm3.25-1.25c.55228 0 1 .447716 1 1 0 .55229-.44772 1-1 1-.55229 0-1-.44771-1-1 0-.552284.44771-1 1-1z" />
