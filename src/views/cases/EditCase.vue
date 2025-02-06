@@ -7,9 +7,11 @@ import { Share, Preview, PreviewURL } from '@/components'
 import IconLink from '@/components/icons/IconLink.vue'
 import LinkModal from '@/components/LinkModal.vue';
 
+// need this to silence the warning of props
 const props = defineProps<{
     id: Number;
 }>();
+
 const route = useRoute()
 interface HTMLInputEvent extends Event {
     target: HTMLInputElement & EventTarget
@@ -157,14 +159,12 @@ function openSocket() {
                 isSubmitting.value = false
                 btnSubmit.value.disabled = false
                 checkedItems.value = []
-                // checkboxNoHistory.value = false
+                checkboxNoHistory.value = false
                 filesUpload.value = []
                 links.value = []
                 break
             case "error":
                 console.warn(event.error)
-                // window.alert("Token expired. Re-login")
-                // useAuthStore().logout()
                 break
             default:
                 console.warn("Ws default:", data)

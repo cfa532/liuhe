@@ -11,7 +11,7 @@ const ayApi = ["GetVarByContext", "Act", "Login", "Getvar", "SwarmLocal", "DhtGe
 ];
 
 function getcurips() {
-    let ips = "127.0.0.1:4800"
+    let ips = "127.0.0.1:8081"
     // getParam is a Leither function
     if (window.getParam != null){
         const p=window.getParam()
