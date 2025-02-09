@@ -10,7 +10,7 @@ const { user } = storeToRefs(useAuthStore());
 const sideNav = ref<HTMLDivElement>()
 const settings = ref(user.value.template ? user.value.template : {llm:"openai",temperature: "0.0",model:"gpt-4o"})
 const submitted = ref(true)
-const models = ref(["o1-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"])
+const models = ref(["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"])
 
 async function onSubmit() {
   submitted.value = true
@@ -24,7 +24,7 @@ async function onSubmit() {
 }
 function selectLLM() {
   if (settings.value.llm == "openai") {
-    models.value = ["o1-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]
+    models.value = ["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]
   } else if (settings.value.llm == "gemini") {
     models.value = ["gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"]
   }

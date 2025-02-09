@@ -7,7 +7,7 @@ import { Share, Preview, PreviewURL } from '@/components'
 import IconLink from '@/components/icons/IconLink.vue'
 import LinkModal from '@/components/LinkModal.vue';
 
-// need this to silence the warning of props
+// need this props to silence the warning of props
 const props = defineProps<{
     id: Number;
 }>();
