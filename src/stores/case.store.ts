@@ -54,11 +54,9 @@ export const useCaseListStore = defineStore({
     state: ()=>({
         appId: import.meta.env.VITE_APP_ID,
         api: useLeitherStore(),     // Leither api handle
+        auth: useAuthStore(),
         _activeId: "",              // current case Id
         _allcases: [] as ChatCase[],
-        user: useAuthStore().user as UserAccount,
-        userId: useAuthStore().user.username,
-        userMid: localStorage.getItem("userMid"),
     }),
     getters: {
         activeId: function():string {
@@ -76,12 +74,12 @@ export const useCaseListStore = defineStore({
                 return state._allcases
 
             state._allcases = await state.api.client.RunMApp("get_cases", {aid: state.appId, ver: "last",
-                mid: state.userMid
+                mid: state.auth.user.mid
             })
             state._allcases = state._allcases ? state._allcases : []
             state._allcases.sort((a, b) => b.timestamp - a.timestamp)
             return state._allcases
-        }
+        },
     },
     actions: {
         setActiveId(id:string) {
@@ -101,7 +99,7 @@ export const useCaseListStore = defineStore({
             kase.id = kase.timestamp.toString()
             kase.brief = caption
             await this.api.client.RunMApp("add_case", {aid: this.appId, ver: "last",
-                mid: this.userMid, case: JSON.stringify(kase)
+                mid: this.auth.user.mid, case: JSON.stringify(kase)
             })
             // add new case into list
             this._allcases.unshift(kase)
@@ -110,11 +108,14 @@ export const useCaseListStore = defineStore({
         async deleteCase(id:string) {
             // id must be activeId
             await this.api.client.RunMApp("delete_case", {aid: this.appId, ver: "last",
-                mid: this.userMid, caseid: id
+                mid: this.auth.user.mid, caseid: id
             })
             // remove the id from case list
             this._allcases = this._allcases.filter((e:any)=>e.id!=id)
             console.log(id, this._allcases)
+        },
+        clearCaseList: function() {
+            this._allcases = []
         }
     }
 })

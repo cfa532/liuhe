@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia';
 import { useCaseListStore } from "@/stores";
 import { router } from '@/router'
@@ -15,24 +15,11 @@ const cases = ref<ChatCase[]>([])
 
 onMounted(async () => {
     // get list of cases of the user
-    console.log("case list mounted", caseListStore.activeId.value, await caseListStore.allCases.value)
     cases.value = await caseListStore.allCases.value
     mySidenav.value!.style.backgroundColor = document.body.style.background + " solid"
+    console.log("cases mounted", cases.value)
 })
-// watch(() => props.caseId, async (nv, ov) => {
-//     console.log("caseId:", nv, ov)
-//     if (nv) {
-//             // caseId prefixed with '-' means current case has been removed.
-//             if (nv.substring(0,1) !== '-') {
-//             useCaseListStore().setActiveId(nv)
-//         } else {
-//             useCaseListStore().unsetActiveId()
-//             cases.value = await caseListStore.allCases.value
-//             console.log("Select case", cases.value)
-//             router.push("/case")
-//         }
-//     }
-// })
+
 function selectCase(c: ChatCase) {
     // highlight current case and
     useCaseListStore().setActiveId(c.id)

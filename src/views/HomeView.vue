@@ -11,15 +11,21 @@ const sideNav = ref<HTMLDivElement>()
 const settings = ref(user.value.template ? user.value.template : {llm:"openai",temperature: "0.0",model:"gpt-4o"})
 const submitted = ref(true)
 const models = ref(["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"])
+const alert = useAlertStore()
 
 async function onSubmit() {
+  alert.clear()
   submitted.value = true
   user.value.template = settings.value
+  if (models.value.indexOf(settings.value.model) == -1) {
+    alert.error("必须选择 Model")
+    return
+  }
   try {
     await useUsersStore().update(user.value.username, user.value)
-    useAlertStore().success("Account updated.")
+    alert.success("Account updated.")
   } catch {
-    useAlertStore().error("Update user account failed.")
+    alert.error("Update user account failed.")
   }
 }
 function selectLLM() {
