@@ -75,7 +75,8 @@ async function onSubmit(event: any) {
 
     // send message to websocket and wait for response
     const ci = {} as ChatItem
-    query.value = (query.value ? query.value : "Hello");        // query submitted to AI
+    const inputTxt = query.value
+    query.value = (inputTxt ? inputTxt : "Hello");        // query submitted to AI
     ci.Q = query.value + "\n" + (keywords.value ? 'keywords of my query: ' + keywords.value : "") + "\n"
     ci.A = ""
 
