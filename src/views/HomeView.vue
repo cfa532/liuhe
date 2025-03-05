@@ -49,7 +49,7 @@ onMounted(()=>{
       <div class="col">
         <h3 v-if="user">Hi, {{ user.given_name }}</h3>
         <br>
-        <form @change.prevent="submitted=false" @submit.prevent="onSubmit">
+        <form id="llms" @change.prevent="submitted=false" @submit.prevent="onSubmit">
           <div class="row">
             <div class="col-4">
               <label for="llm">LLM:</label>

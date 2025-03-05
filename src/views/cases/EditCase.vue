@@ -253,7 +253,7 @@ function adjustWidth() {
 <template>
     <LinkModal :isVisible="showModal" @save="handleSave" @cancel="handleCancel" />
     <div class="col-md-10 col-sm-12">
-        <form @submit.prevent="onSubmit" @keydown="handleKeyDown">
+        <form id="aiquery" @submit.prevent="onSubmit" @keydown="handleKeyDown">
             <div class="container d-grid row-gap-3" @drop.prevent="onSelect">
                 <Share style=" display: inline-block; position: absolute; right:40px;" @delete-post="delCase"></Share>
                 <div class="row mt-2" style="position: relative;">
