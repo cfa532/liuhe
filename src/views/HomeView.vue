@@ -33,6 +33,8 @@ function selectLLM() {
     models.value = ["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]
   } else if (settings.value.llm == "gemini") {
     models.value = ["gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"]
+  } else if (settings.value.llm == "claude") {
+    models.value = ["claude-3-7-sonnet-20250219"]
   }
 }
 onMounted(()=>{
@@ -56,6 +58,7 @@ onMounted(()=>{
               <select v-model="settings.llm" @change.prevent="selectLLM" class="form-select mt-2 mb-3">
                 <option value="openai" selected>OpenAI</option>
                 <option value="gemini">Gemini</option>
+                <option value="claude">Claude</option>
               </select>
             </div>
             <div class="col-4">
