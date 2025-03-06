@@ -42,7 +42,7 @@ export const useUsersStore = defineStore({
         async update(id: string, params: any) {
             console.log(id, params)
             this.user = await fetchWrapper.put(`${baseUrl}`, params);   // update settings in server.
-            localStorage.setItem("user", JSON.stringify(this.user))     // update settings in memory.
+            localStorage.setItem("user", JSON.stringify(params))     // update settings in memory.
         },
         async delete(id: string) {
             if (window.confirm("Are you sure?")) {

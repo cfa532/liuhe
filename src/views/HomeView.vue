@@ -2,44 +2,73 @@
 import { storeToRefs } from 'pinia';
 import { useAuthStore, useUsersStore, useAlertStore } from '@/stores';
 import { CaseList } from '@/components';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 // const api = useLeither();
 // const mmInfo = useMimei();
 const { user } = storeToRefs(useAuthStore());
-const sideNav = ref<HTMLDivElement>()
-const settings = ref(user.value.template ? user.value.template : {llm:"openai",temperature: "0.0",model:"gpt-4o"})
-const submitted = ref(true)
-const models = ref(["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"])
-const alert = useAlertStore()
+const sideNav = ref<HTMLDivElement | null>(null); // Add null type
+const settings = ref({
+  llm: user.value?.template?.llm || "openai", // Default to openai if undefined
+  temperature: user.value?.template?.temperature || "0.0", // Default to 0.0 if undefined
+  model: user.value?.template?.model || "gpt-4o" // Default to gpt-4o if undefined
+});
+const submitted = ref(true);
+const models = ref(["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]);
+const alert = useAlertStore();
 
 async function onSubmit() {
-  alert.clear()
-  submitted.value = true
-  user.value.template = settings.value
-  if (models.value.indexOf(settings.value.model) == -1) {
-    alert.error("必须选择 Model")
-    return
+  alert.clear();
+  submitted.value = true;
+
+  if (!settings.value.model || models.value.indexOf(settings.value.model) === -1) {
+    alert.error("必须选择 Model");
+    submitted.value = false;
+    return;
   }
   try {
-    await useUsersStore().update(user.value.username, user.value)
-    alert.success("Account updated.")
-  } catch {
-    alert.error("Update user account failed.")
+    // Ensure user.value exists before accessing properties
+    if (user.value) {
+      user.value.template = { ...settings.value }; // Create a new object to avoid reference issues
+      await useUsersStore().update(user.value.username, user.value);
+      alert.success("Account updated.");
+    } else {
+      alert.error("User data not available.");
+      submitted.value = false;
+    }
+  } catch (error) {
+    console.error("Update user account failed:", error); // Log the error for debugging
+    alert.error("Update user account failed.");
+    submitted.value = false;
   }
 }
+
 function selectLLM() {
-  if (settings.value.llm == "openai") {
-    models.value = ["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]
-  } else if (settings.value.llm == "gemini") {
-    models.value = ["gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"]
-  } else if (settings.value.llm == "claude") {
-    models.value = ["claude-3-7-sonnet-20250219"]
+  let newModels: string[] = [];
+  if (settings.value.llm === "openai") {
+    newModels = ["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"];
+  } else if (settings.value.llm === "gemini") {
+    newModels = ["gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"];
+  } else if (settings.value.llm === "claude") {
+    newModels = ["claude-3-7-sonnet-20250219"];
+  }
+  models.value = newModels;
+
+  // Ensure settings.value.model is valid after LLM change
+  if (!models.value.includes(settings.value.model)) {
+    settings.value.model = models.value[0]; // Default to the first model in the list
   }
 }
-onMounted(()=>{
-  selectLLM()
-})
+
+onMounted(() => {
+  selectLLM();
+});
+
+// Watch for changes in settings to enable the submit button
+watch(settings, () => {
+  submitted.value = false;
+}, { deep: true });
+
 </script>
 
 <template>
@@ -51,12 +80,12 @@ onMounted(()=>{
       <div class="col">
         <h3 v-if="user">Hi, {{ user.given_name }}</h3>
         <br>
-        <form @change.prevent="submitted=false" @submit.prevent="onSubmit">
+        <form id="llms" @submit.prevent="onSubmit">
           <div class="row">
             <div class="col-4">
               <label for="llm">LLM:</label>
-              <select v-model="settings.llm" @change.prevent="selectLLM" class="form-select mt-2 mb-3">
-                <option value="openai" selected>OpenAI</option>
+              <select v-model="settings.llm" @change="selectLLM" class="form-select mt-2 mb-3">
+                <option value="openai">OpenAI</option>
                 <option value="gemini">Gemini</option>
                 <option value="claude">Claude</option>
               </select>
@@ -64,13 +93,14 @@ onMounted(()=>{
             <div class="col-4">
               <label for="llm">Model:</label>
               <select v-model="settings.model" class="form-select mt-2 mb-3">
-                <option v-for="(model, index) in models" :value="model" :key="index">{{model}}</option>
+                <option v-for="(model, index) in models" :value="model" :key="index">{{ model }}</option>
               </select>
             </div>
           </div>
           <label>设定参数：</label>
           <div class="form-floating mb-3 col-4">
-            <input v-model="settings.temperature" type="text" id="temperature" class="form-control" placeholder="temperature: 0">
+            <input v-model="settings.temperature" type="text" id="temperature" class="form-control"
+              placeholder="temperature: 0">
             <label for="temperature">Temperature:</label>
           </div>
           <button type="submit" class="btn btn-primary" :disabled="submitted">提交</button>
