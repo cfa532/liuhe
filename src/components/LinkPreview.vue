@@ -27,26 +27,6 @@ function thumbnail() {
     imageUrl.value = canvas.toDataURL("image/png");
     caption.value = props.src.substring(props.src.lastIndexOf('/') + 1)
 }
-
-const generateVideoThumbnail = (file: File) => {
-  return new Promise<string>((resolve) => {
-    const canvas = document.createElement("canvas");
-    const video = document.createElement("video");
-
-    // this is important
-    video.autoplay = true;
-    video.muted = true;
-    video.src = URL.createObjectURL(file) + '#t=1';     // delay 1s
-    video.onloadeddata = () => {
-      let ctx = canvas.getContext("2d");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx!.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-      video.pause();
-      return resolve(canvas.toDataURL("image/png"));
-    };
-  });
-};
 </script>
 
 <template>
