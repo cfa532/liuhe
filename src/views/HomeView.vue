@@ -48,7 +48,7 @@ function selectLLM() {
   if (settings.value.llm === "openai") {
     newModels = ["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"];
   } else if (settings.value.llm === "gemini") {
-    newModels = ["gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"];
+    newModels = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
   } else if (settings.value.llm === "claude") {
     newModels = ["claude-3-7-sonnet-20250219"];
   }
