@@ -11,7 +11,7 @@ const sideNav = ref<HTMLDivElement | null>(null); // Add null type
 const settings = ref({
   llm: user.value?.template?.llm || "openai", // Default to openai if undefined
   temperature: user.value?.template?.temperature || "0.0", // Default to 0.0 if undefined
-  model: user.value?.template?.model || "gpt-4o" // Default to gpt-4o if undefined
+  model: user.value?.template?.model || "gpt-4.1" // Default to gpt-4o if undefined
 });
 const submitted = ref(true);
 const models = ref(["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]);
@@ -46,11 +46,11 @@ async function onSubmit() {
 function selectLLM() {
   let newModels: string[] = [];
   if (settings.value.llm === "openai") {
-    newModels = ["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"];
+    newModels = ["o3-mini", "gpt-4o", "gpt-4.1"];
   } else if (settings.value.llm === "gemini") {
-    newModels = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+    newModels = ["gemini-2.5-pro-preview-06-05", "gemini-1.5-pro"];
   } else if (settings.value.llm === "claude") {
-    newModels = ["claude-3-7-sonnet-20250219"];
+    newModels = ["claude-sonnet-4-20250514", "claude-opus-4-20250514"];
   }
   models.value = newModels;
 
