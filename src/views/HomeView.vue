@@ -14,7 +14,7 @@ const settings = ref({
   model: user.value?.template?.model || "gpt-4.1" // Default to gpt-4o if undefined
 });
 const submitted = ref(true);
-const models = ref(["o3-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]);
+const models = ref(["o3-mini", "gpt-4o", "gpt-4.1"]);
 const alert = useAlertStore();
 
 async function onSubmit() {
